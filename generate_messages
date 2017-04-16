@@ -1,0 +1,161 @@
+#!/usr/bin/php
+<?php
+const MESSAGES_URL = 'https://raw.githubusercontent.com/royale-proxy/node-cr-proxy/master/enums/emsg.js';
+const INDENT = "\t";
+const INDENT2 = INDENT . INDENT;
+
+
+echo 'Downloading messages...', PHP_EOL;
+$messagesText = file_get_contents(MESSAGES_URL);
+
+echo 'Parsing messages...', PHP_EOL;
+$lines = explode(PHP_EOL, $messagesText);
+$status = 0;
+$type = 0;
+$messages = [
+	'client' => [],
+	'server' => []
+];
+foreach ($lines as $line) {
+	switch ($status) {
+	case 0:
+		if ($line === 'module.exports = {') {
+			$status = 1;
+		}
+		break;
+	case 1:
+		switch ($line) {
+		case '    // Client Messages':
+			$type = 1;
+			continue;
+		case '    // Server Messages':
+			$type = 2;
+			continue;
+		case '    // Value-to-name mapping for convenience':
+			break 3;
+		}
+
+		if (preg_match('~\s*\'([^\']*)\': ([^,]*),~', $line, $match) !== 1) {
+			break;
+		}
+
+		switch ($type) {
+		case 1:
+			$messages['client'][$match[1]] = intval($match[2]);
+			break;
+		case 2:
+			$messages['server'][$match[1]] = intval($match[2]);
+			break;
+		}
+		break;
+	}
+}
+
+echo 'Writing messages...', PHP_EOL;
+$file = fopen('src/com/tarik02/clashroyale/server/protocol/Info.java', 'w');
+fwrite($file, 'package com.tarik02.clashroyale.server.protocol;' . PHP_EOL);
+fwrite($file, PHP_EOL);
+fwrite($file, 'public class Info {' . PHP_EOL);
+fwrite($file, INDENT . 'private Info() {}' . PHP_EOL);
+fwrite($file, PHP_EOL);
+fwrite($file, INDENT . '// Client messages' . PHP_EOL);
+foreach ($messages['client'] as $name => $id) {
+	fwrite($file, INDENT . 'public static final short ' . convertMessageName($name) . ' = ' . $id . ';' . PHP_EOL);
+}
+fwrite($file, PHP_EOL);
+fwrite($file, INDENT . '// Server messages' . PHP_EOL);
+foreach ($messages['server'] as $name => $id) {
+	fwrite($file, INDENT . 'public static final short ' . convertMessageName($name) . ' = ' . $id . ';' . PHP_EOL);
+}
+fwrite($file, '}' . PHP_EOL);
+fclose($file);
+
+
+echo 'Clonning messages definitions...', PHP_EOL;
+`mkdir temp && cd temp && git clone git@github.com:royale-proxy/cr-messages.git`;
+
+echo 'Starting parsing messages...', PHP_EOL;
+
+echo 'Parsing components...', PHP_EOL;
+parseMessages('component', 'temp/cr-messages/component/', 'src/com/tarik02/clashroyale/server/protocol/messages/component/');
+echo 'Parsing client messages...', PHP_EOL;
+parseMessages('client', 'temp/cr-messages/client/', 'src/com/tarik02/clashroyale/server/protocol/messages/client/');
+echo 'Parsing server messages...', PHP_EOL;
+parseMessages('server', 'temp/cr-messages/server/', 'src/com/tarik02/clashroyale/server/protocol/messages/server/');
+
+//echo 'Removing temponary directory...', PHP_EOL;
+//`rm -rf temp`;
+
+function convertMessageName(string $name) {
+	return strtoupper(preg_replace('/(.)([A-Z])/', '$1_$2', $name));
+}
+
+function parseMessages(string $label, string $input, string $output) {
+	global $messages;
+
+	`rm -rf $output && mkdir $output`;
+
+	$base = $label === 'component' ? 'Component' : 'Message';
+	foreach (listDirectory($input) as $name => $path) {
+		$data = json_decode(file_get_contents($path), true);
+		
+		if ($base === 'Component') {
+			$messageName = substr($name, 0, strrpos($name, '.'));
+		} else {
+			$messageName = $data['name'] = array_search($data['id'], $messages['client'] + $messages['server'], true);
+		}
+
+		if (trim($messageName) === '') {
+			continue;
+		}
+
+		$messageIdName = convertMessageName($messageName);
+
+		$file = fopen("src/com/tarik02/clashroyale/server/protocol/messages/$label/$messageName.java", 'w');
+		fwrite($file, "package com.tarik02.clashroyale.server.protocol.messages.$label;" . PHP_EOL);
+		fwrite($file, PHP_EOL);
+		fwrite($file, "import com.tarik02.clashroyale.server.protocol.Info;" . PHP_EOL);
+		fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.$base;" . PHP_EOL);
+		if ($base === 'Message') { fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;" . PHP_EOL); }
+		fwrite($file, "import com.tarik02.clashroyale.server.utils.DataStream;" . PHP_EOL);
+		fwrite($file, PHP_EOL);
+		fwrite($file, "public class $messageName extends $base {" . PHP_EOL);
+
+		if ($base === 'Message') {
+			fwrite($file, INDENT . "public static final short ID = Info.$messageIdName;" . PHP_EOL);
+			fwrite($file, PHP_EOL);
+			//fwrite($file, INDENT . "static {" . PHP_EOL);
+			//fwrite($file, INDENT2 . "MessageFactory.register($messageName.class);" . PHP_EOL);
+			//fwrite($file, INDENT . "}" . PHP_EOL);
+			//fwrite($file, PHP_EOL);
+			fwrite($file, INDENT . "public $messageName() {" . PHP_EOL);
+			fwrite($file, INDENT2 . "super(ID);" . PHP_EOL);
+			fwrite($file, INDENT . "}" . PHP_EOL);
+			fwrite($file, PHP_EOL);
+		}
+
+		fwrite($file, INDENT . "@Override" . PHP_EOL);
+		fwrite($file, INDENT . "public void encode(DataStream stream) {" . PHP_EOL);
+		fwrite($file, INDENT2 . "super.encode(stream);" . PHP_EOL);
+		fwrite($file, INDENT . "}" . PHP_EOL);
+		fwrite($file, PHP_EOL);
+		fwrite($file, INDENT . "@Override" . PHP_EOL);
+		fwrite($file, INDENT . "public void decode(DataStream stream) {" . PHP_EOL);
+		fwrite($file, INDENT2 . "super.decode(stream);" . PHP_EOL);
+		fwrite($file, INDENT . "}" . PHP_EOL);
+		fwrite($file, "}" . PHP_EOL);
+		fclose($file);
+	}
+}
+
+function listDirectory(string $dir) {
+	$result = [];
+
+	foreach (array_filter(scandir($dir), function(string $name) {
+		return !in_array($name, ['.', '..']);
+	}) as $name) {
+		$result[$name] = $dir . '/' . $name;
+	}
+
+	return $result;
+}
