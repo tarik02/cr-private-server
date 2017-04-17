@@ -7,11 +7,15 @@ public class Hex {
 	private Hex() {}
 
 	public static String dump(final byte[] buffer) {
+		return dump(buffer, 0, buffer.length);
+	}
+
+	public static String dump(final byte[] buffer, final int offset, final int count) {
 		final StringBuilder builder = new StringBuilder();
 
-		final int parts = (int)Math.ceil(((float)buffer.length) / DUMP_WIDTH);
+		final int parts = (int)Math.ceil(((float)count) / DUMP_WIDTH);
 		final int leftPad = String.valueOf((parts * DUMP_WIDTH) + 1).length();
-		int position = 0;
+		int position = offset;
 
 		for (int i = 0; i < parts; ++i) {
 			builder.append((new String(new char[leftPad - String.valueOf(position).length()])).replace('\0', ' '));
@@ -19,7 +23,7 @@ public class Hex {
 			builder.append(": ");
 
 			final int from = position;
-			final int to = Math.min(position + DUMP_WIDTH, buffer.length);
+			final int to = Math.min(position + DUMP_WIDTH, offset + count);
 			position += DUMP_WIDTH;
 
 			for (int j = from; j < to; ++j) {
