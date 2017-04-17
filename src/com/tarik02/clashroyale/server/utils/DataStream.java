@@ -1,12 +1,21 @@
 package com.tarik02.clashroyale.server.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 public class DataStream {
+	private final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
 	protected byte[] buffer;
 	protected int offset, count;
+	protected ByteBuffer byteBuffer;
 
 	public DataStream() {
 		this(new byte[32]);
@@ -20,19 +29,32 @@ public class DataStream {
 		this.buffer = buffer;
 		this.offset = offset;
 		count = 0;
+
+		byteBuffer = ByteBuffer.allocate(8);
 	}
 
-	public void reset() {
-		buffer = new byte[32];
+	public DataStream reset() {
+		return reset(false);
+	}
+
+	public DataStream reset(boolean saveBufferCapacity) {
+		if (saveBufferCapacity) {
+			Arrays.fill(buffer, (byte)0);
+		} else {
+			buffer = new byte[32];
+		}
+
 		offset = 0;
 		count = 0;
+
+		return this;
 	}
 
 	public byte[] getBuffer() {
 		return Arrays.copyOf(buffer, count);
 	}
 
-	public void setBuffer(byte[] buffer) {
+	public DataStream setBuffer(byte[] buffer) {
 		if (buffer == null) {
 			this.buffer = new byte[32];
 			count = 0;
@@ -40,19 +62,26 @@ public class DataStream {
 			this.buffer = buffer;
 			count = buffer.length;
 		}
+
+		return this;
 	}
 
 	public int getOffset() {
 		return offset;
 	}
 
-	public void setOffset(int offset) {
+	public DataStream setOffset(int offset) {
 		ensureCapacity(offset);
 		this.offset = offset;
+
+		return this;
 	}
 
 	public int getCount() {
 		return count;
+	}
+	public int remaining() {
+		return count - offset;
 	}
 
 	protected void ensureCapacity(int capacity) {
@@ -60,6 +89,13 @@ public class DataStream {
 			buffer = Arrays.copyOf(buffer, buffer.length << 1);
 		}
 	}
+
+
+	public DataStream skip(int count) {
+		offset += count;
+		return this;
+	}
+
 
 	public byte[] get() {
 		byte[] result = Arrays.copyOfRange(buffer, offset, count);
@@ -100,7 +136,7 @@ public class DataStream {
 
 	public byte getByte() {
 		if (offset < count) {
-			return buffer[offset];
+			return buffer[offset++];
 		}
 
 		return 0;
@@ -113,83 +149,267 @@ public class DataStream {
 		return this;
 	}
 
+
 	public short getBShort() {
-		return ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).put(get(2)).getShort(0);
-	}
-
-	public short getLShort() {
-		return ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).put(get(2)).getShort(0);
-	}
-
-	public int getBTriad() {
-		return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).put((byte)0x00).put(get(3)).getInt(0);
-	}
-
-	public int getLTriad() {
-		return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(get(3)).put((byte)0x00).getInt(0);
-	}
-
-	public int getBInt() {
-		return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).put(get(4)).getInt(0);
-	}
-
-	public int getLInt() {
-		return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(get(4)).getInt(0);
-	}
-
-	public long getBLong() {
-		return ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN).put(get(8)).getLong(0);
-	}
-
-	public long getLLong() {
-		return ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).put(get(8)).getLong(0);
-	}
-
-	public float getBFloat() {
-		return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).put(get(4)).getFloat(0);
-	}
-
-	public float getLFloat() {
-		return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(get(4)).getFloat(0);
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.BIG_ENDIAN).put(get(2)).getShort(0);
 	}
 
 	public DataStream putBShort(short value) {
-		return put(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort(value).array());
+		return put(byteBuffer.order(ByteOrder.BIG_ENDIAN).putShort(0, value).array(), 0, 2);
+	}
+
+	public short getLShort() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.LITTLE_ENDIAN).put(get(2)).getShort(0);
 	}
 
 	public DataStream putLShort(short value) {
-		return put(ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(value).array());
+		return put(byteBuffer.order(ByteOrder.LITTLE_ENDIAN).putShort(0, value).array(), 0, 2);
+	}
+
+
+	public int getBTriad() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.BIG_ENDIAN).put(0, (byte)0x00).put(get(3)).getInt(0);
 	}
 
 	public DataStream putBTriad(int value) {
-		return put(ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(value).array(), 1, 3);
+		return put(byteBuffer.order(ByteOrder.BIG_ENDIAN).putInt(0, value).array(), 1, 3);
+	}
+
+	public int getLTriad() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.LITTLE_ENDIAN).put(get(3)).put((byte)0x00).getInt(0);
 	}
 
 	public DataStream putLTriad(int value) {
-		return put(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(value).array(), 0, 3);
+		return put(byteBuffer.order(ByteOrder.LITTLE_ENDIAN).putInt(0, value).array(), 0, 3);
+	}
+
+
+	public int getBInt() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.BIG_ENDIAN).put(get(4)).getInt(0);
 	}
 
 	public DataStream putBInt(int value) {
-		return put(ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(value).array());
+		return put(byteBuffer.order(ByteOrder.BIG_ENDIAN).putInt(0, value).array(), 0, 4);
+	}
+
+	public int getLInt() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.LITTLE_ENDIAN).put(get(4)).getInt(0);
 	}
 
 	public DataStream putLInt(int value) {
-		return put(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(value).array());
+		return put(byteBuffer.order(ByteOrder.LITTLE_ENDIAN).putInt(0, value).array(), 0, 4);
+	}
+
+
+	public long getBLong() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.BIG_ENDIAN).put(get(8)).getLong(0);
 	}
 
 	public DataStream putBLong(long value) {
-		return put(ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN).putLong(value).array());
+		return put(byteBuffer.order(ByteOrder.BIG_ENDIAN).putLong(0, value).array(), 0, 8);
+	}
+
+	public long getLLong() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.LITTLE_ENDIAN).put(get(8)).getLong(0);
 	}
 
 	public DataStream putLLong(long value) {
-		return put(ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(value).array());
+		return put(byteBuffer.order(ByteOrder.LITTLE_ENDIAN).putLong(0, value).array(), 0, 8);
+	}
+
+
+	public float getBFloat() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.BIG_ENDIAN).put(get(4)).getFloat(0);
 	}
 
 	public DataStream putBFloat(float value) {
-		return put(ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(value).array());
+		return put(byteBuffer.order(ByteOrder.BIG_ENDIAN).putFloat(0, value).array(), 0, 4);
+	}
+
+	public float getLFloat() {
+		byteBuffer.position(0);
+		return byteBuffer.order(ByteOrder.LITTLE_ENDIAN).put(get(4)).getFloat(0);
 	}
 
 	public DataStream putLFloat(float value) {
-		return put(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putFloat(value).array());
+		return put(byteBuffer.order(ByteOrder.LITTLE_ENDIAN).putFloat(0, value).array(), 0, 4);
+	}
+
+
+	public long getRrsInt32() {
+		short c = 0;
+		long value = 0;
+		long b;
+		long seventh;
+		long msb;
+
+		do {
+			b = getByte() & 0xFF;
+
+			if (c == 0) {
+				seventh = (b & 0x40) >> 6; // save 7th bit
+				msb = (b & 0x80) >> 7; // save msb
+				b = b << 1; // rotate to the left
+				b = b & ~(0x181); // clear 8th and 1st bit and 9th if any
+				b = b | (msb << 7) | (seventh); // insert msb and 6th back in
+			}
+
+			value |= (b & 0x7f) << (7 * c);
+			++c;
+		} while ((b & 0x80) > 0);
+
+		value = (value >>> 1) ^ -(value & 1);
+		return value;
+	}
+
+	public DataStream putRrsInt32(long value) {
+		int size = calculateVarInt32(value);
+		boolean rotate = true;
+		long b;
+
+		value = (value << 1) ^ (value >> 31);
+		while (value != 0) {
+			b = (value & 0x7f);
+
+			if (value >= 0x80) {
+				b |= 0x80;
+			} if (rotate) {
+				rotate = false;
+				long lsb = b & 0x1;
+				long msb = (b & 0x80) >> 7;
+				b = b >> 1; // rotate to the right
+				b = b & ~(0xC0); // clear 7th and 6th bit
+				b = b | (msb << 7) | (lsb << 6); // insert msb and lsb back in
+			}
+
+			putByte((byte)b);
+			value >>>= 7;
+		}
+
+		return this;
+	}
+
+
+	public String getString() {
+		int count = getBInt();
+		if (count == 0xFFFFFFFF) {
+			return "";
+		}
+
+		return new String(get(count), UTF8_CHARSET);
+	}
+
+	public DataStream putString(String value) {
+		if (value.length() == 0) {
+			putBInt(0xFFFFFFFF);
+		} else {
+			putBInt(value.length());
+			put(value.getBytes(UTF8_CHARSET));
+		}
+
+		return this;
+	}
+
+
+	public String getZipString() {
+		int length = getBInt() - 4;
+		int zlength = getLInt();
+
+		if (remaining() > length) {
+			Inflater decompressor = new Inflater();
+			decompressor.setInput(buffer, offset, length);
+			offset += length;
+
+			try {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream(zlength);
+				byte[] buf = new byte[1024];
+				int count;
+				while ((!decompressor.finished()) && ((count = decompressor.inflate(buf)) > 0)) {
+					bos.write(buf, 0, count);
+				}
+				decompressor.end();
+				bos.close();
+
+				return new String(bos.toByteArray(), UTF8_CHARSET);
+			} catch (DataFormatException | IOException ignored) {}
+		}
+
+		return null;
+	}
+
+	public DataStream putZipString(String value) {
+		Deflater compressor = new Deflater();
+		byte[] buffer = value.getBytes(UTF8_CHARSET);
+		compressor.setInput(buffer);
+
+		int sizeOffset = count;
+		putBInt(0).putLInt(buffer.length);
+
+		byte[] buf = new byte[1024];
+		int length = 0;
+
+		compressor.finish();
+		while (!compressor.finished()) {
+			int count = compressor.deflate(buf);
+			put(buf, 0, count);
+			length += count;
+		}
+		compressor.end();
+
+		int endOffset = count;
+		count = sizeOffset;
+		putBInt(length);
+		count = endOffset;
+
+		return this;
+	}
+
+
+	public Bitset getBitset() {
+		return new Bitset(getByte());
+	}
+
+	public DataStream putBitset(Bitset value) {
+		return putByte(value.getValue());
+	}
+
+
+	public String dump() {
+		return Hex.dump(buffer, 0, count);
+	}
+
+	public DataStream printDump() {
+		System.out.println(dump());
+		return this;
+	}
+
+
+	protected static int calculateVarInt32(long value) {
+		if (value < 1 << 7) {
+			return 1;
+		}
+
+		if (value < 1 << 14) {
+			return 2;
+		}
+
+		if (value < 1 << 21) {
+			return 3;
+		}
+
+		if (value < 1 << 28) {
+			return 4;
+		}
+
+		return 5;
 	}
 }
