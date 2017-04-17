@@ -111,23 +111,38 @@ function parseMessages(string $label, string $input, string $output) {
 
 		$messageIdName = convertMessageName($messageName);
 
+		$importFields = $classFields = $encodeFields = $decodeFields = [];
+		printFields($data['fields'] ?? [], $importFields, $classFields, $encodeFields, $decodeFields);
+
 		$file = fopen("src/com/tarik02/clashroyale/server/protocol/messages/$label/$messageName.java", 'w');
 		fwrite($file, "package com.tarik02.clashroyale.server.protocol.messages.$label;" . PHP_EOL);
 		fwrite($file, PHP_EOL);
 		fwrite($file, "import com.tarik02.clashroyale.server.protocol.Info;" . PHP_EOL);
 		fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.$base;" . PHP_EOL);
-		if ($base === 'Message') { fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;" . PHP_EOL); }
+		//if ($base === 'Message') { fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;" . PHP_EOL); }
 		fwrite($file, "import com.tarik02.clashroyale.server.utils.DataStream;" . PHP_EOL);
+
+		if (count($importFields) !== 0) {
+			fwrite($file, PHP_EOL);
+			foreach ($importFields as $import) {
+				fwrite($file, "import $import;" . PHP_EOL);
+			}
+		}
+
 		fwrite($file, PHP_EOL);
 		fwrite($file, "public class $messageName extends $base {" . PHP_EOL);
 
 		if ($base === 'Message') {
 			fwrite($file, INDENT . "public static final short ID = Info.$messageIdName;" . PHP_EOL);
 			fwrite($file, PHP_EOL);
-			//fwrite($file, INDENT . "static {" . PHP_EOL);
-			//fwrite($file, INDENT2 . "MessageFactory.register($messageName.class);" . PHP_EOL);
-			//fwrite($file, INDENT . "}" . PHP_EOL);
-			//fwrite($file, PHP_EOL);
+
+			if (count($classFields) > 0) {
+				foreach ($classFields as $name => $type) {
+					fwrite($file, INDENT . "public $type $name;" . PHP_EOL);
+				}
+				fwrite ($file, PHP_EOL);
+			}
+
 			fwrite($file, INDENT . "public $messageName() {" . PHP_EOL);
 			fwrite($file, INDENT2 . "super(ID);" . PHP_EOL);
 			fwrite($file, INDENT . "}" . PHP_EOL);
@@ -137,11 +152,23 @@ function parseMessages(string $label, string $input, string $output) {
 		fwrite($file, INDENT . "@Override" . PHP_EOL);
 		fwrite($file, INDENT . "public void encode(DataStream stream) {" . PHP_EOL);
 		fwrite($file, INDENT2 . "super.encode(stream);" . PHP_EOL);
+		if (count($encodeFields) > 0) {
+			fwrite($file, PHP_EOL);
+			foreach ($encodeFields as $field) {
+				fwrite($file, INDENT2 . $field . PHP_EOL);
+			}
+		}
 		fwrite($file, INDENT . "}" . PHP_EOL);
 		fwrite($file, PHP_EOL);
 		fwrite($file, INDENT . "@Override" . PHP_EOL);
 		fwrite($file, INDENT . "public void decode(DataStream stream) {" . PHP_EOL);
 		fwrite($file, INDENT2 . "super.decode(stream);" . PHP_EOL);
+		if (count($decodeFields) > 0) {
+			fwrite($file, PHP_EOL);
+			foreach ($decodeFields as $field) {
+				fwrite($file, INDENT2 . $field . PHP_EOL);
+			}
+		}
 		fwrite($file, INDENT . "}" . PHP_EOL);
 		fwrite($file, "}" . PHP_EOL);
 		fclose($file);
@@ -158,4 +185,81 @@ function listDirectory(string $dir) {
 	}
 
 	return $result;
+}
+
+function printFields(array $fields, array &$importFields = null, array &$classFields = null, array &$encodeFields = null, array &$decodeFields = null) {
+	static $Types = [
+		'BOOLEAN' => [
+			'javaType' => 'boolean',
+			'streamName' => 'Boolean'
+		], 'BYTE' => [
+			'javaType' => 'byte',
+			'streamName' => 'Byte'
+		], 'INT' => [
+			'javaType' => 'int',
+			'streamName' => 'BInt'
+		], 'INT32' => [
+			'javaType' => 'int',
+			'streamName' => 'RrsInt32'
+		]/*, 'RRSINT32' => [
+			'javaType' => 'int',
+			'streamName' => 'RrsInt32'
+		]*/, 'RRSLONG' => [
+			'javaType' => 'long',
+			'streamName' => 'RrsLong'
+		], 'SCID' => [
+			'javaType' => 'long',
+			'streamName' => 'SCID'
+		], 'LONG' => [
+			'javaType' => 'long',
+			'streamName' => 'BLong'
+		], 'STRING' => [
+			'javaType' => 'String',
+			'streamName' => 'String'
+		], 'ZIP_STRING' => [
+			'javaType' => 'String',
+			'streamName' => 'ZipString'
+		], 'BITSET' => [
+			'javaType' => 'Bitset',
+			'streamName' => 'Bitset',
+			'importName' => 'com.tarik02.clashroyale.server.utils.Bitset'
+		]
+	];
+
+	if (!$importFields) {
+		$importFields = [];
+	}
+
+	if (!$classFields) {
+		$classFields = [];
+	}
+
+	if (!$encodeFields) {
+		$encodeFields = [];
+	}
+
+	if (!$decodeFields) {
+		$decodeFields = [];
+	}
+
+	foreach ($fields as $field) {
+		$fieldType = $Types[$field['type']] ?? null;
+		$isScalarField = ($fieldType !== null) && ($fieldType['streamName']);
+
+		if (!$fieldType) {
+			continue;
+		}
+
+		if (!empty($fieldType['importName'])) {
+			$importFields[$fieldType['importName']] = $fieldType['importName'];
+		}
+
+		if (!empty($field['name'])) {
+			$classFields[$field['name']] = $fieldType['javaType'];
+			if ($isScalarField) {
+				$encodeFields []= "stream.put$fieldType[streamName]($field[name]);";
+				$decodeFields []= "$field[name] = stream.get$fieldType[streamName]();";
+			}
+		}
+	}
 }
