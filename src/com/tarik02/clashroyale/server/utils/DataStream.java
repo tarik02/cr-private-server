@@ -104,7 +104,7 @@ public class DataStream {
 	}
 
 	public byte[] get(int len) {
-		len = Math.min(len, count - offset);
+		len = Math.min(len, buffer.length - offset);
 
 		byte[] result = Arrays.copyOfRange(buffer, offset, offset + len);
 		offset += len;
@@ -245,7 +245,7 @@ public class DataStream {
 	}
 
 
-	public long getRrsInt32() {
+	public int getRrsInt32() {
 		short c = 0;
 		long value = 0;
 		long b;
@@ -268,19 +268,20 @@ public class DataStream {
 		} while ((b & 0x80) > 0);
 
 		value = (value >>> 1) ^ -(value & 1);
-		return value;
+		return (int)value;
 	}
 
-	public DataStream putRrsInt32(long value) {
-		int size = calculateVarInt32(value);
+	public DataStream putRrsInt32(int value) {
+		long lvalue = value;
+		int size = calculateVarInt32(lvalue);
 		boolean rotate = true;
 		long b;
 
-		value = (value << 1) ^ (value >> 31);
-		while (value != 0) {
-			b = (value & 0x7f);
+		lvalue = (lvalue << 1) ^ (lvalue >> 31);
+		while (lvalue != 0) {
+			b = (lvalue & 0x7f);
 
-			if (value >= 0x80) {
+			if (lvalue >= 0x80) {
 				b |= 0x80;
 			} if (rotate) {
 				rotate = false;
@@ -292,10 +293,19 @@ public class DataStream {
 			}
 
 			putByte((byte)b);
-			value >>>= 7;
+			lvalue >>>= 7;
 		}
 
 		return this;
+	}
+
+
+	public long getRrsLong() {
+		return (((long)getRrsInt32()) << 32) | ((long)getRrsInt32());
+	}
+
+	public DataStream putRrsLong(long value) {
+		return putRrsInt32((int)(value >> 32)).putRrsInt32((int)value);
 	}
 
 
@@ -380,6 +390,30 @@ public class DataStream {
 
 	public DataStream putBitset(Bitset value) {
 		return putByte(value.getValue());
+	}
+
+
+	public long getSCID() {
+		int high = getRrsInt32();
+
+		if (high > 0) {
+			int low = getRrsInt32();
+			return high * 1000000 + low;
+		}
+
+		return 0;
+	}
+
+	public DataStream putSCID(long value) {
+		int high = (int)(value / 1000000);
+		int low = (int)(value % 1000000);
+
+		putRrsInt32(high);
+		if (high > 0) {
+			putRrsInt32(low);
+		}
+
+		return this;
 	}
 
 
