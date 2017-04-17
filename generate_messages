@@ -119,7 +119,6 @@ function parseMessages(string $label, string $input, string $output) {
 		fwrite($file, PHP_EOL);
 		fwrite($file, "import com.tarik02.clashroyale.server.protocol.Info;" . PHP_EOL);
 		fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.$base;" . PHP_EOL);
-		//if ($base === 'Message') { fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;" . PHP_EOL); }
 		fwrite($file, "import com.tarik02.clashroyale.server.utils.DataStream;" . PHP_EOL);
 
 		if (count($importFields) !== 0) {
@@ -135,14 +134,16 @@ function parseMessages(string $label, string $input, string $output) {
 		if ($base === 'Message') {
 			fwrite($file, INDENT . "public static final short ID = Info.$messageIdName;" . PHP_EOL);
 			fwrite($file, PHP_EOL);
+		}
 
-			if (count($classFields) > 0) {
-				foreach ($classFields as $name => $type) {
-					fwrite($file, INDENT . "public $type $name;" . PHP_EOL);
-				}
-				fwrite ($file, PHP_EOL);
+		if (count($classFields) > 0) {
+			foreach ($classFields as $name => $type) {
+				fwrite($file, INDENT . "public $type $name;" . PHP_EOL);
 			}
+			fwrite ($file, PHP_EOL);
+		}
 
+		if ($base === 'Message') {
 			fwrite($file, INDENT . "public $messageName() {" . PHP_EOL);
 			fwrite($file, INDENT2 . "super(ID);" . PHP_EOL);
 			fwrite($file, INDENT . "}" . PHP_EOL);
