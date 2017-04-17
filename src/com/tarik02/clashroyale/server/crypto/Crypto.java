@@ -1,5 +1,6 @@
 package com.tarik02.clashroyale.server.crypto;
 
+import com.caligochat.nacl.Box;
 import com.caligochat.nacl.NaclException;
 import com.caligochat.nacl.SecretBox;
 import com.tarik02.clashroyale.server.protocol.MessageHeader;
@@ -18,6 +19,14 @@ public abstract class Crypto {
 	protected Nonce encryptNonce;
 	protected byte[] sessionKey;
 
+	public byte[] getSessionKey() {
+		return sessionKey;
+	}
+
+	public void setSessionKey(byte[] sessionKey) {
+		this.sessionKey = sessionKey;
+	}
+
 	public byte[] encrypt(byte[] message) {
 		return encrypt(message, null);
 	}
@@ -28,7 +37,8 @@ public abstract class Crypto {
 			nonce.increment();
 		}
 
-		return SecretBox.seal(message, nonce.getBytes(), sharedKey);
+		//return SecretBox.seal(message, nonce.getBytes(), sharedKey);
+		return (new Box(clientKey, privateKey)).seal(message, nonce.getBytes());
 	}
 
 	public byte[] decrypt(byte[] message) {
@@ -42,7 +52,8 @@ public abstract class Crypto {
 		}
 
 		try {
-			return SecretBox.open(message, decryptNonce.getBytes(), sharedKey);
+			//return SecretBox.open(message, nonce.getBytes(), sharedKey);
+			return (new Box(clientKey, privateKey)).open(message, nonce.getBytes());
 		} catch (NaclException e) {}
 
 		return null;

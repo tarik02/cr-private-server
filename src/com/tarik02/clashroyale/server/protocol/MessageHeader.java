@@ -19,6 +19,13 @@ public class MessageHeader {
 
 		version = buffer.getShort(0);
 		payload = new byte[bytes.length - 2];
-		buffer.get(payload, 2, payload.length - 2);
+		buffer.get(payload, 0, payload.length);
+	}
+
+	public byte[] toBuffer() {
+		return ByteBuffer.allocate(2 + payload.length).order(ByteOrder.BIG_ENDIAN)
+			.putShort(version)
+			.put(payload)
+			.array();
 	}
 }

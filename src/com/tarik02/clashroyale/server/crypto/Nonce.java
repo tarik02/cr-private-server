@@ -36,14 +36,14 @@ public class Nonce {
 	}
 
 	public void increment() {
-		ByteBuffer buffer = ByteBuffer.wrap(bytes, 0, 4);
+		ByteBuffer buffer = ByteBuffer.wrap(bytes, 0, 2);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		short val = buffer.getShort(0);
 		val += 2;
 		buffer.putShort(0, val);
 
 		buffer.position(0);
-		buffer.get(bytes, 0, 4);
+		buffer.get(bytes, 0, 2);
 	}
 
 	public byte[] getBytes() {

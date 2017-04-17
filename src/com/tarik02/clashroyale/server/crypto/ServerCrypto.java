@@ -1,5 +1,6 @@
 package com.tarik02.clashroyale.server.crypto;
 
+import com.caligochat.nacl.Box;
 import com.caligochat.nacl.Curve25519;
 import com.caligochat.nacl.Salsa;
 import com.tarik02.clashroyale.server.protocol.Info;
@@ -32,8 +33,8 @@ public class ServerCrypto extends Crypto {
 			clientKey = Arrays.copyOfRange(message.payload, 0, 32);
 			byte[] cipherText = Arrays.copyOfRange(message.payload, 32, message.payload.length);
 
-			sharedKey = Curve25519.scalarMult(privateKey, clientKey);
-			sharedKey = Salsa.HSalsa20(new byte[16], sharedKey, Salsa.SIGMA);
+			//sharedKey = Curve25519.scalarMult(privateKey, clientKey);
+			//sharedKey = Salsa.HSalsa20(new byte[16], sharedKey, Salsa.SIGMA);
 
 			Nonce nonce = new Nonce(clientKey, serverKey);
 			message.decrypted = decrypt(cipherText, nonce);
