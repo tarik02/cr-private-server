@@ -5,8 +5,7 @@ import com.caligochat.nacl.NaclException;
 import com.caligochat.nacl.SecretBox;
 import com.tarik02.clashroyale.server.protocol.MessageHeader;
 import com.tarik02.clashroyale.server.utils.LogManager;
-
-import java.util.logging.Logger;
+import com.tarik02.clashroyale.server.utils.Logger;
 
 public abstract class Crypto {
 	private static Logger logger = LogManager.getLogger(Crypto.class);
@@ -33,8 +32,8 @@ public abstract class Crypto {
 
 	public byte[] encrypt(byte[] message, Nonce nonce) {
 		if (nonce == null) {
+			encryptNonce.increment();
 			nonce = encryptNonce;
-			nonce.increment();
 		}
 
 		return SecretBox.seal(message, nonce.getBytes(), sharedKey);
@@ -46,8 +45,8 @@ public abstract class Crypto {
 
 	public byte[] decrypt(byte[] message, Nonce nonce) {
 		if (nonce == null) {
+			decryptNonce.increment();
 			nonce = decryptNonce;
-			nonce.increment();
 		}
 
 		try {

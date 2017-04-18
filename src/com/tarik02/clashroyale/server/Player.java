@@ -5,8 +5,6 @@ import com.tarik02.clashroyale.server.protocol.Session;
 import com.tarik02.clashroyale.server.protocol.messages.client.*;
 import com.tarik02.clashroyale.server.protocol.messages.server.KeepAliveOk;
 
-import java.net.Socket;
-
 public class Player implements Handler {
 	protected Server server;
 	protected Session session;

@@ -1,5 +1,9 @@
 package com.tarik02.clashroyale.server.protocol;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Info {
 	private Info() {}
 
@@ -158,4 +162,168 @@ public class Info {
 	public static final short LOGIC_DEVICE_LINK_RESPONSE = 26005;
 	public static final short LOGIC_DEVICE_LINK_DONE = 26007;
 	public static final short LOGIC_DEVICE_LINK_ERROR = 26008;
+
+	public static final Map<Integer, String> messagesMap = createMessagesMap();
+
+	private static Map<Integer, String> createMessagesMap() {
+		Map<Integer, String> map = new HashMap<>();
+
+		// Client messages
+		map.put(10100, "ClientHello");
+		map.put(10101, "Login");
+		map.put(10107, "ClientCapabilities");
+		map.put(10108, "KeepAlive");
+		map.put(10112, "AuthenticationCheck");
+		map.put(10113, "SetDeviceToken");
+		map.put(10116, "ResetAccount");
+		map.put(10117, "ReportUser");
+		map.put(10118, "AccountSwitched");
+		map.put(10121, "UnlockAccount");
+		map.put(10150, "AppleBillingRequest");
+		map.put(10151, "GoogleBillingRequest");
+		map.put(10159, "KunlunBillingRequest");
+		map.put(10212, "ChangeAvatarName");
+		map.put(10512, "AskForPlayingGamecenterFriends");
+		map.put(10513, "AskForPlayingFacebookFriends");
+		map.put(10905, "InboxOpened");
+		map.put(12211, "UnbindFacebookAccount");
+		map.put(12903, "RequestSectorState");
+		map.put(12904, "SectorCommand");
+		map.put(12905, "GetCurrentBattleReplayData");
+		map.put(12951, "SendBattleEvent");
+		map.put(14101, "GoHome");
+		map.put(14102, "EndClientTurn");
+		map.put(14104, "StartMission");
+		map.put(14105, "HomeLogicStopped");
+		map.put(14107, "CancelMatchmake");
+		map.put(14108, "ChangeHomeName");
+		map.put(14113, "VisitHome");
+		map.put(14114, "HomeBattleReplay");
+		map.put(14117, "HomeBattleReplayViewed");
+		map.put(14120, "AcceptChallenge");
+		map.put(14123, "CancelChallengeMessage");
+		map.put(14201, "BindFacebookAccount");
+		map.put(14212, "BindGamecenterAccount");
+		map.put(14262, "BindGoogleServiceAccount");
+		map.put(14301, "CreateAlliance");
+		map.put(14302, "AskForAllianceData");
+		map.put(14303, "AskForJoinableAlliancesList");
+		map.put(14304, "AskForAllianceStream");
+		map.put(14305, "JoinAlliance");
+		map.put(14306, "ChangeAllianceMemberRole");
+		map.put(14307, "KickAllianceMember");
+		map.put(14308, "LeaveAlliance");
+		map.put(14310, "DonateAllianceUnit");
+		map.put(14315, "ChatToAllianceStream");
+		map.put(14316, "ChangeAllianceSettings");
+		map.put(14317, "RequestJoinAlliance");
+		map.put(14318, "SelectSpellsFromCoOpen");
+		map.put(14319, "OfferChestForCoOpen");
+		map.put(14321, "RespondToAllianceJoinRequest");
+		map.put(14322, "SendAllianceInvitation");
+		map.put(14323, "JoinAllianceUsingInvitation");
+		map.put(14324, "SearchAlliances");
+		map.put(14330, "SendAllianceMail");
+		map.put(14401, "AskForAllianceRankingList");
+		map.put(14402, "AskForTVContent");
+		map.put(14403, "AskForAvatarRankingList");
+		map.put(14404, "AskForAvatarLocalRanking");
+		map.put(14405, "AskForAvatarStream");
+		map.put(14406, "AskForBattleReplayStream");
+		map.put(14408, "AskForLastAvatarTournamentResults");
+		map.put(14418, "RemoveAvatarStreamEntry");
+		map.put(14600, "AvatarNameCheckRequest");
+		map.put(16000, "LogicDeviceLinkCodeStatus");
+		map.put(16103, "AskForJoinableTournaments");
+		map.put(16113, "SearchTournaments");
+
+		// Server messages
+		map.put(20100, "ServerHello");
+		map.put(20103, "LoginFailed");
+		map.put(20104, "LoginOk");
+		map.put(20105, "FriendList");
+		map.put(20108, "KeepAliveOk");
+		map.put(20118, "ChatAccountBanStatus");
+		map.put(20121, "BillingRequestFailed");
+		map.put(20132, "UnlockAccountOk");
+		map.put(20133, "UnlockAccountFailed");
+		map.put(20151, "AppleBillingProcessedByServer");
+		map.put(20152, "GoogleBillingProcessedByServer");
+		map.put(20156, "KunlunBillingProcessedByServer");
+		map.put(20161, "ShutdownStarted");
+		map.put(20205, "AvatarNameChangeFailed");
+		map.put(20206, "AvatarInGameStatusUpdated");
+		map.put(20207, "AllianceOnlineStatusUpdated");
+		map.put(20225, "BattleResult");
+		map.put(20300, "AvatarNameCheckResponse");
+		map.put(20801, "OpponentLeftMatchNotification");
+		map.put(20802, "OpponentRejoinsMatchNotification");
+		map.put(21902, "SectorHearbeat");
+		map.put(21903, "SectorState");
+		map.put(22952, "BattleEvent");
+		map.put(22957, "PvpMatchmakeNotification");
+		map.put(24101, "OwnHomeData");
+		map.put(24102, "OwnAvatarData");
+		map.put(24104, "OutOfSync");
+		map.put(24106, "StopHomeLogic");
+		map.put(24107, "MatchmakeInfo");
+		map.put(24108, "MatchmakeFailed");
+		map.put(24111, "AvailableServerCommand");
+		map.put(24112, "UdpConnectionInfo");
+		map.put(24113, "VisitedHomeData");
+		map.put(24114, "HomeBattleReplayData");
+		map.put(24115, "ServerError");
+		map.put(24116, "HomeBattleReplayFailed");
+		map.put(24121, "ChallengeFailed");
+		map.put(24124, "CancelChallengeDone");
+		map.put(24125, "CancelMatchmakeDone");
+		map.put(24201, "FacebookAccountBound");
+		map.put(24202, "FacebookAccountAlreadyBound");
+		map.put(24212, "GamecenterAccountAlreadyBound");
+		map.put(24213, "FacebookAccountUnbound");
+		map.put(24261, "GoogleServiceAccountBound");
+		map.put(24262, "GoogleServiceAccountAlreadyBound");
+		map.put(24301, "AllianceData");
+		map.put(24302, "AllianceJoinFailed");
+		map.put(24303, "AllianceJoinOk");
+		map.put(24304, "JoinableAllianceList");
+		map.put(24305, "AllianceLeaveOk");
+		map.put(24306, "ChangeAllianceMemberRoleOk");
+		map.put(24307, "KickAllianceMemberOk");
+		map.put(24308, "AllianceMember");
+		map.put(24309, "AllianceMemberRemoved");
+		map.put(24310, "AllianceList");
+		map.put(24311, "AllianceStream");
+		map.put(24312, "AllianceStreamEntry");
+		map.put(24318, "AllianceStreamEntryRemoved");
+		map.put(24319, "AllianceJoinRequestOk");
+		map.put(24320, "AllianceJoinRequestFailed");
+		map.put(24321, "AllianceInvitationSendFailed");
+		map.put(24322, "AllianceInvitationSentOk");
+		map.put(24324, "AllianceFullEntryUpdate");
+		map.put(24332, "AllianceCreateFailed");
+		map.put(24333, "AllianceChangeFailed");
+		map.put(24401, "AllianceRankingList");
+		map.put(24402, "AllianceLocalRankingList");
+		map.put(24403, "AvatarRankingList");
+		map.put(24404, "AvatarLocalRankingList");
+		map.put(24405, "RoyalTVContent");
+		map.put(24407, "LastAvatarTournamentResults");
+		map.put(24411, "AvatarStream");
+		map.put(24412, "AvatarStreamEntry");
+		map.put(24413, "BattleReportStream");
+		map.put(24418, "AvatarStreamEntryRemoved");
+		map.put(24445, "InboxList");
+		map.put(24446, "InboxGlobal");
+		map.put(24447, "InboxCount");
+		map.put(25892, "Disconnected");
+		map.put(26002, "LogicDeviceLinkCodeResponse");
+		map.put(26003, "LogicDeviceLinkNewDeviceLinked");
+		map.put(26004, "LogicDeviceLinkCodeDeactivated");
+		map.put(26005, "LogicDeviceLinkResponse");
+		map.put(26007, "LogicDeviceLinkDone");
+		map.put(26008, "LogicDeviceLinkError");
+
+		return Collections.unmodifiableMap(map);
+	}
 }

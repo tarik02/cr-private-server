@@ -56,6 +56,10 @@ echo 'Writing messages...', PHP_EOL;
 $file = fopen('src/com/tarik02/clashroyale/server/protocol/Info.java', 'w');
 fwrite($file, 'package com.tarik02.clashroyale.server.protocol;' . PHP_EOL);
 fwrite($file, PHP_EOL);
+fwrite($file, 'import java.util.Collections;' . PHP_EOL);
+fwrite($file, 'import java.util.HashMap;' . PHP_EOL);
+fwrite($file, 'import java.util.Map;' . PHP_EOL);
+fwrite($file, PHP_EOL);
 fwrite($file, 'public class Info {' . PHP_EOL);
 fwrite($file, INDENT . 'private Info() {}' . PHP_EOL);
 fwrite($file, PHP_EOL);
@@ -68,6 +72,26 @@ fwrite($file, INDENT . '// Server messages' . PHP_EOL);
 foreach ($messages['server'] as $name => $id) {
 	fwrite($file, INDENT . 'public static final short ' . convertMessageName($name) . ' = ' . $id . ';' . PHP_EOL);
 }
+fwrite($file, PHP_EOL);
+fwrite($file, INDENT . 'public static final Map<Integer, String> messagesMap = createMessagesMap();' . PHP_EOL);
+fwrite($file, PHP_EOL);
+fwrite($file, INDENT . 'private static Map<Integer, String> createMessagesMap() {' . PHP_EOL);
+
+fwrite($file, INDENT2 . 'Map<Integer, String> map = new HashMap<>();' . PHP_EOL);
+fwrite($file, PHP_EOL);
+fwrite($file, INDENT2 . '// Client messages' . PHP_EOL);
+foreach ($messages['client'] as $name => $id) {
+	fwrite($file, INDENT2 . "map.put($id, \"$name\");" . PHP_EOL);
+}
+fwrite($file, PHP_EOL);
+fwrite($file, INDENT2 . '// Server messages' . PHP_EOL);
+foreach ($messages['server'] as $name => $id) {
+	fwrite($file, INDENT2 . "map.put($id, \"$name\");" . PHP_EOL);
+}
+fwrite($file, PHP_EOL);
+fwrite($file, INDENT2 . 'return Collections.unmodifiableMap(map);' . PHP_EOL);
+
+fwrite($file, INDENT . '}' . PHP_EOL);
 fwrite($file, '}' . PHP_EOL);
 fclose($file);
 

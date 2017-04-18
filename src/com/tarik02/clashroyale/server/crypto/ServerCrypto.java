@@ -63,15 +63,16 @@ public class ServerCrypto extends Crypto {
 			Nonce nonce = new Nonce(clientKey, serverKey, decryptNonce.getBytes());
 			ByteArrayOutputStream toEncrypt = new ByteArrayOutputStream();
 
+			//sharedKey = client.sharedKey;
+
 			try {
 				encryptNonce = new Nonce();
 				toEncrypt.write(encryptNonce.getBytes());
-				toEncrypt.write(client.sharedKey);
+				toEncrypt.write(sharedKey);
 				toEncrypt.write(message.decrypted);
 			} catch (IOException ignored) {}
 
 			message.payload = encrypt(toEncrypt.toByteArray(), nonce);
-			sharedKey = client.sharedKey;
 			break;
 		default:
 			message.payload = encrypt(message.decrypted);

@@ -14,6 +14,7 @@ import com.tarik02.clashroyale.server.protocol.messages.server.ServerHello;
 import com.tarik02.clashroyale.server.utils.DataStream;
 import com.tarik02.clashroyale.server.utils.Hex;
 import com.tarik02.clashroyale.server.utils.LogManager;
+import com.tarik02.clashroyale.server.utils.Logger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -22,8 +23,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Server {
 	private static Logger logger = LogManager.getLogger(Server.class);
@@ -148,7 +147,7 @@ loop:
 
 				Message message = readMessage();
 				if (message.id != Info.CLIENT_HELLO) {
-					logger.warning("Excepted ClientHello, received " + message.getClass().getSimpleName() + ". Disconnecting...");
+					logger.warn("Excepted ClientHello, received " + message.getClass().getSimpleName() + ". Disconnecting...");
 					break loop;
 				}
 
@@ -169,7 +168,7 @@ loop:
 
 				message = readMessage();
 				if (message.id != Info.LOGIN) {
-					logger.warning("Excepted Login, received " + message.getClass().getSimpleName() + ". Disconnecting...");
+					logger.warn("Excepted Login, received " + message.getClass().getSimpleName() + ". Disconnecting...");
 					break loop;
 				}
 
@@ -211,10 +210,10 @@ loop:
 					if (message != null) {
 						try {
 							if (!message.handle(player)) {
-								logger.warning("Failed to handle message " + message.getClass().getSimpleName() + ".");
+								logger.warn("Failed to handle message " + message.getClass().getSimpleName() + ".");
 							}
 						} catch (Throwable e) {
-							logger.log(Level.WARNING, "Failed to handle message " + message.getClass().getSimpleName() + ". Error throwed:", e);
+							logger.error("Failed to handle message " + message.getClass().getSimpleName() + ". Error throwed:", e);
 						}
 					}
 
@@ -267,13 +266,28 @@ loop:
 			serverCrypto.decryptPacket(header);
 
 			Message message = MessageFactory.create(header.id);
-			if (message == null) {
 
+			if (message == null) {
+				if (header.decrypted == null) {
+					logger.error("Failed to decrypt packet %d, encrypted payload:\n%s", header.id, Hex.dump(header.payload));
+				} else {
+					String name = Info.messagesMap.getOrDefault(header.id, null);
+
+					if (name == null) {
+						logger.debug("Received unknown packet %d:\n%s", header.id, Hex.dump(header.decrypted));
+					} else {
+						logger.debug("Received undefined packet %s:\n%s", name, Hex.dump(header.decrypted));
+					}
+				}
+			} else if (header.decrypted == null) {
+				logger.error("Failed to decrypt packet %s, encrypted payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.payload));
 			} else {
+				logger.debug("Received packet %s:\n%s", message.getClass().getSimpleName(), Hex.dump(header.decrypted));
 				message.decode(new DataStream(header.decrypted));
+				return message;
 			}
 
-			return message;
+			return null;
 		}
 
 		public void writeMessage(Message message) throws IOException {
