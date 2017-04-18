@@ -54,6 +54,19 @@ public class Hex {
 		return builder.toString();
 	}
 
+	public static String toHexString(byte[] buffer) {
+		return toHexString(buffer, 0, buffer.length);
+	}
+
+	public static String toHexString(byte[] buffer, int offset, int count) {
+		StringBuilder sb = new StringBuilder((count - offset) * 2);
+		for (int i = offset; i < offset + count; ++i) {
+			sb.append(HEX_SET[(buffer[i] >> 4) & 0xF]);
+			sb.append(HEX_SET[buffer[i] & 0xF]);
+		}
+		return sb.toString();
+	}
+
 	public static byte[] toByteArray(String s) {
 		int len = s.length();
 		byte[] data = new byte[len / 2];
