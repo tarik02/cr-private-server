@@ -16,6 +16,7 @@ $messages = [
 	'client' => [],
 	'server' => []
 ];
+$definedMessages = [];
 foreach ($lines as $line) {
 	switch ($status) {
 	case 0:
@@ -70,7 +71,6 @@ foreach ($messages['server'] as $name => $id) {
 fwrite($file, '}' . PHP_EOL);
 fclose($file);
 
-
 echo 'Clonning messages definitions...', PHP_EOL;
 `mkdir temp && cd temp && git clone git@github.com:royale-proxy/cr-messages.git`;
 
@@ -83,8 +83,36 @@ parseMessages('client', 'temp/cr-messages/client/', 'src/com/tarik02/clashroyale
 echo 'Parsing server messages...', PHP_EOL;
 parseMessages('server', 'temp/cr-messages/server/', 'src/com/tarik02/clashroyale/server/protocol/messages/server/');
 
+echo 'Writing handler file...', PHP_EOL;
+writeHandlerFile();
+
 //echo 'Removing temponary directory...', PHP_EOL;
 //`rm -rf temp`;
+
+function writeHandlerFile() {
+	global $messages;
+	global $definedMessages;
+
+	$file = fopen('src/com/tarik02/clashroyale/server/protocol/Handler.java', 'w');
+	fwrite($file, 'package com.tarik02.clashroyale.server.protocol;' . PHP_EOL);
+	fwrite($file, PHP_EOL);
+
+	foreach ($messages['client'] as $name => $id) {
+		if (isset($definedMessages[$id])) {
+			fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.client.$name;" . PHP_EOL);
+		}
+	}
+
+	fwrite($file, PHP_EOL);
+	fwrite($file, 'public interface Handler {' . PHP_EOL);
+	foreach ($messages['client'] as $name => $id) {
+		if (isset($definedMessages[$id])) {
+			fwrite($file, INDENT . "boolean handle$name($name message) throws Throwable;" . PHP_EOL);
+		}
+	}
+	fwrite($file, '}' . PHP_EOL);
+	fclose($file);
+}
 
 function convertMessageName(string $name) {
 	return strtoupper(preg_replace('/(.)([A-Z])/', '$1_$2', $name));
@@ -92,6 +120,7 @@ function convertMessageName(string $name) {
 
 function parseMessages(string $label, string $input, string $output) {
 	global $messages;
+	global $definedMessages;
 
 	`rm -rf $output && mkdir $output`;
 
@@ -103,6 +132,7 @@ function parseMessages(string $label, string $input, string $output) {
 			$messageName = substr($name, 0, strrpos($name, '.'));
 		} else {
 			$messageName = $data['name'] = array_search($data['id'], $messages['client'] + $messages['server'], true);
+			$definedMessages[$data['id']] = $messageName;
 		}
 
 		if (trim($messageName) === '') {
@@ -117,6 +147,11 @@ function parseMessages(string $label, string $input, string $output) {
 		$file = fopen("src/com/tarik02/clashroyale/server/protocol/messages/$label/$messageName.java", 'w');
 		fwrite($file, "package com.tarik02.clashroyale.server.protocol.messages.$label;" . PHP_EOL);
 		fwrite($file, PHP_EOL);
+
+		if ($label === 'client') {
+			fwrite($file, "import com.tarik02.clashroyale.server.protocol.Handler;" . PHP_EOL);
+		}
+
 		fwrite($file, "import com.tarik02.clashroyale.server.protocol.Info;" . PHP_EOL);
 		fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.$base;" . PHP_EOL);
 		fwrite($file, "import com.tarik02.clashroyale.server.utils.DataStream;" . PHP_EOL);
@@ -182,6 +217,14 @@ function parseMessages(string $label, string $input, string $output) {
 			}
 		}
 		fwrite($file, INDENT . "}" . PHP_EOL);
+
+		if ($label === 'client') {
+			fwrite($file, PHP_EOL);
+			fwrite($file, INDENT . "public boolean handle(Handler handler) throws Throwable {" . PHP_EOL);
+			fwrite($file, INDENT2 . "return handler.handle$messageName(this);" . PHP_EOL);
+			fwrite($file, INDENT . "}" . PHP_EOL);
+		}
+
 		fwrite($file, "}" . PHP_EOL);
 		fclose($file);
 	}

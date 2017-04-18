@@ -1,5 +1,6 @@
 package com.tarik02.clashroyale.server.protocol.messages.client;
 
+import com.tarik02.clashroyale.server.protocol.Handler;
 import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.utils.DataStream;
@@ -43,5 +44,9 @@ public class JoinAlliance extends Message {
 		unknown_2 = stream.getByte();
 		unknown_3 = stream.getByte();
 		unknown_4 = stream.getByte();
+	}
+
+	public boolean handle(Handler handler) throws Throwable {
+		return handler.handleJoinAlliance(this);
 	}
 }

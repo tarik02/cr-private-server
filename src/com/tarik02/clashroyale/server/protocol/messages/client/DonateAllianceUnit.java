@@ -1,5 +1,6 @@
 package com.tarik02.clashroyale.server.protocol.messages.client;
 
+import com.tarik02.clashroyale.server.protocol.Handler;
 import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.utils.DataStream;
@@ -51,5 +52,9 @@ public class DonateAllianceUnit extends Message {
 		unknown_4 = stream.getByte();
 		unknown_5 = stream.getByte();
 		streamID = stream.getBLong();
+	}
+
+	public boolean handle(Handler handler) throws Throwable {
+		return handler.handleDonateAllianceUnit(this);
 	}
 }

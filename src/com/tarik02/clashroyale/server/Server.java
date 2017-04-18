@@ -4,9 +4,12 @@ import com.tarik02.clashroyale.server.crypto.ClientCrypto;
 import com.tarik02.clashroyale.server.crypto.ServerCrypto;
 import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.MessageHeader;
+import com.tarik02.clashroyale.server.protocol.Session;
 import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;
 import com.tarik02.clashroyale.server.protocol.messages.client.ClientHello;
+import com.tarik02.clashroyale.server.protocol.messages.client.Login;
+import com.tarik02.clashroyale.server.protocol.messages.server.LoginOk;
 import com.tarik02.clashroyale.server.protocol.messages.server.ServerHello;
 import com.tarik02.clashroyale.server.utils.DataStream;
 import com.tarik02.clashroyale.server.utils.Hex;
@@ -19,6 +22,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server {
@@ -115,7 +119,7 @@ public class Server {
 		}
 	}
 
-	private class ClientThread extends Thread {
+	private class ClientThread extends Thread implements Session {
 		private Socket socket;
 		private DataInputStream reader;
 		private DataOutputStream writer;
@@ -144,6 +148,7 @@ loop:
 
 				Message message = readMessage();
 				if (message.id != Info.CLIENT_HELLO) {
+					logger.warning("Excepted ClientHello, received " + message.getClass().getSimpleName() + ". Disconnecting...");
 					break loop;
 				}
 
@@ -160,14 +165,58 @@ loop:
 					writeMessage(serverHello);
 					serverCrypto.setSessionKey(serverHello.sessionKey.getBytes());
 					clientCrypto.setSessionKey(serverHello.sessionKey.getBytes());
-					logger.info("Send hello");
+				}
+
+				message = readMessage();
+				if (message.id != Info.LOGIN) {
+					logger.warning("Excepted Login, received " + message.getClass().getSimpleName() + ". Disconnecting...");
+					break loop;
+				}
+
+				{
+					Login login = (Login)message;
+					message = null;
+
+					LoginOk loginOk = new LoginOk();
+					loginOk.userId = loginOk.homeId = 1515; // TODO: Get it from store
+					loginOk.userToken = "8zn8t2bjy8cnk26re8899c3mhc9xa7pg7tb4yk3m"; // TODO: Get it from store
+					loginOk.gameCenterId = "";
+					loginOk.facebookId = "";
+					loginOk.serverMajorVersion = 3; // TODO: Make it constant
+					loginOk.serverBuild = 193; // TODO: Make it constant
+					loginOk.contentVersion = 8; // TODO: Make it constant
+					loginOk.environment = "prod";
+					loginOk.sessionCount = 5;
+					loginOk.playTimeSeconds = 114; // TODO: Get it from store
+					loginOk.daysSinceStartedPlaying = 0; // TODO: Get it from store
+					loginOk.facebookAppId = "1475268786112433";
+					loginOk.serverTime = String.valueOf(System.currentTimeMillis());
+					loginOk.accountCreatedDate = String.valueOf(System.currentTimeMillis() - 50000); // TODO: Get it from store
+					loginOk.unknown_16 = 0;
+					loginOk.googleServiceId = "";
+					loginOk.unknown_18 = "";
+					loginOk.unknown_19 = "";
+					loginOk.region = "UA"; // TODO: Make it from config
+					loginOk.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com"; // TODO: Make it from config
+					loginOk.eventAssetsURL = "https://event-assets.clashroyale.com"; // TODO: Make it from config
+					loginOk.unknown_23 = 1;
+					writeMessage(loginOk);
 				}
 
 
-				player = new Player(Server.this, socket);
+				player = new Player(Server.this, this);
 
 				while (true) {
 					message = readMessage();
+					if (message != null) {
+						try {
+							if (!message.handle(player)) {
+								logger.warning("Failed to handle message " + message.getClass().getSimpleName() + ".");
+							}
+						} catch (Throwable e) {
+							logger.log(Level.WARNING, "Failed to handle message " + message.getClass().getSimpleName() + ". Error throwed:", e);
+						}
+					}
 
 					message = null;
 				}
@@ -204,7 +253,7 @@ loop:
 
 			payload = new byte[3];
 			reader.readFully(payload);
-			reader.readShort(); // Unknown
+			reader.readShort(); // Version, always 5
 
 			int length = ByteBuffer
 				.allocate(4)
@@ -214,13 +263,15 @@ loop:
 			payload = new byte[length];
 			reader.readFully(payload);
 
-			logger.info(Hex.dump(payload));
-
 			MessageHeader header = new MessageHeader(id, payload);
 			serverCrypto.decryptPacket(header);
 
 			Message message = MessageFactory.create(header.id);
-			message.decode(new DataStream(header.decrypted));
+			if (message == null) {
+
+			} else {
+				message.decode(new DataStream(header.decrypted));
+			}
 
 			return message;
 		}
@@ -230,14 +281,23 @@ loop:
 			message.encode(stream);
 			MessageHeader header = new MessageHeader();
 			header.id = message.id;
-			header.version = 5;
 			header.decrypted = stream.getBuffer();
 			serverCrypto.encryptPacket(header);
 
 			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort(message.id).array());
 			writer.write(ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(header.payload.length).array(), 1, 3);
-			writer.writeShort(0);
+			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort((short) 5).array());
 			writer.write(header.payload);
+		}
+
+
+		@Override
+		public void sendMessage(Message message) {
+			try {
+				writeMessage(message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

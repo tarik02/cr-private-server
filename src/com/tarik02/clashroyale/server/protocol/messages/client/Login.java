@@ -1,5 +1,6 @@
 package com.tarik02.clashroyale.server.protocol.messages.client;
 
+import com.tarik02.clashroyale.server.protocol.Handler;
 import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.utils.DataStream;
@@ -131,5 +132,9 @@ public class Login extends Message {
 		unknown_24 = stream.getString();
 		unknown_25 = stream.getString();
 		unknown_26 = stream.getByte();
+	}
+
+	public boolean handle(Handler handler) throws Throwable {
+		return handler.handleLogin(this);
 	}
 }

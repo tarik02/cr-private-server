@@ -64,6 +64,7 @@ public class ServerCrypto extends Crypto {
 			ByteArrayOutputStream toEncrypt = new ByteArrayOutputStream();
 
 			try {
+				encryptNonce = new Nonce();
 				toEncrypt.write(encryptNonce.getBytes());
 				toEncrypt.write(client.sharedKey);
 				toEncrypt.write(message.decrypted);
