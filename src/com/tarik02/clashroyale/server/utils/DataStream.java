@@ -413,6 +413,35 @@ public class DataStream {
 	}
 
 
+	public int getVarInt32() {
+		int result = 0;
+		int shift = 0;
+		int b;
+		do {
+			if (shift >= 32) {
+				return 0;
+			}
+
+			b = getByte();
+			result |= (b & 0x7F) << shift;
+			shift += 7;
+		} while ((b & 0x80) != 0);
+
+		return result;
+	}
+
+	public DataStream putVarInt32(int value) {
+		do {
+			int bits = value & 0x7F;
+			value >>>= 7;
+			byte b = (byte)(bits + ((value != 0) ? 0x80 : 0));
+			putByte(b);
+		} while (value != 0);
+
+		return this;
+	}
+
+
 	public String dump() {
 		return Hex.dump(buffer, 0, count);
 	}
