@@ -111,8 +111,8 @@ function parseMessages(string $label, string $input, string $output) {
 
 		$messageIdName = convertMessageName($messageName);
 
-		$importFields = $classFields = $encodeFields = $decodeFields = [];
-		printFields($data['fields'] ?? [], $importFields, $classFields, $encodeFields, $decodeFields);
+		$importFields = $classFields = $constructorFields = $encodeFields = $decodeFields = [];
+		printFields($data['fields'] ?? [], $importFields, $classFields, $constructorFields, $encodeFields, $decodeFields);
 
 		$file = fopen("src/com/tarik02/clashroyale/server/protocol/messages/$label/$messageName.java", 'w');
 		fwrite($file, "package com.tarik02.clashroyale.server.protocol.messages.$label;" . PHP_EOL);
@@ -143,9 +143,20 @@ function parseMessages(string $label, string $input, string $output) {
 			fwrite ($file, PHP_EOL);
 		}
 
-		if ($base === 'Message') {
+		if (($base === 'Message') || (count($constructorFields) !== 0)) {
 			fwrite($file, INDENT . "public $messageName() {" . PHP_EOL);
-			fwrite($file, INDENT2 . "super(ID);" . PHP_EOL);
+
+			if ($base === 'Message') {
+				fwrite($file, INDENT2 . "super(ID);" . PHP_EOL);
+				if (count($constructorFields) !== 0) {
+					fwrite($file, PHP_EOL);
+				}
+			}
+
+			foreach ($constructorFields as $field) {
+				fwrite($file, INDENT2 . $field . PHP_EOL);
+			}
+
 			fwrite($file, INDENT . "}" . PHP_EOL);
 			fwrite($file, PHP_EOL);
 		}
@@ -188,42 +199,53 @@ function listDirectory(string $dir) {
 	return $result;
 }
 
-function printFields(array $fields, array &$importFields = null, array &$classFields = null, array &$encodeFields = null, array &$decodeFields = null) {
+function printFields(array $fields, array &$importFields = null, array &$classFields = null, array &$constructorFields, array &$encodeFields = null, array &$decodeFields = null) {
 	static $Types = [
 		'BOOLEAN' => [
 			'javaType' => 'boolean',
-			'streamName' => 'Boolean'
+			'streamName' => 'Boolean',
+			'default' => 'false'
 		], 'BYTE' => [
 			'javaType' => 'byte',
-			'streamName' => 'Byte'
+			'streamName' => 'Byte',
+			'default' => '0'
 		], 'INT' => [
 			'javaType' => 'int',
-			'streamName' => 'BInt'
+			'streamName' => 'BInt',
+			'default' => '0'
 		], 'INT32' => [
 			'javaType' => 'int',
-			'streamName' => 'RrsInt32'
-		]/*, 'RRSINT32' => [
+			'streamName' => 'VarInt32',
+			'default' => '0'
+		], 'RRSINT32' => [
 			'javaType' => 'int',
-			'streamName' => 'RrsInt32'
-		]*/, 'RRSLONG' => [
+			'streamName' => 'RrsInt32',
+			'default' => '0'
+		], 'RRSLONG' => [
 			'javaType' => 'long',
-			'streamName' => 'RrsLong'
+			'streamName' => 'RrsLong',
+			'default' => '0'
 		], 'SCID' => [
 			'javaType' => 'SCID',
 			'streamName' => 'SCID',
+			'default' => 'new SCID()',
 			'importName' => 'com.tarik02.clashroyale.server.utils.SCID'
 		], 'LONG' => [
 			'javaType' => 'long',
-			'streamName' => 'BLong'
+			'streamName' => 'BLong',
+			'default' => '0'
 		], 'STRING' => [
 			'javaType' => 'String',
-			'streamName' => 'String'
+			'streamName' => 'String',
+			'default' => '""'
 		], 'ZIP_STRING' => [
 			'javaType' => 'String',
-			'streamName' => 'ZipString'
+			'streamName' => 'ZipString',
+			'default' => '""'
 		], 'BITSET' => [
 			'javaType' => 'Bitset',
 			'streamName' => 'Bitset',
+			'default' => 'new Bitset()',
 			'importName' => 'com.tarik02.clashroyale.server.utils.Bitset'
 		]
 	];
@@ -236,6 +258,10 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 		$classFields = [];
 	}
 
+	if (!$constructorFields) {
+		$constructorFields = [];
+	}
+
 	if (!$encodeFields) {
 		$encodeFields = [];
 	}
@@ -244,7 +270,7 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 		$decodeFields = [];
 	}
 
-	foreach ($fields as $field) {
+	foreach ($fields as $i => $field) {
 		$fieldType = $Types[$field['type']] ?? null;
 		$isScalarField = ($fieldType !== null) && ($fieldType['streamName']);
 
@@ -256,12 +282,15 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 			$importFields[$fieldType['importName']] = $fieldType['importName'];
 		}
 
-		if (!empty($field['name'])) {
-			$classFields[$field['name']] = $fieldType['javaType'];
-			if ($isScalarField) {
-				$encodeFields []= "stream.put$fieldType[streamName]($field[name]);";
-				$decodeFields []= "$field[name] = stream.get$fieldType[streamName]();";
-			}
+		if (empty($field['name'])) {
+			$field['name'] = 'unknown_' . $i;
+		}
+
+		$classFields[$field['name']] = $fieldType['javaType'];
+		$constructorFields []= "$field[name] = $fieldType[default];";
+		if ($isScalarField) {
+			$encodeFields []= "stream.put$fieldType[streamName]($field[name]);";
+			$decodeFields []= "$field[name] = stream.get$fieldType[streamName]();";
 		}
 	}
 }

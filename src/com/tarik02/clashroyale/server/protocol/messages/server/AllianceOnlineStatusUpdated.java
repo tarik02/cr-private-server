@@ -8,9 +8,13 @@ public class AllianceOnlineStatusUpdated extends Message {
 	public static final short ID = Info.ALLIANCE_ONLINE_STATUS_UPDATED;
 
 	public byte membersOnline;
+	public byte unknown_1;
 
 	public AllianceOnlineStatusUpdated() {
 		super(ID);
+
+		membersOnline = 0;
+		unknown_1 = 0;
 	}
 
 	@Override
@@ -18,6 +22,7 @@ public class AllianceOnlineStatusUpdated extends Message {
 		super.encode(stream);
 
 		stream.putByte(membersOnline);
+		stream.putByte(unknown_1);
 	}
 
 	@Override
@@ -25,5 +30,6 @@ public class AllianceOnlineStatusUpdated extends Message {
 		super.decode(stream);
 
 		membersOnline = stream.getByte();
+		unknown_1 = stream.getByte();
 	}
 }

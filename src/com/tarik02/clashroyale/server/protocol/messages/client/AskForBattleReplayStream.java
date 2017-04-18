@@ -11,6 +11,8 @@ public class AskForBattleReplayStream extends Message {
 
 	public AskForBattleReplayStream() {
 		super(ID);
+
+		accountID = 0;
 	}
 
 	@Override

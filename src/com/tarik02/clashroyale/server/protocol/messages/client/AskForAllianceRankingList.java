@@ -11,6 +11,8 @@ public class AskForAllianceRankingList extends Message {
 
 	public AskForAllianceRankingList() {
 		super(ID);
+
+		region = 0;
 	}
 
 	@Override

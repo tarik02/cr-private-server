@@ -11,6 +11,8 @@ public class VisitHome extends Message {
 
 	public VisitHome() {
 		super(ID);
+
+		accountID = 0;
 	}
 
 	@Override

@@ -11,6 +11,8 @@ public class AskForAllianceData extends Message {
 
 	public AskForAllianceData() {
 		super(ID);
+
+		allianceId = 0;
 	}
 
 	@Override

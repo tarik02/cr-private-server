@@ -11,6 +11,8 @@ public class BattleReportStream extends Message {
 
 	public BattleReportStream() {
 		super(ID);
+
+		accountID = 0;
 	}
 
 	@Override

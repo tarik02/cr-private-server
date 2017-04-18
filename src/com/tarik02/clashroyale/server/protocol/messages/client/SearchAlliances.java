@@ -15,9 +15,20 @@ public class SearchAlliances extends Message {
 	public int maxMembers;
 	public int minTrophies;
 	public boolean findOnlyJoinableClans;
+	public int unknown_6;
+	public int unknown_7;
 
 	public SearchAlliances() {
 		super(ID);
+
+		searchString = "";
+		desiredRegion = new SCID();
+		minMembers = 0;
+		maxMembers = 0;
+		minTrophies = 0;
+		findOnlyJoinableClans = false;
+		unknown_6 = 0;
+		unknown_7 = 0;
 	}
 
 	@Override
@@ -30,6 +41,8 @@ public class SearchAlliances extends Message {
 		stream.putBInt(maxMembers);
 		stream.putBInt(minTrophies);
 		stream.putBoolean(findOnlyJoinableClans);
+		stream.putBInt(unknown_6);
+		stream.putBInt(unknown_7);
 	}
 
 	@Override
@@ -42,5 +55,7 @@ public class SearchAlliances extends Message {
 		maxMembers = stream.getBInt();
 		minTrophies = stream.getBInt();
 		findOnlyJoinableClans = stream.getBoolean();
+		unknown_6 = stream.getBInt();
+		unknown_7 = stream.getBInt();
 	}
 }

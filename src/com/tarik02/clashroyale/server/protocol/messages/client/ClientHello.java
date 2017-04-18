@@ -18,6 +18,15 @@ public class ClientHello extends Message {
 
 	public ClientHello() {
 		super(ID);
+
+		protocol = 0;
+		keyVersion = 0;
+		majorVersion = 0;
+		minorVersion = 0;
+		build = 0;
+		contentHash = "";
+		deviceType = 0;
+		appStore = 0;
 	}
 
 	@Override

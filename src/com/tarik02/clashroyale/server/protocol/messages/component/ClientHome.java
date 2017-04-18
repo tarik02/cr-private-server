@@ -7,6 +7,10 @@ import com.tarik02.clashroyale.server.utils.DataStream;
 public class ClientHome extends Component {
 	public byte id;
 
+	public ClientHome() {
+		id = 0;
+	}
+
 	@Override
 	public void encode(DataStream stream) {
 		super.encode(stream);

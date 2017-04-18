@@ -13,6 +13,8 @@ public class AskForTVContent extends Message {
 
 	public AskForTVContent() {
 		super(ID);
+
+		arena = new SCID();
 	}
 
 	@Override

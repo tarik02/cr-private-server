@@ -7,6 +7,10 @@ import com.tarik02.clashroyale.server.utils.DataStream;
 public class DonationContainer extends Component {
 	public long avatarId;
 
+	public DonationContainer() {
+		avatarId = 0;
+	}
+
 	@Override
 	public void encode(DataStream stream) {
 		super.encode(stream);

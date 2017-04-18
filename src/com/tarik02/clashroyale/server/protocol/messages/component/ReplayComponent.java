@@ -7,6 +7,10 @@ import com.tarik02.clashroyale.server.utils.DataStream;
 public class ReplayComponent extends Component {
 	public byte id;
 
+	public ReplayComponent() {
+		id = 0;
+	}
+
 	@Override
 	public void encode(DataStream stream) {
 		super.encode(stream);

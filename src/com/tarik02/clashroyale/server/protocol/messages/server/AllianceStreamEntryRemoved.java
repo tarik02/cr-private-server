@@ -11,6 +11,8 @@ public class AllianceStreamEntryRemoved extends Message {
 
 	public AllianceStreamEntryRemoved() {
 		super(ID);
+
+		entryId = 0;
 	}
 
 	@Override

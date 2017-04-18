@@ -12,6 +12,9 @@ public class AvatarInGameStatusUpdated extends Message {
 
 	public AvatarInGameStatusUpdated() {
 		super(ID);
+
+		avatarId = 0;
+		status = 0;
 	}
 
 	@Override

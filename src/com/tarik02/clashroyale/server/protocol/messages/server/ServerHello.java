@@ -11,6 +11,8 @@ public class ServerHello extends Message {
 
 	public ServerHello() {
 		super(ID);
+
+		sessionKey = "";
 	}
 
 	@Override
