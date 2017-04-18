@@ -37,8 +37,8 @@ public abstract class Crypto {
 			nonce.increment();
 		}
 
-		//return SecretBox.seal(message, nonce.getBytes(), sharedKey);
-		return (new Box(clientKey, privateKey)).seal(message, nonce.getBytes());
+		return SecretBox.seal(message, nonce.getBytes(), sharedKey);
+		//return (new Box(clientKey, privateKey)).seal(message, nonce.getBytes());
 	}
 
 	public byte[] decrypt(byte[] message) {
@@ -52,8 +52,9 @@ public abstract class Crypto {
 		}
 
 		try {
-			//return SecretBox.open(message, nonce.getBytes(), sharedKey);
-			return (new Box(clientKey, privateKey)).open(message, nonce.getBytes());
+			return SecretBox.open(message, nonce.getBytes(), sharedKey);
+			//return (new Box(clientKey, privateKey)).open(message, nonce.getBytes());
+			//return sharedKey.open(message, nonce.getBytes());
 		} catch (NaclException e) {}
 
 		return null;

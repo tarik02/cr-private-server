@@ -4,10 +4,12 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Component;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
+import com.tarik02.clashroyale.server.utils.SCID;
+
 public class AllianceHeaderEntry extends Component {
 	public long Id;
 	public String name;
-	public long badge;
+	public SCID badge;
 	public byte type;
 	public byte numberOfMembers;
 

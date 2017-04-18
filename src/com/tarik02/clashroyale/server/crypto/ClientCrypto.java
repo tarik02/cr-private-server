@@ -23,6 +23,7 @@ public class ClientCrypto extends Crypto {
 		clientKey = pair.pubKey;
 		this.serverKey = serverKey;
 
+		//sharedKey = new Box(serverKey, privateKey);
 		sharedKey = Curve25519.scalarMult(privateKey, serverKey);
 		sharedKey = Salsa.HSalsa20(new byte[16], sharedKey, Salsa.SIGMA);
 

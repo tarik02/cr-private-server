@@ -4,11 +4,13 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Component;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
+import com.tarik02.clashroyale.server.utils.SCID;
+
 public class AllianceMemberEntry extends Component {
 	public long avatarId;
 	public String facebookId;
 	public String name;
-	public long arena;
+	public SCID arena;
 	public byte role;
 	public byte currenRank;
 	public byte previousRank;

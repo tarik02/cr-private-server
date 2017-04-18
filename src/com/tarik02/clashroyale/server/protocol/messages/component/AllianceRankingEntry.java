@@ -4,11 +4,13 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Component;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
+import com.tarik02.clashroyale.server.utils.SCID;
+
 public class AllianceRankingEntry extends Component {
 	public long allianceId;
 	public String allianceName;
-	public long badge;
-	public long region;
+	public SCID badge;
+	public SCID region;
 
 	@Override
 	public void encode(DataStream stream) {

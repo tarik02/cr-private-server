@@ -4,6 +4,8 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
+import com.tarik02.clashroyale.server.utils.SCID;
+
 public class HomeBattleReplay extends Message {
 	public static final short ID = Info.HOME_BATTLE_REPLAY;
 
@@ -11,7 +13,7 @@ public class HomeBattleReplay extends Message {
 	public byte serverId;
 	public byte feedPosition;
 	public byte gameMode;
-	public long arena;
+	public SCID arena;
 
 	public HomeBattleReplay() {
 		super(ID);

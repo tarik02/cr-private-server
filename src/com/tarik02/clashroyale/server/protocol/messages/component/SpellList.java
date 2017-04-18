@@ -4,8 +4,10 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Component;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
+import com.tarik02.clashroyale.server.utils.SCID;
+
 public class SpellList extends Component {
-	public long card;
+	public SCID card;
 
 	@Override
 	public void encode(DataStream stream) {

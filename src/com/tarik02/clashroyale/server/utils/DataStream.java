@@ -393,27 +393,23 @@ public class DataStream {
 	}
 
 
-	public long getSCID() {
+	public SCID getSCID() {
 		int high = getRrsInt32();
 
 		if (high > 0) {
 			int low = getRrsInt32();
-			return high * 1000000 + low;
+			return new SCID(high, low);
 		}
 
-		return 0;
+		return new SCID();
 	}
 
-	public DataStream putSCID(long value) {
-		int high = (int)(value / 1000000);
-		int low = (int)(value % 1000000);
-
-		putRrsInt32(high);
-		if (high > 0) {
-			putRrsInt32(low);
+	public DataStream putSCID(SCID value) {
+		if (value.getHigh() > 0) {
+			return putRrsInt32(value.getHigh()).putRrsInt32(value.getLow());
 		}
 
-		return this;
+		return putRrsInt32(0);
 	}
 
 

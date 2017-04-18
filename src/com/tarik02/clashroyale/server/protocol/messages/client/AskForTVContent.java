@@ -4,10 +4,12 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
+import com.tarik02.clashroyale.server.utils.SCID;
+
 public class AskForTVContent extends Message {
 	public static final short ID = Info.ASK_FOR_TV_CONTENT;
 
-	public long arena;
+	public SCID arena;
 
 	public AskForTVContent() {
 		super(ID);

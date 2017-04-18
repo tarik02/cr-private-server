@@ -4,11 +4,13 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
+import com.tarik02.clashroyale.server.utils.SCID;
+
 public class SearchAlliances extends Message {
 	public static final short ID = Info.SEARCH_ALLIANCES;
 
 	public String searchString;
-	public long desiredRegion;
+	public SCID desiredRegion;
 	public int minMembers;
 	public int maxMembers;
 	public int minTrophies;
