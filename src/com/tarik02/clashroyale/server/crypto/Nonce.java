@@ -7,6 +7,12 @@ import java.nio.ByteOrder;
 import java.security.SecureRandom;
 
 public class Nonce {
+	public static class NonceException extends Exception {
+		public NonceException(String message) {
+			super(message);
+		}
+	}
+
 	private byte[] bytes;
 
 	public Nonce() {
@@ -15,7 +21,11 @@ public class Nonce {
 		r.nextBytes(bytes);
 	}
 
-	public Nonce(byte[] nonce) {
+	public Nonce(byte[] nonce) throws NonceException {
+		if (nonce.length != 24) {
+			throw new NonceException("nonce.length must be 24");
+		}
+
 		bytes = nonce;
 	}
 
@@ -42,8 +52,8 @@ public class Nonce {
 		val += 2;
 		buffer.putShort(0, val);
 
-		buffer.position(0);
-		buffer.get(bytes, 0, 2);
+		bytes[0] = buffer.get(0);
+		bytes[1] = buffer.get(1);
 	}
 
 	public byte[] getBytes() {

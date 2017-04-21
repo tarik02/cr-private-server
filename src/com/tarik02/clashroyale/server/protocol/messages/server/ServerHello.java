@@ -7,25 +7,25 @@ import com.tarik02.clashroyale.server.utils.DataStream;
 public class ServerHello extends Message {
 	public static final short ID = Info.SERVER_HELLO;
 
-	public String sessionKey;
+	public byte[] sessionKey;
 
 	public ServerHello() {
 		super(ID);
 
-		sessionKey = "";
+		sessionKey = new byte[0];
 	}
 
 	@Override
 	public void encode(DataStream stream) {
 		super.encode(stream);
 
-		stream.putString(sessionKey);
+		stream.putByteSet(sessionKey);
 	}
 
 	@Override
 	public void decode(DataStream stream) {
 		super.decode(stream);
 
-		sessionKey = stream.getString();
+		sessionKey = stream.getByteSet();
 	}
 }

@@ -96,7 +96,7 @@ fwrite($file, '}' . PHP_EOL);
 fclose($file);
 
 echo 'Clonning messages definitions...', PHP_EOL;
-`mkdir temp && cd temp && git clone git@github.com:royale-proxy/cr-messages.git`;
+`mkdir temp && cd temp && git clone git@github.com:Tarik02/cr-messages.git`;
 
 echo 'Starting parsing messages...', PHP_EOL;
 
@@ -305,6 +305,10 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 			'javaType' => 'String',
 			'streamName' => 'String',
 			'default' => '""'
+		], 'BYTESET' => [
+			'javaType' => 'byte[]',
+			'streamName' => 'ByteSet',
+			'default' => 'new byte[0]'
 		], 'ZIP_STRING' => [
 			'javaType' => 'String',
 			'streamName' => 'ZipString',

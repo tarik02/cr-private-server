@@ -7,15 +7,24 @@ import com.tarik02.clashroyale.server.protocol.MessageHeader;
 import com.tarik02.clashroyale.server.utils.LogManager;
 import com.tarik02.clashroyale.server.utils.Logger;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public abstract class Crypto {
+	public static class CryptoException extends Exception {
+		public CryptoException(String message) {
+			super(message);
+		}
+	}
+
 	private static Logger logger = LogManager.getLogger(Crypto.class);
 
 	protected byte[] privateKey;
 	protected byte[] serverKey;
 	protected byte[] clientKey;
 	protected byte[] sharedKey;
-	protected Nonce decryptNonce;
-	protected Nonce encryptNonce;
+	protected Nonce decryptNonce = new Nonce();
+	protected Nonce encryptNonce = new Nonce();
 	protected byte[] sessionKey;
 
 	public byte[] getSessionKey() {
@@ -24,6 +33,18 @@ public abstract class Crypto {
 
 	public void setSessionKey(byte[] sessionKey) {
 		this.sessionKey = sessionKey;
+	}
+
+	public byte[] getSharedKey() {
+		return sharedKey;
+	}
+
+	public void setSharedKey(byte[] sharedKey) throws CryptoException {
+		if (sharedKey.length != 32) {
+			throw new CryptoException("sharedKey.length must be 32");
+		}
+
+		this.sharedKey = sharedKey;
 	}
 
 	public byte[] encrypt(byte[] message) {
@@ -51,7 +72,9 @@ public abstract class Crypto {
 
 		try {
 			return SecretBox.open(message, nonce.getBytes(), sharedKey);
-		} catch (NaclException e) {}
+		} catch (NaclException e) {
+			e.printStackTrace();
+		}
 
 		return null;
 	}

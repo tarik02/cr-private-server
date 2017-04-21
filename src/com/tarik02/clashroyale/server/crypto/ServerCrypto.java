@@ -1,8 +1,6 @@
 package com.tarik02.clashroyale.server.crypto;
 
-import com.caligochat.nacl.Box;
-import com.caligochat.nacl.Curve25519;
-import com.caligochat.nacl.Salsa;
+import com.caligochat.nacl.*;
 import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.MessageHeader;
 import com.tarik02.clashroyale.server.utils.Hex;
@@ -21,6 +19,7 @@ public class ServerCrypto extends Crypto {
 
 	public void setClient(ClientCrypto client) {
 		this.client = client;
+		sharedKey = client.sharedKey;
 	}
 
 	@Override
@@ -41,8 +40,12 @@ public class ServerCrypto extends Crypto {
 
 			if (message.decrypted != null) {
 				sessionKey = Arrays.copyOfRange(message.decrypted, 0, 24);
-				decryptNonce = new Nonce(Arrays.copyOfRange(message.decrypted, 24, 48));
-				client.encryptNonce = new Nonce(Arrays.copyOfRange(message.decrypted, 24, 48));
+				try {
+					decryptNonce = new Nonce(Arrays.copyOfRange(message.decrypted, 24, 48));
+					client.encryptNonce = new Nonce(Arrays.copyOfRange(message.decrypted, 24, 48));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 
 				message.decrypted = Arrays.copyOfRange(message.decrypted, 48, message.decrypted.length);
 			}
@@ -63,10 +66,7 @@ public class ServerCrypto extends Crypto {
 			Nonce nonce = new Nonce(clientKey, serverKey, decryptNonce.getBytes());
 			ByteArrayOutputStream toEncrypt = new ByteArrayOutputStream();
 
-			//sharedKey = client.sharedKey;
-
 			try {
-				encryptNonce = new Nonce();
 				toEncrypt.write(encryptNonce.getBytes());
 				toEncrypt.write(sharedKey);
 				toEncrypt.write(message.decrypted);

@@ -23,7 +23,6 @@ public class ClientCrypto extends Crypto {
 		clientKey = pair.pubKey;
 		this.serverKey = serverKey;
 
-		//sharedKey = new Box(serverKey, privateKey);
 		sharedKey = Curve25519.scalarMult(privateKey, serverKey);
 		sharedKey = Salsa.HSalsa20(new byte[16], sharedKey, Salsa.SIGMA);
 
@@ -48,8 +47,13 @@ public class ClientCrypto extends Crypto {
 			message.decrypted = decrypt(message.payload, nonce);
 
 			if (message.decrypted != null) {
-				decryptNonce = new Nonce(Arrays.copyOfRange(message.decrypted, 0, 24));
-				server.encryptNonce = new Nonce(Arrays.copyOfRange(message.decrypted, 0, 24));
+				try {
+					decryptNonce = new Nonce(Arrays.copyOfRange(message.decrypted, 0, 24));
+					server.encryptNonce = new Nonce(Arrays.copyOfRange(message.decrypted, 0, 24));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 				sharedKey = Arrays.copyOfRange(message.decrypted, 24, 56);
 
 				message.decrypted = Arrays.copyOfRange(message.decrypted, 56, message.decrypted.length);

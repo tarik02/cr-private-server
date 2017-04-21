@@ -322,8 +322,9 @@ public class DataStream {
 		if (value.length() == 0) {
 			putBInt(0xFFFFFFFF);
 		} else {
-			putBInt(value.length());
-			put(value.getBytes(UTF8_CHARSET));
+			byte[] bytes = value.getBytes(UTF8_CHARSET);
+			putBInt(bytes.length);
+			put(bytes);
 		}
 
 		return this;
@@ -390,6 +391,24 @@ public class DataStream {
 
 	public DataStream putBitset(Bitset value) {
 		return putByte(value.getValue());
+	}
+
+
+	public byte[] getByteSet() {
+		int len = getBInt();
+		if (len == 0xFFFFFFFF) {
+			return new byte[0];
+		}
+
+		return get(len);
+	}
+
+	public DataStream putByteSet(byte[] value) {
+		if (value.length == 0) {
+			return putBInt(0xFFFFFFFF);
+		}
+
+		return putBInt(value.length).put(value);
 	}
 
 

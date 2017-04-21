@@ -10,6 +10,7 @@ import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;
 import com.tarik02.clashroyale.server.protocol.messages.client.ClientHello;
 import com.tarik02.clashroyale.server.protocol.messages.client.Login;
 import com.tarik02.clashroyale.server.protocol.messages.server.LoginOk;
+import com.tarik02.clashroyale.server.protocol.messages.server.OwnHomeData;
 import com.tarik02.clashroyale.server.protocol.messages.server.ServerHello;
 import com.tarik02.clashroyale.server.utils.DataStream;
 import com.tarik02.clashroyale.server.utils.Hex;
@@ -18,6 +19,7 @@ import com.tarik02.clashroyale.server.utils.Logger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -106,6 +108,7 @@ public class Server {
 	private class NetworkThread extends Thread {
 		public void run() {
 			try {
+				//serverSocket = new ServerSocket(9340);
 				serverSocket = new ServerSocket(9339);
 
 				while (running) {
@@ -134,6 +137,7 @@ public class Server {
 
 		public void run() {
 			byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");
+			byte[] sessionKey = Hex.toByteArray("74794DE40D62A03AC6F6E86A9815C6262AA12BEDD518F883");
 			clientCrypto = new ClientCrypto(serverKey);
 			serverCrypto = new ServerCrypto();
 
@@ -147,28 +151,24 @@ loop:
 
 				Message message = readMessage();
 				if (message.id != Info.CLIENT_HELLO) {
-					logger.warn("Excepted ClientHello, received " + message.getClass().getSimpleName() + ". Disconnecting...");
+					logger.warn("Excepted ClientHello, received %s. Disconnecting...", message.getClass().getSimpleName());
 					break loop;
 				}
 
 				{
 					ClientHello clientHello = (ClientHello)message;
 					message = null;
-
-
 				}
 
 				{
 					ServerHello serverHello = new ServerHello();
-					serverHello.sessionKey = "Helloworld";
+					serverHello.sessionKey = sessionKey;
 					writeMessage(serverHello);
-					serverCrypto.setSessionKey(serverHello.sessionKey.getBytes());
-					clientCrypto.setSessionKey(serverHello.sessionKey.getBytes());
 				}
 
 				message = readMessage();
 				if (message.id != Info.LOGIN) {
-					logger.warn("Excepted Login, received " + message.getClass().getSimpleName() + ". Disconnecting...");
+					logger.warn("Excepted Login, received %s. Disconnecting...", message.getClass().getSimpleName());
 					break loop;
 				}
 
@@ -200,6 +200,11 @@ loop:
 					loginOk.eventAssetsURL = "https://event-assets.clashroyale.com"; // TODO: Make it from config
 					loginOk.unknown_23 = 1;
 					writeMessage(loginOk);
+
+					OwnHomeData ownHomeData = new OwnHomeData();
+					ownHomeData.age = 0;
+					ownHomeData.id = 3;
+					ownHomeData.timeStamp = System.currentTimeMillis();
 				}
 
 
@@ -219,14 +224,16 @@ loop:
 
 					message = null;
 				}
+			} catch (EOFException ignored) {
+
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Error while looping client.", e);
 			}
 
 			try {
 				socket.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("Failed to close the socket.", e);
 			}
 
 			if (player != null) {
@@ -274,15 +281,14 @@ loop:
 					String name = Info.messagesMap.getOrDefault(header.id, null);
 
 					if (name == null) {
-						logger.debug("Received unknown packet %d:\n%s", header.id, Hex.dump(header.decrypted));
+						logger.warn("Received unknown packet %d:\n%s", header.id, Hex.dump(header.decrypted));
 					} else {
-						logger.debug("Received undefined packet %s:\n%s", name, Hex.dump(header.decrypted));
+						logger.warn("Received undefined packet %s:\n%s", name, Hex.dump(header.decrypted));
 					}
 				}
 			} else if (header.decrypted == null) {
 				logger.error("Failed to decrypt packet %s, encrypted payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.payload));
 			} else {
-				logger.debug("Received packet %s:\n%s", message.getClass().getSimpleName(), Hex.dump(header.decrypted));
 				message.decode(new DataStream(header.decrypted));
 				return message;
 			}
@@ -300,7 +306,7 @@ loop:
 
 			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort(message.id).array());
 			writer.write(ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(header.payload.length).array(), 1, 3);
-			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort((short) 5).array());
+			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort((short)5).array());
 			writer.write(header.payload);
 		}
 
