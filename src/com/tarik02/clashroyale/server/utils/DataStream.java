@@ -85,7 +85,7 @@ public class DataStream {
 	}
 
 	protected void ensureCapacity(int capacity) {
-		if (buffer.length < capacity) {
+		while (buffer.length < capacity) {
 			buffer = Arrays.copyOf(buffer, buffer.length << 1);
 		}
 	}
