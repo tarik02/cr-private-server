@@ -215,10 +215,10 @@ loop:
 					if (message != null) {
 						try {
 							if (!message.handle(player)) {
-								logger.warn("Failed to handle message " + message.getClass().getSimpleName() + ".");
+								logger.warn("Failed to handle message %s.", message.getClass().getSimpleName());
 							}
 						} catch (Throwable e) {
-							logger.error("Failed to handle message " + message.getClass().getSimpleName() + ". Error throwed:", e);
+							logger.error("Failed to handle message %s. Error throwed:", e, message.getClass().getSimpleName());
 						}
 					}
 
