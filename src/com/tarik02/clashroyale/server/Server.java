@@ -108,7 +108,6 @@ public class Server {
 	private class NetworkThread extends Thread {
 		public void run() {
 			try {
-				//serverSocket = new ServerSocket(9340);
 				serverSocket = new ServerSocket(9339);
 
 				while (running) {
