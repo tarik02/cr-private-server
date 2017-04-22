@@ -73,6 +73,7 @@ public class DataStream {
 	public DataStream setOffset(int offset) {
 		ensureCapacity(offset);
 		this.offset = offset;
+		this.count = offset;
 
 		return this;
 	}
@@ -104,7 +105,9 @@ public class DataStream {
 	}
 
 	public byte[] get(int len) {
-		len = Math.min(len, buffer.length - offset);
+		if (offset + len > buffer.length) {
+			len = buffer.length - offset;
+		}
 
 		byte[] result = Arrays.copyOfRange(buffer, offset, offset + len);
 		offset += len;
@@ -135,7 +138,7 @@ public class DataStream {
 	}
 
 	public byte getByte() {
-		if (offset < count) {
+		if (offset < buffer.length) {
 			return buffer[offset++];
 		}
 
@@ -253,7 +256,7 @@ public class DataStream {
 		long msb;
 
 		do {
-			b = getByte() & 0xFF;
+			b = getByte();
 
 			if (c == 0) {
 				seventh = (b & 0x40) >> 6; // save 7th bit
@@ -265,7 +268,7 @@ public class DataStream {
 
 			value |= (b & 0x7f) << (7 * c);
 			++c;
-		} while ((b & 0x80) > 0);
+		} while ((b & 0x80) != 0);
 
 		value = (value >>> 1) ^ -(value & 1);
 		return (int)value;
