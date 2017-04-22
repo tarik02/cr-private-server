@@ -4,30 +4,28 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
-import com.tarik02.clashroyale.server.protocol.messages.component.AllianceStreamComponent;
+public class InboxGlobal extends Message {
+	public static final short ID = Info.INBOX_GLOBAL;
 
-public class AllianceStreamEntry extends Message {
-	public static final short ID = Info.ALLIANCE_STREAM_ENTRY;
+	public byte unknown_0;
 
-	public AllianceStreamComponent entry;
-
-	public AllianceStreamEntry() {
+	public InboxGlobal() {
 		super(ID);
 
-		entry = new AllianceStreamComponent();
+		unknown_0 = 0;
 	}
 
 	@Override
 	public void encode(DataStream stream) {
 		super.encode(stream);
 
-		entry.encode(stream);
+		stream.putByte(unknown_0);
 	}
 
 	@Override
 	public void decode(DataStream stream) {
 		super.decode(stream);
 
-		entry.decode(stream);
+		unknown_0 = stream.getByte();
 	}
 }

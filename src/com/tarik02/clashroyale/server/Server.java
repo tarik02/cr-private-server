@@ -9,6 +9,7 @@ import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;
 import com.tarik02.clashroyale.server.protocol.messages.client.ClientHello;
 import com.tarik02.clashroyale.server.protocol.messages.client.Login;
+import com.tarik02.clashroyale.server.protocol.messages.server.InboxGlobal;
 import com.tarik02.clashroyale.server.protocol.messages.server.LoginOk;
 import com.tarik02.clashroyale.server.protocol.messages.server.OwnHomeData;
 import com.tarik02.clashroyale.server.protocol.messages.server.ServerHello;
@@ -201,17 +202,25 @@ loop:
 					writeMessage(loginOk);
 
 					OwnHomeData ownHomeData = new OwnHomeData();
-					ownHomeData.age = 0;
-					ownHomeData.id = 3;
-					ownHomeData.timeStamp = System.currentTimeMillis();
+					ownHomeData.homeId = 1515;
+					ownHomeData.name = "Nickname";
+					ownHomeData.coins = 1000000;
+					ownHomeData.gems = 10000;
+					writeMessage(ownHomeData);
+
+					/*InboxGlobal inboxGlobal = new InboxGlobal();
+					inboxGlobal.unknown_0 = 1;
+					writeMessage(inboxGlobal);*/
 				}
 
-
+				logger.info("Player connected.");
 				player = new Player(Server.this, this);
 
 				while (true) {
 					message = readMessage();
 					if (message != null) {
+						logger.debug("> %s", message.getClass().getSimpleName());
+
 						try {
 							if (!message.handle(player)) {
 								logger.warn("Failed to handle message %s.", message.getClass().getSimpleName());
@@ -288,7 +297,12 @@ loop:
 			} else if (header.decrypted == null) {
 				logger.error("Failed to decrypt packet %s, encrypted payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.payload));
 			} else {
-				message.decode(new DataStream(header.decrypted));
+				try {
+					message.decode(new DataStream(header.decrypted));
+				} catch (Exception e) {
+					logger.error("Failed to decode packet %s, payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.decrypted));
+				}
+
 				return message;
 			}
 
@@ -296,6 +310,8 @@ loop:
 		}
 
 		public void writeMessage(Message message) throws IOException {
+			logger.debug("< %s", message.getClass().getSimpleName());
+
 			DataStream stream = new DataStream();
 			message.encode(stream);
 			MessageHeader header = new MessageHeader();

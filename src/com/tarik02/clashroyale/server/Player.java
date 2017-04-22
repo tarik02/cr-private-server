@@ -3,6 +3,9 @@ package com.tarik02.clashroyale.server;
 import com.tarik02.clashroyale.server.protocol.Handler;
 import com.tarik02.clashroyale.server.protocol.Session;
 import com.tarik02.clashroyale.server.protocol.messages.client.*;
+import com.tarik02.clashroyale.server.protocol.messages.component.AllianceHeaderEntry;
+import com.tarik02.clashroyale.server.protocol.messages.server.AvatarStream;
+import com.tarik02.clashroyale.server.protocol.messages.server.JoinableAllianceList;
 import com.tarik02.clashroyale.server.protocol.messages.server.KeepAliveOk;
 
 public class Player implements Handler {
@@ -36,87 +39,97 @@ public class Player implements Handler {
 	@Override
 	public boolean handleKeepAlive(KeepAlive message) throws Throwable {
 		KeepAliveOk response = new KeepAliveOk();
-		session.sendMessage(message);
+		session.sendMessage(response);
 		return true;
 	}
 
 	@Override
 	public boolean handleInboxOpened(InboxOpened message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleEndClientTurn(EndClientTurn message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleVisitHome(VisitHome message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleHomeBattleReplay(HomeBattleReplay message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleAskForAllianceData(AskForAllianceData message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleAskForJoinableAlliancesList(AskForJoinableAlliancesList message) throws Throwable {
+		/*JoinableAllianceList response = new JoinableAllianceList();
+		response.alliances = new AllianceHeaderEntry[1];
+		response.alliances[0] = new AllianceHeaderEntry();
+		response.alliances[0].Id = 0;
+		response.alliances[0].name = "Hello";
+		session.sendMessage(response);*/
+
 		return true;
 	}
 
 	@Override
 	public boolean handleJoinAlliance(JoinAlliance message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleLeaveAlliance(LeaveAlliance message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleDonateAllianceUnit(DonateAllianceUnit message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleSearchAlliances(SearchAlliances message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleAskForAllianceRankingList(AskForAllianceRankingList message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleAskForTVContent(AskForTVContent message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleAskForAvatarRankingList(AskForAvatarRankingList message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleAskForAvatarLocalRanking(AskForAvatarLocalRanking message) throws Throwable {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean handleAskForAvatarStream(AskForAvatarStream message) throws Throwable {
+		AvatarStream avatarStream = new AvatarStream();
+		avatarStream.unknown_0 = 0;
+		session.sendMessage(avatarStream);
 		return true;
 	}
 
 	@Override
 	public boolean handleAskForBattleReplayStream(AskForBattleReplayStream message) throws Throwable {
-		return true;
+		return false;
 	}
 }

@@ -4,6 +4,8 @@ import com.tarik02.clashroyale.server.protocol.Info;
 import com.tarik02.clashroyale.server.protocol.messages.Component;
 import com.tarik02.clashroyale.server.utils.DataStream;
 
+import com.tarik02.clashroyale.server.protocol.messages.component.ReplayComponent;
+
 public class BattleStreamEntry extends Component {
 	public byte unknown_0;
 	public int unknown_1;
@@ -19,6 +21,7 @@ public class BattleStreamEntry extends Component {
 	public byte unknown_11;
 	public int unknown_12;
 	public byte unknown_13;
+	public ReplayComponent replayData;
 
 	public BattleStreamEntry() {
 		unknown_0 = 0;
@@ -35,6 +38,7 @@ public class BattleStreamEntry extends Component {
 		unknown_11 = 0;
 		unknown_12 = 0;
 		unknown_13 = 0;
+		replayData = new ReplayComponent();
 	}
 
 	@Override
@@ -55,6 +59,7 @@ public class BattleStreamEntry extends Component {
 		stream.putByte(unknown_11);
 		stream.putVarInt32(unknown_12);
 		stream.putByte(unknown_13);
+		replayData.encode(stream);
 	}
 
 	@Override
@@ -75,5 +80,6 @@ public class BattleStreamEntry extends Component {
 		unknown_11 = stream.getByte();
 		unknown_12 = stream.getVarInt32();
 		unknown_13 = stream.getByte();
+		replayData.decode(stream);
 	}
 }
