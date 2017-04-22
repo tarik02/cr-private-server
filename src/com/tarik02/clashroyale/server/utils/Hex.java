@@ -1,10 +1,23 @@
 package com.tarik02.clashroyale.server.utils;
 
+import java.util.regex.Pattern;
+
 public class Hex {
 	public static final int DUMP_WIDTH = 16;
 	public static final char[] HEX_SET = "0123456789ABCDEF".toCharArray();
+	private static final byte[] PRINTABLE = new byte[] {(byte)0, (byte)0, (byte)0, (byte)0, (byte)255, (byte)255, (byte)255, (byte)255, (byte)255, (byte)255, (byte)255, (byte)127, (byte)255, (byte)255, (byte)255, (byte)127, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0};
+	private static final Pattern REMOVE_NOT_HEX_PATTERN = Pattern.compile("[^0-9A-F]");
 
 	private Hex() {}
+
+	private static boolean isPrintable(char ch) {
+		int index = (int)ch;
+		if (index > 255) {
+			return false;
+		}
+
+		return ((PRINTABLE[index / 8] >> (index % 8)) & 0x01) == 1;
+	}
 
 	public static String dump(final byte[] buffer) {
 		return dump(buffer, 0, buffer.length);
@@ -41,7 +54,7 @@ public class Hex {
 			for (int j = from; j < to; ++j) {
 				char ch = (char)buffer[j];
 
-				if ((Character.isLetterOrDigit(ch)) || (Character.isSpaceChar(ch))) {
+				if (isPrintable(ch)) {
 					builder.append(ch);
 				} else {
 					builder.append(".");
@@ -68,6 +81,8 @@ public class Hex {
 	}
 
 	public static byte[] toByteArray(String s) {
+		s = REMOVE_NOT_HEX_PATTERN.matcher(s).replaceAll("");
+
 		int len = s.length();
 		byte[] data = new byte[len / 2];
 
