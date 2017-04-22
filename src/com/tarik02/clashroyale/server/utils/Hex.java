@@ -6,7 +6,7 @@ public class Hex {
 	public static final int DUMP_WIDTH = 16;
 	public static final char[] HEX_SET = "0123456789ABCDEF".toCharArray();
 	private static final byte[] PRINTABLE = new byte[] {(byte)0, (byte)0, (byte)0, (byte)0, (byte)255, (byte)255, (byte)255, (byte)255, (byte)255, (byte)255, (byte)255, (byte)127, (byte)255, (byte)255, (byte)255, (byte)127, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0};
-	private static final Pattern REMOVE_NOT_HEX_PATTERN = Pattern.compile("[^0-9A-F]");
+	private static final Pattern REMOVE_NOT_HEX_PATTERN = Pattern.compile("[^0-9a-fA-F]");
 
 	private Hex() {}
 
