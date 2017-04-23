@@ -52,8 +52,16 @@ public final class MainLogger extends Logger {
 		sb.append(DATE_FORMAT.format(new Date()));
 		sb.append(" [");
 		sb.append(level.name());
-		sb.append("/Thread ");
-		sb.append(Thread.currentThread().getName());
+		sb.append("/");
+
+		String threadName = Thread.currentThread().getName();
+		if (threadName.equals("main")) {
+			sb.append("Main thread");
+		} else {
+			sb.append("Thread ");
+			sb.append(threadName);
+		}
+
 		sb.append("] ");
 
 		if (name.equals("")) {
