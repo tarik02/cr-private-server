@@ -9,23 +9,18 @@ import com.tarik02.clashroyale.server.protocol.messages.Message;
 import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;
 import com.tarik02.clashroyale.server.protocol.messages.client.ClientHello;
 import com.tarik02.clashroyale.server.protocol.messages.client.Login;
-import com.tarik02.clashroyale.server.protocol.messages.server.InboxGlobal;
-import com.tarik02.clashroyale.server.protocol.messages.server.LoginOk;
-import com.tarik02.clashroyale.server.protocol.messages.server.OwnHomeData;
-import com.tarik02.clashroyale.server.protocol.messages.server.ServerHello;
+import com.tarik02.clashroyale.server.protocol.messages.server.*;
 import com.tarik02.clashroyale.server.utils.DataStream;
 import com.tarik02.clashroyale.server.utils.Hex;
 import com.tarik02.clashroyale.server.utils.LogManager;
 import com.tarik02.clashroyale.server.utils.Logger;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 
 public class Server {
 	private static Logger logger = LogManager.getLogger(Server.class);
@@ -36,7 +31,23 @@ public class Server {
 	protected ServerSocket serverSocket = null;
 	protected NetworkThread networkThread = null;
 
-	public Server() {
+	protected String resourceFingerprint = "";
+
+	public Server() throws ServerException {
+		try {
+			File file = new File("assets/fingerprint.json");
+			if (!file.exists()) {
+				throw new ServerException("Fingerprint file does not exists.");
+			}
+
+			FileInputStream fis = new FileInputStream(file);
+			byte[] buffer = new byte[fis.available()];
+			fis.read(buffer);
+			fis.close();
+
+			resourceFingerprint = new String(buffer, Charset.forName("UTF-8"));
+		} catch (IOException ignored) {}
+
 		start();
 	}
 
@@ -174,6 +185,20 @@ loop:
 
 				{
 					Login login = (Login)message;
+					/*if (login.resourceSha.equals("65dded3fcfd249dec11f4db84c05a4b37cd7a427")) {
+						LoginFailed loginFailed = new LoginFailed();
+						loginFailed.errorCode = 7;
+						loginFailed.resourceFingerprintData = resourceFingerprint;
+						loginFailed.redirectDomain = "";
+						loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
+						loginFailed.updateURL = "";
+						loginFailed.reason = "";
+						loginFailed.secondsUntilMaintenanceEnd = 0;
+						loginFailed.unknown_7 = (byte)0;
+						loginFailed.unknown_8 = "";
+						writeMessage(loginFailed);
+						break loop;
+					}*/
 					message = null;
 
 					LoginOk loginOk = new LoginOk();
@@ -219,8 +244,6 @@ loop:
 				while (true) {
 					message = readMessage();
 					if (message != null) {
-						logger.debug("> %s", message.getClass().getSimpleName());
-
 						try {
 							if (!message.handle(player)) {
 								logger.warn("Failed to handle message %s.", message.getClass().getSimpleName());
@@ -297,6 +320,8 @@ loop:
 			} else if (header.decrypted == null) {
 				logger.error("Failed to decrypt packet %s, encrypted payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.payload));
 			} else {
+				logger.debug("> %s", message.getClass().getSimpleName());
+
 				try {
 					message.decode(new DataStream(header.decrypted));
 				} catch (Exception e) {
@@ -333,6 +358,12 @@ loop:
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	protected static class ServerException extends Exception {
+		public ServerException(String message) {
+			super(message);
 		}
 	}
 }

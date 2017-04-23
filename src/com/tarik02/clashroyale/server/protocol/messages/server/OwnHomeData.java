@@ -40,7 +40,7 @@ public class OwnHomeData extends Message {
 		//stream.put(Hex.toByteArray("A6"));
 		stream.putRrsInt32(gems);
 		stream.put(Hex.toByteArray("01"));
-		stream.put(Hex.toByteArray("A6"));
+		stream.put(Hex.toByteArray("A6")); // Experience?
 		//stream.putRrsInt32(100);
 		stream.put(Hex.toByteArray("010401000100000000000007000000D1C1C2CB02B6C1D88F0B89EA5E"));
 		/*stream.put(staticData1);

@@ -1,4 +1,5 @@
 /.idea
 /temp
 /server.log
+/workdir/server.log
 /out
