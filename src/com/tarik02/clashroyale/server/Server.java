@@ -117,6 +117,10 @@ public class Server {
 
 	}
 
+	public String getResourceFingerprint() {
+		return resourceFingerprint;
+	}
+
 	private class NetworkThread extends Thread {
 		public void run() {
 			try {
@@ -313,6 +317,9 @@ loop:
 
 					if (name == null) {
 						logger.warn("Received unknown packet %d:\n%s", header.id, Hex.dump(header.decrypted));
+						if (header.id == 10099) {
+							player.disconnect("DEBUGGING"); // Sometimes I receive this packet
+						}
 					} else {
 						logger.warn("Received undefined packet %s:\n%s", name, Hex.dump(header.decrypted));
 					}

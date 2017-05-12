@@ -7,6 +7,7 @@ import com.tarik02.clashroyale.server.protocol.messages.component.AllianceHeader
 import com.tarik02.clashroyale.server.protocol.messages.server.AvatarStream;
 import com.tarik02.clashroyale.server.protocol.messages.server.JoinableAllianceList;
 import com.tarik02.clashroyale.server.protocol.messages.server.KeepAliveOk;
+import com.tarik02.clashroyale.server.protocol.messages.server.LoginFailed;
 
 public class Player implements Handler {
 	protected Server server;
@@ -131,5 +132,19 @@ public class Player implements Handler {
 	@Override
 	public boolean handleAskForBattleReplayStream(AskForBattleReplayStream message) throws Throwable {
 		return false;
+	}
+
+	public void disconnect(String reason) {
+		LoginFailed loginFailed = new LoginFailed();
+		loginFailed.errorCode = 7;
+		loginFailed.resourceFingerprintData = server.getResourceFingerprint();
+		loginFailed.redirectDomain = "";
+		loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
+		loginFailed.updateURL = "";
+		loginFailed.reason = reason;
+		loginFailed.secondsUntilMaintenanceEnd = 0;
+		loginFailed.unknown_7 = (byte)0;
+		loginFailed.unknown_8 = "";
+		session.sendMessage(loginFailed);
 	}
 }
