@@ -280,23 +280,28 @@ public class DataStream {
 		boolean rotate = true;
 		long b;
 
-		lvalue = (lvalue << 1) ^ (lvalue >> 31);
-		while (lvalue != 0) {
-			b = (lvalue & 0x7f);
+		if (value == 0) {
+			putByte((byte)0);
+		} else {
+			lvalue = (lvalue << 1) ^ (lvalue >> 31);
+			while (lvalue != 0) {
+				b = (lvalue & 0x7f);
 
-			if (lvalue >= 0x80) {
-				b |= 0x80;
-			} if (rotate) {
-				rotate = false;
-				long lsb = b & 0x1;
-				long msb = (b & 0x80) >> 7;
-				b = b >> 1; // rotate to the right
-				b = b & ~(0xC0); // clear 7th and 6th bit
-				b = b | (msb << 7) | (lsb << 6); // insert msb and lsb back in
+				if (lvalue >= 0x80) {
+					b |= 0x80;
+				}
+				if (rotate) {
+					rotate = false;
+					long lsb = b & 0x1;
+					long msb = (b & 0x80) >> 7;
+					b = b >> 1; // rotate to the right
+					b = b & ~(0xC0); // clear 7th and 6th bit
+					b = b | (msb << 7) | (lsb << 6); // insert msb and lsb back in
+				}
+
+				putByte((byte)b);
+				lvalue >>>= 7;
 			}
-
-			putByte((byte)b);
-			lvalue >>>= 7;
 		}
 
 		return this;
