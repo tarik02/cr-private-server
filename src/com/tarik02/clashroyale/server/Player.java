@@ -146,5 +146,6 @@ public class Player implements Handler {
 		loginFailed.unknown_7 = (byte)0;
 		loginFailed.unknown_8 = "";
 		session.sendMessage(loginFailed);
+		session.close();
 	}
 }
