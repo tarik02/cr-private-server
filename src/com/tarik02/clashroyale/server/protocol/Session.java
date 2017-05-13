@@ -4,4 +4,5 @@ import com.tarik02.clashroyale.server.protocol.messages.Message;
 
 public interface Session {
 	void sendMessage(Message message);
+	void close();
 }
