@@ -10,10 +10,7 @@ import com.tarik02.clashroyale.server.protocol.messages.MessageFactory;
 import com.tarik02.clashroyale.server.protocol.messages.client.ClientHello;
 import com.tarik02.clashroyale.server.protocol.messages.client.Login;
 import com.tarik02.clashroyale.server.protocol.messages.server.*;
-import com.tarik02.clashroyale.server.utils.DataStream;
-import com.tarik02.clashroyale.server.utils.Hex;
-import com.tarik02.clashroyale.server.utils.LogManager;
-import com.tarik02.clashroyale.server.utils.Logger;
+import com.tarik02.clashroyale.server.utils.*;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -250,10 +247,10 @@ loop:
 					if (message != null) {
 						try {
 							if (!message.handle(player)) {
-								logger.warn("Failed to handle message %s.", message.getClass().getSimpleName());
+								logger.warn("Failed to handle message %s:\n%s", message.getClass().getSimpleName(), Dumper.dump(message));
 							}
 						} catch (Throwable e) {
-							logger.error("Failed to handle message %s. Error throwed:", e, message.getClass().getSimpleName());
+							logger.error("Failed to handle message %s:\n%s. Error throwed:", e, message.getClass().getSimpleName(), Dumper.dump(message));
 						}
 					}
 
@@ -362,6 +359,15 @@ loop:
 		public void sendMessage(Message message) {
 			try {
 				writeMessage(message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void close() {
+			try {
+				socket.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
