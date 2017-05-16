@@ -1,4 +1,4 @@
 # UCR Beta
 ## Сервер разрабатывают:
-* Xset
-+ Tarik02
+* Tarik02
++ Xset
