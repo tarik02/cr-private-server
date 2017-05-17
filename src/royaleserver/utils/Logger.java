@@ -1,7 +1,5 @@
 package royaleserver.utils;
 
-import com.sun.istack.internal.NotNull;
-
 public abstract class Logger {
 	private final String loggerName;
 
@@ -33,7 +31,7 @@ public abstract class Logger {
 		return log(LogLevel.FATAL, message, format);
 	}
 
-	public Logger log(@NotNull LogLevel level, String message, Object... format) {
+	public Logger log(LogLevel level, String message, Object... format) {
 		send(level, loggerName, message, format);
 		return this;
 	}

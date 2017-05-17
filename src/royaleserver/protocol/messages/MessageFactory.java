@@ -28,7 +28,11 @@ public class MessageFactory {
 	}
 
 	public static Message create(short id, DataStream stream) {
-		Class<?> clazz = registeredMessages.getOrDefault(id, null);
+		Class<?> clazz = null;
+		if (registeredMessages.containsKey(id)) {
+			clazz = registeredMessages.get(id);
+		}
+
 		if (clazz == null) {
 			return null;
 		}
