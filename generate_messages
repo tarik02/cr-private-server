@@ -54,7 +54,7 @@ foreach ($lines as $line) {
 
 echo 'Writing messages...', PHP_EOL;
 $file = fopen('src/com/tarik02/clashroyale/server/protocol/Info.java', 'w');
-fwrite($file, 'package com.tarik02.clashroyale.server.protocol;' . PHP_EOL);
+fwrite($file, 'package royaleserver.protocol;' . PHP_EOL);
 fwrite($file, PHP_EOL);
 fwrite($file, 'import java.util.Collections;' . PHP_EOL);
 fwrite($file, 'import java.util.HashMap;' . PHP_EOL);
@@ -118,12 +118,12 @@ function writeHandlerFile() {
 	global $definedMessages;
 
 	$file = fopen('src/com/tarik02/clashroyale/server/protocol/Handler.java', 'w');
-	fwrite($file, 'package com.tarik02.clashroyale.server.protocol;' . PHP_EOL);
+	fwrite($file, 'package royaleserver.protocol;' . PHP_EOL);
 	fwrite($file, PHP_EOL);
 
 	foreach ($messages['client'] as $name => $id) {
 		if (isset($definedMessages[$id])) {
-			fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.client.$name;" . PHP_EOL);
+			fwrite($file, "import royaleserver.protocol.messages.client.$name;" . PHP_EOL);
 		}
 	}
 
@@ -169,16 +169,16 @@ function parseMessages(string $label, string $input, string $output) {
 		printFields($data['fields'] ?? [], $importFields, $classFields, $constructorFields, $encodeFields, $decodeFields);
 
 		$file = fopen("src/com/tarik02/clashroyale/server/protocol/messages/$label/$messageName.java", 'w');
-		fwrite($file, "package com.tarik02.clashroyale.server.protocol.messages.$label;" . PHP_EOL);
+		fwrite($file, "package royaleserver.protocol.messages.$label;" . PHP_EOL);
 		fwrite($file, PHP_EOL);
 
 		if ($label === 'client') {
-			fwrite($file, "import com.tarik02.clashroyale.server.protocol.Handler;" . PHP_EOL);
+			fwrite($file, "import royaleserver.protocol.Handler;" . PHP_EOL);
 		}
 
-		fwrite($file, "import com.tarik02.clashroyale.server.protocol.Info;" . PHP_EOL);
-		fwrite($file, "import com.tarik02.clashroyale.server.protocol.messages.$base;" . PHP_EOL);
-		fwrite($file, "import com.tarik02.clashroyale.server.utils.DataStream;" . PHP_EOL);
+		fwrite($file, "import royaleserver.protocol.Info;" . PHP_EOL);
+		fwrite($file, "import royaleserver.protocol.messages.$base;" . PHP_EOL);
+		fwrite($file, "import royaleserver.utils.DataStream;" . PHP_EOL);
 
 		if (count($importFields) !== 0) {
 			fwrite($file, PHP_EOL);
@@ -296,7 +296,7 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 			'javaType' => 'SCID',
 			'streamName' => 'SCID',
 			'default' => 'new SCID()',
-			'importName' => 'com.tarik02.clashroyale.server.utils.SCID'
+			'importName' => 'royaleserver.utils.SCID'
 		], 'LONG' => [
 			'javaType' => 'long',
 			'streamName' => 'BLong',
@@ -317,7 +317,7 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 			'javaType' => 'Bitset',
 			'streamName' => 'Bitset',
 			'default' => 'new Bitset()',
-			'importName' => 'com.tarik02.clashroyale.server.utils.Bitset'
+			'importName' => 'royaleserver.utils.Bitset'
 		], 'STATIC' => [
 			'javaType' => 'byte[]',
 			'streamName' => '',
@@ -359,7 +359,7 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 				$fieldType = [
 					'javaType' => $field['type'],
 					'default' => "new $field[type]()",
-					'importName' => "com.tarik02.clashroyale.server.protocol.messages.component.$field[type]"
+					'importName' => "royaleserver.protocol.messages.component.$field[type]"
 				];
 			} else {
 				$closeBracket = strpos($field['type'], ']', $openBracket);
@@ -374,7 +374,7 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 							'javaType' => $field['type'],
 							'default' => "new $field[type]()",
 							'defaultArray' => "new $field[type][0]",
-							'importName' => "com.tarik02.clashroyale.server.protocol.messages.component.$field[type]",
+							'importName' => "royaleserver.protocol.messages.component.$field[type]",
 							'arrayType' => $field['lengthType'] ?? 'RRSINT32'
 						];
 					} else {
@@ -393,7 +393,7 @@ function printFields(array $fields, array &$importFields = null, array &$classFi
 							'javaType' => $field['type'],
 							'default' => "new $field[type]()",
 							'defaultArray' => "new $field[type][$count]",
-							'importName' => "com.tarik02.clashroyale.server.protocol.messages.component.$field[type]",
+							'importName' => "royaleserver.protocol.messages.component.$field[type]",
 							'arrayType' => 'AUTO'
 						];
 					} else {
