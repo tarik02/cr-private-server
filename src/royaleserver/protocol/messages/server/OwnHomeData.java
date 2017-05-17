@@ -118,18 +118,37 @@ public class OwnHomeData extends Message {
         	deck.encode(stream);
         }*/
         // deck count?
-        stream.putRrsInt32(1);
+        stream.putRrsInt32(3);
 
-        for (int i = 0; i < currentDeck.cards.length; i++)
-            currentDeck.cards[i].cardId = i + 1;
+        int[][] decks = new int[][]{
+                {26000021, 28000001, 28000011, 27000003, 28000003, 28000004, 26000000, 26000041},
+                {26000032, 26000045, 28000004, 28000012, 28000006, 28000001, 26000012, 26000043},
+                {27000008, 26000030, 26000010, 26000031, 26000005, 28000000, 27000003, 28000011}
+        };
 
-        stream.putRrsInt32(currentDeck.cards.length);
+        for (int i = 0; i < decks.length; i++) {
+            stream.putRrsInt32(decks[i].length);
 
-        for (int i = 0; i < currentDeck.cards.length; i++) {
-            stream.putRrsInt32(currentDeck.cards[i].cardId);
+            for (int j = 0; j < decks[i].length; j++) {
+                stream.putRrsInt32(decks[i][j]);
+            }
         }
 
         stream.put(Hex.toByteArray("ff"));
+
+        // Cards | Deck
+
+        // Да, тот самый говнокод. Нужно сделать двумерный массив:
+		/*
+			cardID =>
+			[
+				level
+				unk
+				count
+				unk
+				typeOfCard (can be 00/01/02) (1 = upgradable , 2 = card is new)
+			]
+		*/
 
 	    currentDeck.encode(stream);
 
