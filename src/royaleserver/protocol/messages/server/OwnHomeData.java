@@ -25,29 +25,29 @@ public class OwnHomeData extends Message {
     public int gold;
     public int gems;
 
-	public int trophies;
-	public int arena;
-	public int lastArena;
+    public int trophies;
+    public int arena;
+    public int lastArena;
 
     public int level;
     public int lastLevel;
     public int levelExperience;
 
-	public HomeChest homeChests[];
+    public HomeChest homeChests[];
 
-	public Card[] cards;
+    public Card[] cards;
 
-	public Deck currentDeck;
+    public Deck currentDeck;
     public Deck[] decks;
 
-	public String[] offers; // JSON
-	public String[] challenges; // JSON
+    public String[] offers; // JSON
+    public String[] challenges; // JSON
 
     public OwnHomeData() {
         super(ID);
 
         accountCreatedTime = (int)(System.currentTimeMillis() / 1000); // I think that it must be devided
-	    loginTime = (int)(System.currentTimeMillis() / 1000); // It's also
+        loginTime = (int)(System.currentTimeMillis() / 1000); // It's also
 
         offers = new String[]{
                 //"{\"ShopOffers\":[{\"PurchasedImage\":{\"Path\":\"\\/6d26b49e892198356e5b72119f64c977\",\"Checksum\":\"6d26b49e892198356e5b72119f64c977\",\"File\":\"shop_retro_royale_01_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":50,\"Spell\":\"MiniPekka\"}],\"Title\":\"Mini P.E.K.K.A\",\"Image\":{\"Path\":\"\\/e0f1800e761e52fb859bd8dd48bd229f\",\"Checksum\":\"e0f1800e761e52fb859bd8dd48bd229f\",\"File\":\"shop_retro_royale_01.png\"},\"CostType\":\"gems\",\"Cost\":200,\"Template\":\"shop_item3_text\"},{\"PurchasedImage\":{\"Path\":\"\\/9808af35e14b32e6e358f85e7e027eb0\",\"Checksum\":\"9808af35e14b32e6e358f85e7e027eb0\",\"File\":\"shop_retro_royale_02_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":10,\"Spell\":\"BabyDragon\"}],\"Title\":\"Baby Dragon\",\"Image\":{\"Path\":\"\\/6fae6a66d43a6a430aa9c4496377760a\",\"Checksum\":\"6fae6a66d43a6a430aa9c4496377760a\",\"File\":\"shop_retro_royale_02.png\"},\"CostType\":\"gems\",\"Cost\":400,\"Template\":\"shop_item3_text\"},{\"PurchasedImage\":{\"Path\":\"\\/c799ecc30f63f3aa8098363986558c31\",\"Checksum\":\"c799ecc30f63f3aa8098363986558c31\",\"File\":\"shop_retro_royale_03_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":10,\"Spell\":\"Prince\"}],\"Title\":\"Prince\",\"Image\":{\"Path\":\"\\/5eb151c16be8e91653f11d926ddf3c6c\",\"Checksum\":\"5eb151c16be8e91653f11d926ddf3c6c\",\"File\":\"shop_retro_royale_03.png\"},\"CostType\":\"gems\",\"Cost\":400,\"Template\":\"shop_item3_text\"}],\"Subtitle\":\"Power up your classic cards!\",\"Title\":\"Retro Royale Stack Offers!\",\"StartNotification\":\"Power up your classic cards with Retro Royale Stack Offers! Available now!\",\"EndNotification\":\"Only two hours left to power up your classic cards with Retro Royale Stack Offers!\"}"//"{\"Title\":\"Тестовое предложение\",\"Subtitle\":\"Тестовое предложение\",\"ShopOffers\":[{\"Rewards\":[{\"Type\":\"gems\",\"Amount\":10000}],\"Multiplier\":2,\"Image\":{\"Path\":\"\\/6f64e932ac74096596f6dcfc3ca9d1ec\",\"Checksum\":\"6f64e932ac74096596f6dcfc3ca9d1ec\",\"File\":\"2v2_double_01.png\"},\"CostType\":\"IAP\",\"CostIAP\":\"com.supercell.scroll.specialoffertier1\",\"Template\":\"shop_item2_no_text\"},{\"Rewards\":[{\"Type\":\"gold\",\"Amount\":6000}],\"Multiplier\":2,\"Image\":{\"Path\":\"/047a47702dff2d04c204232c9d7f07db\",\"Checksum\":\"047a47702dff2d04c204232c9d7f07db\",\"File\":\"2v2_double_02.png\"},\"CostType\":\"IAP\",\"CostIAP\":\"com.supercell.scroll.specialoffertier2\",\"Template\":\"shop_item2_no_text\"}],\"EndNotification\":\"Начинай яй!\",\"StartNotification\":\"ЧТО?\"}"
@@ -60,17 +60,17 @@ public class OwnHomeData extends Message {
         cards = new Card[0];
 
         currentDeck = new Deck();
-	    decks = new Deck[3];
-	    for (int i = 0; i < 3; ++i) {
-		    decks[i] = new Deck();
-	    }
+        decks = new Deck[3];
+        for (int i = 0; i < 3; ++i) {
+            decks[i] = new Deck();
+        }
 
         homeChests = new HomeChest[4];
 
         homeChests[0] = new HomeChest();
         homeChests[0].chestID = new SCID(19, 45);
-	    homeChests[0].first = true;
-	    homeChests[0].slot = 1;
+        homeChests[0].first = true;
+        homeChests[0].slot = 1;
         homeChests[0].status = HomeChest.STATUS_OPENING;
         homeChests[0].ticksToOpen = 3 * 60 * 20 - 120;
         homeChests[0].openTicks = 3 * 60 * 20;
@@ -97,9 +97,9 @@ public class OwnHomeData extends Message {
     public void encode(DataStream stream) {
         super.encode(stream);
 
-	    if (homeChests.length != 4) {
-		    throw new RuntimeException("homeChests.length must be 4");
-	    }
+        if (homeChests.length != 4) {
+            throw new RuntimeException("homeChests.length must be 4");
+        }
 
         stream.putBLong(homeId);
 
@@ -113,10 +113,10 @@ public class OwnHomeData extends Message {
 
         stream.putByte((byte)0);
 
-        /*stream.putRrsInt32(decks.length);
-        for (Deck deck : decks) {
-        	deck.encode(stream);
-        }*/
+		/*stream.putRrsInt32(decks.length);
+		 for (Deck deck : decks) {
+		 deck.encode(stream);
+		 }*/
         // deck count?
         stream.putRrsInt32(3);
 
@@ -135,27 +135,12 @@ public class OwnHomeData extends Message {
         }
 
         stream.put(Hex.toByteArray("ff"));
+        currentDeck.encode(stream);
 
-        // Cards | Deck
-
-        // Да, тот самый говнокод. Нужно сделать двумерный массив:
-		/*
-			cardID =>
-			[
-				level
-				unk
-				count
-				unk
-				typeOfCard (can be 00/01/02) (1 = upgradable , 2 = card is new)
-			]
-		*/
-
-	    currentDeck.encode(stream);
-
-	    stream.putRrsInt32(cards.length);
-	    for (Card card : cards) {
-	    	card.encode(stream);
-	    }
+        stream.putRrsInt32(cards.length);
+        for (Card card : cards) {
+            card.encode(stream);
+        }
 
         stream.putRrsInt32(0);
 
@@ -241,11 +226,11 @@ public class OwnHomeData extends Message {
         //SCID chestID = new SCID(19, 45);
         // STRUCT: 04 = means that now will chest?, 1 = start slot?, (19 ChestID) == SCID (1900000045), ChestStatus, (<= 08 = opening) time to open, time to open, timestamp, unk)
 
-	    for (HomeChest chest : homeChests) {
-	    	chest.encode(stream);
-	    }
+        for (HomeChest chest : homeChests) {
+            chest.encode(stream);
+        }
 
-	    // Not decoded yet
+        // Not decoded yet
         stream.put(Hex.toByteArray("000098ef1a9ca41d91e6f1900b00007f0000000000000000001dbeae2ba1400900a8802884d4d20195baf2900ba8ee8701a0a0d201b59ff7900b00a8850a80c33da5faf0900b030000000000000002"));
 
         stream.putRrsInt32(lastLevel);
@@ -361,32 +346,32 @@ public class OwnHomeData extends Message {
         stream.putRrsInt32(gems);
 
         stream.putRrsInt32(levelExperience);
-	    stream.putRrsInt32(level);
+        stream.putRrsInt32(level);
 
         stream.putRrsInt32(1);
 
         // Тут должна быть система кланов. У меня она реализована, так что в скором времени перенесу.
 
 		/*if (!player.data[2].equals("")) {
-			// ClanData
-			ClanWorker clanWorker = new ClanWorker(this.player);
-			String[] clanData = clanWorker.getClanDataU("ClanID", this.player.data[2]);
+		 // ClanData
+		 ClanWorker clanWorker = new ClanWorker(this.player);
+		 String[] clanData = clanWorker.getClanDataU("ClanID", this.player.data[2]);
 
-			if (clanData != null) {
-				// hasName|hasClan // 9 - hasClan and username
-				stream.putRrsInt32(9);
+		 if (clanData != null) {
+		 // hasName|hasClan // 9 - hasClan and username
+		 stream.putRrsInt32(9);
 
-				// ClanTAG
-				stream.putRrsLong(Long.parseLong(clanData[0]));
+		 // ClanTAG
+		 stream.putRrsLong(Long.parseLong(clanData[0]));
 
-				// clan info: 1) name 2) badge
-				stream.putString(clanData[1]);
-				stream.putRrsInt32(Integer.parseInt(clanData[2]) + 1); // why +1?!
+		 // clan info: 1) name 2) badge
+		 stream.putString(clanData[1]);
+		 stream.putRrsInt32(Integer.parseInt(clanData[2]) + 1); // why +1?!
 
-				// role
-				stream.putRrsInt32(4);
-			}
-		} else {*/
+		 // role
+		 stream.putRrsInt32(4);
+		 }
+		 } else {*/
         stream.putRrsInt32(1);
         //}
 

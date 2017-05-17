@@ -13,6 +13,8 @@ import royaleserver.protocol.messages.client.VisitHome;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 import royaleserver.utils.UsefulTools;
+import royaleserver.protocol.messages.component.Deck;
+import royaleserver.protocol.messages.component.HomeResources;
 
 public class VisitedHomeData extends Message {
 
@@ -20,13 +22,46 @@ public class VisitedHomeData extends Message {
 
     public long homeID;
     public String username;
+
     public int arena;
     public int trophies;
-    public String deckCards;
+    public int highestTrophies;
+
+    public int level;
+    public int levelExperience;
+
+    public int gold;
+    public int gems;
+
+    public int wins;
+    public int looses;
+
+    public Deck deck;
+
+    public HomeResources homeResources1;
 
     public VisitedHomeData(Player player) {
         super(ID);
 
+        homeID = 0;
+        username = "";
+
+        arena = 1;
+        trophies = 0;
+        highestTrophies = 0;
+
+        level = 0;
+        levelExperience = 0;
+
+        gold = 0;
+        gems = 0;
+
+        wins = 0;
+        looses = 0;
+
+        deck = new Deck();
+
+        homeResources1 = new HomeResources();
     }
 
     @Override
@@ -36,31 +71,23 @@ public class VisitedHomeData extends Message {
         stream.putRrsInt32(250);
         stream.putRrsInt32(1);
 
-        stream.put(Hex.toByteArray("ff"));
-
-        String[] deckCardsArray = "1,8,0,1162,0,0,0,6,2,0,1023,0,0,0,8,1,0,23,0,0,0,10,1,0,39,0,0,0,21,4,0,31,0,0,0,43,1,0,10,0,0,0,46,2,0,39,0,0,0,49,2,0,10,0,0,0".split(",");
-
-        String playerCards = "";
-        String[] playerCardsArray = playerCards.split(",");
-
-        for (int i = 0; i < deckCardsArray.length; i++) {
-            stream.putRrsInt32(Integer.parseInt(deckCardsArray[i].trim()));
-        }
+        stream.put(Hex.toByteArray("ff")); // It seems that's always before deck
+        deck.encode(stream);
 
         stream.putBLong(homeID);
 
-        stream.putByte((byte) 0);
-        stream.putByte((byte) 0);
+        stream.putByte((byte)0);
+        stream.putByte((byte)0);
 
         stream.putRrsLong(homeID);
         stream.putRrsLong(homeID);
         stream.putRrsLong(homeID);
 
-        stream.putString(username); // name
+        stream.putString(username);
         stream.putRrsInt32(0); // name changes count
-        stream.putRrsInt32(8); // arena
+        stream.putRrsInt32(arena);
 
-        stream.putRrsInt32(3500); // trophies
+        stream.putRrsInt32(trophies);
         stream.putRrsInt32(657); // unk_6
 
         stream.putRrsInt32(0); // trophies legendary
@@ -77,12 +104,14 @@ public class VisitedHomeData extends Message {
         stream.putRrsInt32(0); // PreviousSeasonLeaderboardNr
         stream.putRrsInt32(0); // PreviousSeasonTrophies
 
-        stream.putRrsInt32(0); // HighestTrophies
+        stream.putRrsInt32(highestTrophies); // HighestTrophies
 
         stream.putRrsInt32(0); //unk_7 = p.readRRSInt32()
         stream.putRrsInt32(0); //unk_8 = p.readRRSInt32()
         stream.putRrsInt32(7); //always_7 = p.readRRSInt32()
 
+        //homeResources1.resources.put(HomeResources.RESOURCE_GOLD, gold);
+        //homeResources1.resources.put(HomeResources.RESOURCE_FREE_GOLD, gold);
         Map<String, Integer> mp = new HashMap<String, Integer>();
 
         mp.put("Gold", 15000);
@@ -127,13 +156,15 @@ public class VisitedHomeData extends Message {
             stream.putRrsInt32(typeOfItem);
             stream.putRrsInt32(mp.get(key));
         }
+        //homeResources1.encode(stream);
 
         stream.putRrsInt32(0);
 
         //System.out.println("len:" + playerInfo[8].split(",").length);
         //System.out.println("len:" + playerInfo[9].split(",").length);
 
-        int cardsFound = (deckCardsArray.length / 7) + (playerCardsArray.length / 7); // + my cards
+        //int cardsFound = (deckCardsArray.length / 7) + (playerCardsArray.length / 7); // + my cards
+        int cardsFound = 0;
         int cardsGiven = 0;
 
         // Tournament
@@ -156,7 +187,7 @@ public class VisitedHomeData extends Message {
         stream.putRrsInt32(statItems.length);
 
         for (int i = 0; i < statItems.length; i++) {
-            stream.putByte((byte) 60);
+            stream.putByte((byte)60);
             stream.putRrsInt32(i);
             stream.putRrsInt32(statItems[i]);
         }
@@ -223,18 +254,13 @@ public class VisitedHomeData extends Message {
             stream.putRrsInt32(0);
         }
 
-        // 0
-        stream.putRrsInt32(0);
+        stream.putRrsInt32(0); // 0
 
-        // Gems | Free gems
-        stream.putRrsInt32(10000);
-        stream.putRrsInt32(10000);
+        stream.putRrsInt32(gems); // Gems
+        stream.putRrsInt32(gems); // Free gems
 
-        // Experience
-        stream.putRrsInt32(0);
-
-        // Level
-        stream.putRrsInt32(13);
+        stream.putRrsInt32(levelExperience);
+        stream.putRrsInt32(level);
 
         // isMyProfile // 0 - not // 1 - yes, it's my profile
         // it's for "invite" button
@@ -245,28 +271,28 @@ public class VisitedHomeData extends Message {
 
         stream.putRrsInt32(1);
 
-        /*
-        if (!playerInfo[2].equals("")) {
-            // ClanData
-            ClanWorker clanWorker = new ClanWorker(this.player);
-            String[] clanData = clanWorker.getClanDataU("ClanID", playerInfo[2]);
+		/*
+		 if (!playerInfo[2].equals("")) {
+		 // ClanData
+		 ClanWorker clanWorker = new ClanWorker(this.player);
+		 String[] clanData = clanWorker.getClanDataU("ClanID", playerInfo[2]);
 
-            if (clanData != null) {
-                // hasName|hasClan // 9 - hasClan and username
-                stream.putRrsInt32(9);
+		 if (clanData != null) {
+		 // hasName|hasClan // 9 - hasClan and username
+		 stream.putRrsInt32(9);
 
-                // ClanTAG
-                stream.putRrsLong(Long.parseLong(clanData[0]));
+		 // ClanTAG
+		 stream.putRrsLong(Long.parseLong(clanData[0]));
 
-                // clan info: 1) name 2) badge
-                stream.putString(clanData[1]);
-                stream.putRrsInt32(Integer.parseInt(clanData[2]) + 1); // why +1?!
+		 // clan info: 1) name 2) badge
+		 stream.putString(clanData[1]);
+		 stream.putRrsInt32(Integer.parseInt(clanData[2]) + 1); // why +1?!
 
-                // role
-                stream.putRrsInt32(4);
-            }
+		 // role
+		 stream.putRrsInt32(4);
+		 }
 
-        } else {*/
+		 } else {*/
         stream.putRrsInt32(1);
         //}
 
@@ -277,10 +303,10 @@ public class VisitedHomeData extends Message {
         stream.putRrsInt32(0); // unk
 
         // Player Wins
-        stream.putRrsInt32(0);
+        stream.putRrsInt32(wins);
 
         // Player Losses
-        stream.putRrsInt32(0);
+        stream.putRrsInt32(looses);
 
         // Unknown
         stream.putRrsInt32(1);

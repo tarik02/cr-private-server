@@ -82,7 +82,6 @@ public class Player implements Handler {
 		VisitedHomeData response = new VisitedHomeData(this);
 
 		response.homeID = message.accountID;
-		response.deckCards = "1,8,0,1162,0,0,0,6,2,0,1023,0,0,0,8,1,0,23,0,0,0,10,1,0,39,0,0,0,21,4,0,31,0,0,0,43,1,0,10,0,0,0,46,2,0,39,0,0,0,49,2,0,10,0,0,0";
 		response.arena = 8;
 		response.trophies = 3500;
 		response.username = "Tester";
