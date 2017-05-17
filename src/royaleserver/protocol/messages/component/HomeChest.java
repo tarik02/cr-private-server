@@ -9,19 +9,22 @@ public class HomeChest extends Component {
     public static final byte STATUS_OPENED = 1;
     public static final byte STATUS_OPENING = 8;
 
+    public static final SCID CHEST_SUPER_MAGICAL_TRAINING_CAMP = new SCID(19, 45);
+
+    public boolean first;
+    public SCID chestID;
+    public int slot; // from 1
     public byte status;
     public int ticksToOpen; // Remains ticks to open
     public int openTicks; // Ticks to open from zero
-    public int slot;
-    public boolean first;
-    public SCID chestID;
 
     public HomeChest() {
+        first = false;
+        chestID = CHEST_SUPER_MAGICAL_TRAINING_CAMP;
+        slot = 1;
         status = STATUS_STATIC;
         ticksToOpen = 0;
         openTicks = 0;
-        slot = 1; // from 1
-        first = false;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class HomeChest extends Component {
             stream.putRrsInt32(openTicks);
 
             // timestamp
-            stream.putRrsInt32((int) System.currentTimeMillis());
+            stream.putRrsInt32((int)System.currentTimeMillis());
         }
 
         stream.putRrsInt32(slot);

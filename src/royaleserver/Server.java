@@ -9,6 +9,7 @@ import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.MessageFactory;
 import royaleserver.protocol.messages.client.ClientHello;
 import royaleserver.protocol.messages.client.Login;
+import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.*;
 
@@ -230,21 +231,22 @@ loop:
 					OwnHomeData ownHomeData = new OwnHomeData();
 
                     ownHomeData.homeId = login.accountId;
-                    ownHomeData.deckCards = "1,8,0,1162,0,0,0,6,2,0,1023,0,0,0,8,1,0,23,0,0,0,10,1,0,39,0,0,0,21,4,0,31,0,0,0,43,1,0,10,0,0,0,46,2,0,39,0,0,0,49,2,0,10,0,0,0";
                     ownHomeData.arena = 8;
+                    ownHomeData.lastArena = 8;
                     ownHomeData.trophies = 3500;
                     ownHomeData.username = "Tester";
                     ownHomeData.gold = 10000;
                     ownHomeData.gems = 10000;
                     ownHomeData.levelExperience = 0;
                     ownHomeData.level = 13;
-                    ownHomeData.playerCards = "";
+                    ownHomeData.lastLevel = 13;
+
+                    ownHomeData.cards = new Card[80]; // Fill it for testing
+					for (int i = 0; i < ownHomeData.cards.length; ++i) {
+						(ownHomeData.cards[i] = new Card()).cardId = i;
+					}
 
 					writeMessage(ownHomeData);
-
-					/*InboxGlobal inboxGlobal = new InboxGlobal();
-					inboxGlobal.unknown_0 = 1;
-					writeMessage(inboxGlobal);*/
 				}
 
 				logger.info("Player connected.");

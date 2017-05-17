@@ -1,6 +1,5 @@
 package royaleserver.protocol.messages.server;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +24,7 @@ public class VisitedHomeData extends Message {
     public int trophies;
     public String deckCards;
 
-    public VisitedHomeData(Player player) throws SQLException, ClassNotFoundException {
+    public VisitedHomeData(Player player) {
         super(ID);
 
     }
@@ -36,8 +35,6 @@ public class VisitedHomeData extends Message {
 
         stream.putRrsInt32(250);
         stream.putRrsInt32(1);
-
-        System.out.println(homeID);
 
         stream.put(Hex.toByteArray("ff"));
 

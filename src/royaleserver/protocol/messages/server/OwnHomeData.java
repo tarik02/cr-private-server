@@ -2,6 +2,8 @@ package royaleserver.protocol.messages.server;
 
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
+import royaleserver.protocol.messages.component.Card;
+import royaleserver.protocol.messages.component.Deck;
 import royaleserver.protocol.messages.component.HomeChest;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
@@ -16,24 +18,36 @@ public class OwnHomeData extends Message {
     public static final short ID = Info.OWN_HOME_DATA;
 
     public long homeId;
+    public int accountCreatedTime;
+    public int loginTime;
+
     public String username;
     public int gold;
     public int gems;
-    public int arena;
-    public int trophies;
+
+	public int trophies;
+	public int arena;
+	public int lastArena;
+
     public int level;
+    public int lastLevel;
     public int levelExperience;
 
-    public String[] offers; // JSON
-    public String[] challenges; // JSON
+	public HomeChest homeChests[];
 
-    public String deckCards;
-    public String playerCards;
+	public Card[] cards;
 
-    public HomeChest homeChests[];
+	public Deck currentDeck;
+    public Deck[] decks;
+
+	public String[] offers; // JSON
+	public String[] challenges; // JSON
 
     public OwnHomeData() {
         super(ID);
+
+        accountCreatedTime = (int)(System.currentTimeMillis() / 1000); // I think that it must be devided
+	    loginTime = (int)(System.currentTimeMillis() / 1000); // It's also
 
         offers = new String[]{
                 //"{\"ShopOffers\":[{\"PurchasedImage\":{\"Path\":\"\\/6d26b49e892198356e5b72119f64c977\",\"Checksum\":\"6d26b49e892198356e5b72119f64c977\",\"File\":\"shop_retro_royale_01_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":50,\"Spell\":\"MiniPekka\"}],\"Title\":\"Mini P.E.K.K.A\",\"Image\":{\"Path\":\"\\/e0f1800e761e52fb859bd8dd48bd229f\",\"Checksum\":\"e0f1800e761e52fb859bd8dd48bd229f\",\"File\":\"shop_retro_royale_01.png\"},\"CostType\":\"gems\",\"Cost\":200,\"Template\":\"shop_item3_text\"},{\"PurchasedImage\":{\"Path\":\"\\/9808af35e14b32e6e358f85e7e027eb0\",\"Checksum\":\"9808af35e14b32e6e358f85e7e027eb0\",\"File\":\"shop_retro_royale_02_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":10,\"Spell\":\"BabyDragon\"}],\"Title\":\"Baby Dragon\",\"Image\":{\"Path\":\"\\/6fae6a66d43a6a430aa9c4496377760a\",\"Checksum\":\"6fae6a66d43a6a430aa9c4496377760a\",\"File\":\"shop_retro_royale_02.png\"},\"CostType\":\"gems\",\"Cost\":400,\"Template\":\"shop_item3_text\"},{\"PurchasedImage\":{\"Path\":\"\\/c799ecc30f63f3aa8098363986558c31\",\"Checksum\":\"c799ecc30f63f3aa8098363986558c31\",\"File\":\"shop_retro_royale_03_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":10,\"Spell\":\"Prince\"}],\"Title\":\"Prince\",\"Image\":{\"Path\":\"\\/5eb151c16be8e91653f11d926ddf3c6c\",\"Checksum\":\"5eb151c16be8e91653f11d926ddf3c6c\",\"File\":\"shop_retro_royale_03.png\"},\"CostType\":\"gems\",\"Cost\":400,\"Template\":\"shop_item3_text\"}],\"Subtitle\":\"Power up your classic cards!\",\"Title\":\"Retro Royale Stack Offers!\",\"StartNotification\":\"Power up your classic cards with Retro Royale Stack Offers! Available now!\",\"EndNotification\":\"Only two hours left to power up your classic cards with Retro Royale Stack Offers!\"}"//"{\"Title\":\"Тестовое предложение\",\"Subtitle\":\"Тестовое предложение\",\"ShopOffers\":[{\"Rewards\":[{\"Type\":\"gems\",\"Amount\":10000}],\"Multiplier\":2,\"Image\":{\"Path\":\"\\/6f64e932ac74096596f6dcfc3ca9d1ec\",\"Checksum\":\"6f64e932ac74096596f6dcfc3ca9d1ec\",\"File\":\"2v2_double_01.png\"},\"CostType\":\"IAP\",\"CostIAP\":\"com.supercell.scroll.specialoffertier1\",\"Template\":\"shop_item2_no_text\"},{\"Rewards\":[{\"Type\":\"gold\",\"Amount\":6000}],\"Multiplier\":2,\"Image\":{\"Path\":\"/047a47702dff2d04c204232c9d7f07db\",\"Checksum\":\"047a47702dff2d04c204232c9d7f07db\",\"File\":\"2v2_double_02.png\"},\"CostType\":\"IAP\",\"CostIAP\":\"com.supercell.scroll.specialoffertier2\",\"Template\":\"shop_item2_no_text\"}],\"EndNotification\":\"Начинай яй!\",\"StartNotification\":\"ЧТО?\"}"
@@ -43,13 +57,20 @@ public class OwnHomeData extends Message {
                 //"{\"GameMode\":\"CardReleaseDraft\",\"Title\":\"Тестовое испытание\",\"JoinCost\":100,\"JoinCostResource\":\"Gems\",\"MaxLosses\":3,\"Rewards\":[{\"Gold\":1000,\"Cards\":500},{\"Gold\":10000,\"Milestone\":{\"Type\":\"Spell\",\"Amount\":1000,\"Spell\":\"DarkWitch\"},\"Cards\":3},{\"Gold\":240,\"Milestone\":{\"Type\":\"Spell\",\"Amount\":1000,\"Spell\":\"DarkWitch\"},\"Cards\":5},{\"Gold\":10000,\"Milestone\":{\"Type\":\"Spell\",\"Amount\":1000,\"Spell\":\"DarkWitch\"},\"Cards\":5000}],\"IconExportName\":\"icon_tournament_card_release\",\"WinIconExportName\":\"tournament_open_wins_badge_draft\",\"Arena\":\"All\",\"MilestoneHighlightInUI\":3,\"Subtitle\":\"Тестовое испытание\",\"Description\":\"Бла бла бла...\",\"StartNotification\":\"Тестовое испытание началось! Поробуй!\",\"EndNotification\":\"Тестовое испытание закончится через 2 часа! Успей!\",\"CardTheme\":\"DarkWitch\",\"FreePass\":0}"
         };
 
-        // Доделал до конца твою структуру. Теперь всё ворк :)
+        cards = new Card[0];
+
+        currentDeck = new Deck();
+	    decks = new Deck[3];
+	    for (int i = 0; i < 3; ++i) {
+		    decks[i] = new Deck();
+	    }
+
         homeChests = new HomeChest[4];
 
         homeChests[0] = new HomeChest();
         homeChests[0].chestID = new SCID(19, 45);
-        homeChests[0].slot = 1;
-        homeChests[0].first = true;
+	    homeChests[0].first = true;
+	    homeChests[0].slot = 1;
         homeChests[0].status = HomeChest.STATUS_OPENING;
         homeChests[0].ticksToOpen = 3 * 60 * 20 - 120;
         homeChests[0].openTicks = 3 * 60 * 20;
@@ -76,18 +97,10 @@ public class OwnHomeData extends Message {
     public void encode(DataStream stream) {
         super.encode(stream);
 
-        if (homeChests.length != 4) {
-            throw new RuntimeException("homeChests.length must be 4");
-        }
+	    if (homeChests.length != 4) {
+		    throw new RuntimeException("homeChests.length must be 4");
+	    }
 
-        // Ща буит мясцо
-
-        // ВАЖНО! \\
-        /*
-            Сделано это всё небрежно, нужно просто посидеть, чтобы все это раскидать по классам.
-		*/
-
-        // Player id
         stream.putBLong(homeId);
 
         stream.putRrsInt32(4194); // age / time?
@@ -96,10 +109,14 @@ public class OwnHomeData extends Message {
         stream.putRrsInt32(945100); // donation Cooldown Seconds NextFreeChest ?
         stream.putRrsInt32(945100); // donationCapacity
 
-        stream.putRrsInt32((int) System.currentTimeMillis()); // login timestamp
+        stream.putRrsInt32(loginTime);
 
-        stream.putByte((byte) 0);
+        stream.putByte((byte)0);
 
+        /*stream.putRrsInt32(decks.length);
+        for (Deck deck : decks) {
+        	deck.encode(stream);
+        }*/
         // deck count?
         stream.putRrsInt32(3);
 
@@ -132,20 +149,13 @@ public class OwnHomeData extends Message {
 				typeOfCard (can be 00/01/02) (1 = upgradable , 2 = card is new)
 			]
 		*/
-        String[] deckCardsArray = deckCards.split(",");
-        String[] playerCardsArray = playerCards.split(",");
 
-        for (int i = 0; i < deckCardsArray.length; i++) {
-            stream.putRrsInt32(Integer.parseInt(deckCardsArray[i].trim()));
-        }
+	    currentDeck.encode(stream);
 
-        stream.putByte((byte) (playerCardsArray.length / 7));
-
-        if (!playerCards.equals("")) {
-            for (int i = 0; i < playerCardsArray.length; i++) {
-                stream.putRrsInt32(Integer.parseInt(playerCardsArray[i].trim()));
-            }
-        }
+	    stream.putRrsInt32(cards.length);
+	    for (Card card : cards) {
+	    	card.encode(stream);
+	    }
 
         stream.putRrsInt32(0);
 
@@ -155,7 +165,7 @@ public class OwnHomeData extends Message {
 
         // Пока что непонятно, что эта за структура. Я конечно могу предположить, что это как-то связано с offers/challenges, но это не точно
         for (int i = 0; i < 8; i++) {
-            stream.putByte((byte) 127);
+            stream.putByte((byte)127);
 
             stream.putRrsInt32(0);
             stream.putRrsInt32(0);
@@ -168,8 +178,7 @@ public class OwnHomeData extends Message {
             stream.putRrsInt32(i);
         }
 
-        // timestamp
-        stream.putRrsInt32((int) System.currentTimeMillis());
+        stream.putRrsInt32((int)System.currentTimeMillis());
         stream.putRrsInt32(1);
         stream.putRrsInt32(0);
 
@@ -223,7 +232,7 @@ public class OwnHomeData extends Message {
         // Пока что руки не дошли до этого, если будет желание, то изучи.
         stream.put(Hex.toByteArray("00011b00012800119c91cf4502019c91cf4504019d91cf4501019d91cf4502019d91cf4503019d91cf4505019d91cf450601a091cf450101a091cf450201a091cf4503019f91cf4503019f91cf450601a391cf450101a391cf450201a391cf450301a491cf450401a891cf4502010e0080c4be8b0b010000042701280129012a05"));
 
-        // Не работает, либо ставлю неправильный timestamp
+        // year[4]-month[2]-day[2]
         stream.putString("{\"ID\":\"CARD_RELEASE\",\"Params\":{\"Assassin\":\"20170324\",\"Heal\":\"20170501\"}}");
 
         // 251 - draft chest (максимальная лига)
@@ -232,26 +241,19 @@ public class OwnHomeData extends Message {
         //SCID chestID = new SCID(19, 45);
         // STRUCT: 04 = means that now will chest?, 1 = start slot?, (19 ChestID) == SCID (1900000045), ChestStatus, (<= 08 = opening) time to open, time to open, timestamp, unk)
 
-        homeChests[0].encode(stream);
-        homeChests[1].encode(stream);
-        homeChests[2].encode(stream);
-        homeChests[3].encode(stream);
+	    for (HomeChest chest : homeChests) {
+	    	chest.encode(stream);
+	    }
 
-        // Пока что руки не дошли до этого, если будет желание, то изучи.
+	    // Not decoded yet
         stream.put(Hex.toByteArray("000098ef1a9ca41d91e6f1900b00007f0000000000000000001dbeae2ba1400900a8802884d4d20195baf2900ba8ee8701a0a0d201b59ff7900b00a8850a80c33da5faf0900b030000000000000002"));
 
-        // Последний известный уровень. Если поставить например 8 (а у тебя 9), то будет анимация улучшения уровня.
-        stream.putRrsInt32(level);
-
-        // unk
-        stream.putByte((byte) 36);
-
-        // old arena
-        stream.putByte((byte) 8);
+        stream.putRrsInt32(lastLevel);
+        stream.putByte((byte)36); // unk
+        stream.putByte((byte)lastArena);
 
         stream.put(Hex.toByteArray("c5d9c1ba0902028cb56c8cb56c8ff186910b03018201020000000000001c0100018201020000000000001a1c01018201020000000000001a06020000007f00007f00007f1411b31f901b000381030800011a270109008e0c0000fa0716079ef3b0171f0108003d0689c3b21797030005002a08a9c4d317870c00070081010700050008000109009f050006000c0686e8ab17100005000f06b9a6ab171e0003002806809bb817b60200040002aeeae51890fcd91a02aeeae51890fcd91a00028ed2f83e8fd2f83e048dd2f83e8cd2f83e8ed2f83e9cd2f83e019dd2f83e019081a1fe0b00b90101018ae6bf3301139f0301a9410e7fb012880300000000000000"));
 
-        // player ids
         stream.putRrsLong(homeId);
         stream.putRrsLong(homeId);
         stream.putRrsLong(homeId);
@@ -261,10 +263,7 @@ public class OwnHomeData extends Message {
 
         stream.putRrsInt32(0); // changes of username. Если 1, то нельзя будет сменить
 
-        // тут вот интересно, т.к легендарная арена вышла перед джунглей, то:
-        // legendary arena - 8
-        // jungle - 9
-        stream.putRrsInt32(arena); // arena
+        stream.putByte((byte)arena);
 
         // trophies
         stream.putRrsInt32(trophies);
@@ -292,11 +291,8 @@ public class OwnHomeData extends Message {
         stream.putRrsInt32(0);
         stream.putRrsInt32(31);
 
-        // # Leaderboard nr  => previous season
-        stream.putRrsInt32(0);
-
-        // # Trophies        => previous season
-        stream.putRrsInt32(0);
+        stream.putRrsInt32(0); // # Leaderboard nr  => previous season
+        stream.putRrsInt32(0); // # Trophies        => previous season
 
         // # UNK
         stream.putRrsInt32(0);
@@ -361,15 +357,11 @@ public class OwnHomeData extends Message {
 
         stream.put(Hex.toByteArray("050885010509a2eae518050a99e301050b1f05140b0515881b051b0a88011a00001a01001a02001a03001a04001a05001a06001a07001a08001a09001a0a001a0b001a0c001a0d001a0e001a0f001a10001a11001a12001a13001a14001a15001a16001a17001a18001a19001a1a001a1b001a1c001a1d221a1e001a1f001a20001a21001a22001a23001a24001a25001a26001a27001a28001a29001a2aa2021a2b001a2d001a2e001b00001b01001b02001b03001b04001b05001b06001b07001b08001b09001b0a001c00001c01001c02001c03001c04001c05001c06001c07001c08001c09001c0a001c0b001c0c001c0d001c100900"));
 
-        // gems
         stream.putRrsInt32(gems);
-        stream.putRrsInt32(gems); // free
+        stream.putRrsInt32(gems);
 
-        // exp (from database)
         stream.putRrsInt32(levelExperience);
-
-        // level (from db)
-        stream.putRrsInt32(level);
+	    stream.putRrsInt32(level);
 
         stream.putRrsInt32(1);
 
@@ -428,7 +420,7 @@ public class OwnHomeData extends Message {
         stream.putRrsInt32(119049974);
 
         // account create date/time
-        stream.putRrsInt32((int) System.currentTimeMillis());
+        stream.putRrsInt32(accountCreatedTime);
 
         // time played?
         stream.putRrsInt32(1881931);
