@@ -10,8 +10,13 @@ import royaleserver.protocol.messages.MessageFactory;
 import royaleserver.protocol.messages.client.ClientHello;
 import royaleserver.protocol.messages.client.Login;
 import royaleserver.protocol.messages.component.Card;
-import royaleserver.protocol.messages.server.*;
-import royaleserver.utils.*;
+import royaleserver.protocol.messages.server.LoginOk;
+import royaleserver.protocol.messages.server.OwnHomeData;
+import royaleserver.protocol.messages.server.ServerHello;
+import royaleserver.utils.DataStream;
+import royaleserver.utils.Hex;
+import royaleserver.utils.LogManager;
+import royaleserver.utils.Logger;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -44,7 +49,8 @@ public class Server {
 			fis.close();
 
 			resourceFingerprint = new String(buffer, Charset.forName("UTF-8"));
-		} catch (IOException ignored) {}
+		} catch (IOException ignored) {
+		}
 
 		start();
 	}
@@ -119,6 +125,12 @@ public class Server {
 		return resourceFingerprint;
 	}
 
+	protected static class ServerException extends Exception {
+		public ServerException(String message) {
+			super(message);
+		}
+	}
+
 	private class NetworkThread extends Thread {
 		public void run() {
 			try {
@@ -157,7 +169,7 @@ public class Server {
 			clientCrypto.setServer(serverCrypto);
 			serverCrypto.setClient(clientCrypto);
 
-loop:
+			loop:
 			try {
 				reader = new DataInputStream(socket.getInputStream());
 				writer = new DataOutputStream(socket.getOutputStream());
@@ -169,7 +181,7 @@ loop:
 				}
 
 				{
-					ClientHello clientHello = (ClientHello)message;
+					ClientHello clientHello = (ClientHello) message;
 					message = null;
 				}
 
@@ -186,7 +198,7 @@ loop:
 				}
 
 				{
-					Login login = (Login)message;
+					Login login = (Login) message;
 					/*if (login.resourceSha.equals("65dded3fcfd249dec11f4db84c05a4b37cd7a427")) {
 						LoginFailed loginFailed = new LoginFailed();
 						loginFailed.errorCode = 7;
@@ -230,18 +242,18 @@ loop:
 
 					OwnHomeData ownHomeData = new OwnHomeData();
 
-                    ownHomeData.homeId = login.accountId;
-                    ownHomeData.arena = 8;
-                    ownHomeData.lastArena = 8;
-                    ownHomeData.trophies = 3500;
-                    ownHomeData.username = "Tester";
-                    ownHomeData.gold = 10000;
-                    ownHomeData.gems = 10000;
-                    ownHomeData.levelExperience = 0;
-                    ownHomeData.level = 13;
-                    ownHomeData.lastLevel = 13;
+					ownHomeData.homeId = 1515;//login.accountId;
+					ownHomeData.arena = 8;
+					ownHomeData.lastArena = 8;
+					ownHomeData.trophies = 3500;
+					ownHomeData.username = "Tester";
+					ownHomeData.gold = 10000;
+					ownHomeData.gems = 10000;
+					ownHomeData.levelExperience = 0;
+					ownHomeData.level = 13;
+					ownHomeData.lastLevel = 13;
 
-                    ownHomeData.cards = new Card[80]; // Fill it for testing
+					ownHomeData.cards = new Card[80]; // Fill it for testing
 					for (int i = 0; i < ownHomeData.cards.length; ++i) {
 						(ownHomeData.cards[i] = new Card()).cardId = i;
 					}
@@ -257,10 +269,13 @@ loop:
 					if (message != null) {
 						try {
 							if (!message.handle(player)) {
-								logger.warn("Failed to handle message %s:\n%s", message.getClass().getSimpleName(), Dumper.dump(message));
+								// оффнул это, т.к сильно забивает консоль...
+								logger.warn("Failed to handle message %s:", message.getClass().getSimpleName());
+								//logger.warn("Failed to handle message %s:\n%s", message.getClass().getSimpleName(), Dumper.dump(message));
 							}
 						} catch (Throwable e) {
-							logger.error("Failed to handle message %s:\n%s. Error throwed:", e, message.getClass().getSimpleName(), Dumper.dump(message));
+							logger.error("Failed to handle message %s: Error throwed:", e, message.getClass().getSimpleName());
+							//logger.error("Failed to handle message %s:\n%s. Error throwed:", e, message.getClass().getSimpleName(), Dumper.dump(message));
 						}
 					}
 
@@ -295,19 +310,19 @@ loop:
 			byte[] payload = new byte[2];
 			reader.readFully(payload);
 			short id = ByteBuffer
-				.allocate(2)
-				.put(payload)
-				.order(ByteOrder.BIG_ENDIAN).getShort(0);
+					.allocate(2)
+					.put(payload)
+					.order(ByteOrder.BIG_ENDIAN).getShort(0);
 
 			payload = new byte[3];
 			reader.readFully(payload);
 			reader.readShort(); // Version, always 5
 
 			int length = ByteBuffer
-				.allocate(4)
-				.put((byte)0)
-				.put(payload)
-				.order(ByteOrder.BIG_ENDIAN).getInt(0);
+					.allocate(4)
+					.put((byte) 0)
+					.put(payload)
+					.order(ByteOrder.BIG_ENDIAN).getInt(0);
 			payload = new byte[length];
 			reader.readFully(payload);
 
@@ -360,7 +375,7 @@ loop:
 
 			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort(message.id).array());
 			writer.write(ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(header.payload.length).array(), 1, 3);
-			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort((short)5).array());
+			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort((short) 5).array());
 			writer.write(header.payload);
 		}
 
@@ -381,12 +396,6 @@ loop:
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-
-	protected static class ServerException extends Exception {
-		public ServerException(String message) {
-			super(message);
 		}
 	}
 }

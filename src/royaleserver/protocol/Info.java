@@ -162,6 +162,7 @@ public class Info {
 	public static final short LOGIC_DEVICE_LINK_RESPONSE = 26005;
 	public static final short LOGIC_DEVICE_LINK_DONE = 26007;
 	public static final short LOGIC_DEVICE_LINK_ERROR = 26008;
+	public static final short TOURNAMENT_LIST_SEND = 26108;
 
 	public static final Map<Integer, String> messagesMap = createMessagesMap();
 
@@ -266,7 +267,7 @@ public class Info {
 		map.put(24102, "OwnAvatarData");
 		map.put(24104, "OutOfSync");
 		map.put(24106, "StopHomeLogic");
-		map.put(24107, "MatchmakeInfo");
+		map.put(24107, "MatchmakerInfo");
 		map.put(24108, "MatchmakeFailed");
 		map.put(24111, "AvailableServerCommand");
 		map.put(24112, "UdpConnectionInfo");

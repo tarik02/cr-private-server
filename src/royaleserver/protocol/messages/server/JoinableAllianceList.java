@@ -13,15 +13,14 @@ public class JoinableAllianceList extends Message {
 
 	public JoinableAllianceList() {
 		super(ID);
-
-		alliances = new AllianceHeaderEntry[0];
 	}
 
 	@Override
 	public void encode(DataStream stream) {
 		super.encode(stream);
 
-		alliances = new AllianceHeaderEntry[stream.getRrsInt32()];
+		stream.putRrsInt32(alliances.length);
+
 		for (int i = 0; i < alliances.length; ++i) {
 			alliances[i].encode(stream);
 		}

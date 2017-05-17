@@ -1,12 +1,15 @@
 package royaleserver.protocol.messages.component;
 
-import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Component;
 import royaleserver.utils.DataStream;
-
 import royaleserver.utils.SCID;
 
 public class AllianceHeaderEntry extends Component {
+
+	public static final byte CLAN_OPEN = 1;
+	public static final byte CLAN_INVITE = 2;
+	public static final byte CLAN_CLOSED = 3;
+
 	public long Id;
 	public String name;
 	public SCID badge;
@@ -54,21 +57,24 @@ public class AllianceHeaderEntry extends Component {
 		stream.putBLong(Id);
 		stream.putString(name);
 		stream.putSCID(badge);
-		stream.putByte(type);
-		stream.putByte(numberOfMembers);
+		stream.putRrsInt32(type);
+		stream.putRrsInt32(numberOfMembers);
 		stream.putRrsInt32(score);
 		stream.putRrsInt32(requiredScore);
-		stream.putByte(unknown_7);
-		stream.putByte(unknown_8);
+		stream.putRrsInt32(unknown_7);
+		stream.putRrsInt32(unknown_8);
 		stream.putRrsInt32(currenRank);
 		stream.putRrsInt32(unknown_10);
 		stream.putRrsInt32(donations);
 		stream.putRrsInt32(unknown_12);
-		stream.putByte(unknown_13);
-		stream.putByte(unknown_14);
-		stream.putByte(unknown_15);
+		stream.putRrsInt32(unknown_13);
+		stream.putRrsInt32(unknown_14);
+		stream.putRrsInt32(unknown_15);
 		stream.putRrsInt32(region);
-		stream.putByte(unknown_17);
+		stream.putRrsInt32(unknown_17);
+
+		// next clan
+		stream.putByte((byte) 0);
 	}
 
 	@Override
