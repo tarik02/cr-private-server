@@ -267,7 +267,7 @@ public class Info {
 		map.put(24102, "OwnAvatarData");
 		map.put(24104, "OutOfSync");
 		map.put(24106, "StopHomeLogic");
-		map.put(24107, "MatchmakerInfo");
+		map.put(24107, "MatchmakeInfo");
 		map.put(24108, "MatchmakeFailed");
 		map.put(24111, "AvailableServerCommand");
 		map.put(24112, "UdpConnectionInfo");
