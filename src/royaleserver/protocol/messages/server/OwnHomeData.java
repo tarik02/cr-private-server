@@ -16,8 +16,8 @@ public class OwnHomeData extends Message {
     public static final short ID = Info.OWN_HOME_DATA;
 
     public long homeId;
-    public String name;
-    public int coins;
+    public String username;
+    public int gold;
     public int gems;
     public int arena;
     public int trophies;
@@ -27,22 +27,13 @@ public class OwnHomeData extends Message {
     public String[] offers; // JSON
     public String[] challenges; // JSON
 
+    public String deckCards;
+    public String playerCards;
+
     public HomeChest homeChests[];
 
     public OwnHomeData() {
         super(ID);
-
-        homeId = 0;
-        name = "";
-
-        coins = 0;
-        gems = 0;
-
-        arena = 1;
-        trophies = 0;
-
-        level = 1;
-        levelExperience = 0;
 
         offers = new String[]{
                 //"{\"ShopOffers\":[{\"PurchasedImage\":{\"Path\":\"\\/6d26b49e892198356e5b72119f64c977\",\"Checksum\":\"6d26b49e892198356e5b72119f64c977\",\"File\":\"shop_retro_royale_01_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":50,\"Spell\":\"MiniPekka\"}],\"Title\":\"Mini P.E.K.K.A\",\"Image\":{\"Path\":\"\\/e0f1800e761e52fb859bd8dd48bd229f\",\"Checksum\":\"e0f1800e761e52fb859bd8dd48bd229f\",\"File\":\"shop_retro_royale_01.png\"},\"CostType\":\"gems\",\"Cost\":200,\"Template\":\"shop_item3_text\"},{\"PurchasedImage\":{\"Path\":\"\\/9808af35e14b32e6e358f85e7e027eb0\",\"Checksum\":\"9808af35e14b32e6e358f85e7e027eb0\",\"File\":\"shop_retro_royale_02_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":10,\"Spell\":\"BabyDragon\"}],\"Title\":\"Baby Dragon\",\"Image\":{\"Path\":\"\\/6fae6a66d43a6a430aa9c4496377760a\",\"Checksum\":\"6fae6a66d43a6a430aa9c4496377760a\",\"File\":\"shop_retro_royale_02.png\"},\"CostType\":\"gems\",\"Cost\":400,\"Template\":\"shop_item3_text\"},{\"PurchasedImage\":{\"Path\":\"\\/c799ecc30f63f3aa8098363986558c31\",\"Checksum\":\"c799ecc30f63f3aa8098363986558c31\",\"File\":\"shop_retro_royale_03_sold.png\"},\"Rewards\":[{\"Type\":\"spell\",\"Amount\":10,\"Spell\":\"Prince\"}],\"Title\":\"Prince\",\"Image\":{\"Path\":\"\\/5eb151c16be8e91653f11d926ddf3c6c\",\"Checksum\":\"5eb151c16be8e91653f11d926ddf3c6c\",\"File\":\"shop_retro_royale_03.png\"},\"CostType\":\"gems\",\"Cost\":400,\"Template\":\"shop_item3_text\"}],\"Subtitle\":\"Power up your classic cards!\",\"Title\":\"Retro Royale Stack Offers!\",\"StartNotification\":\"Power up your classic cards with Retro Royale Stack Offers! Available now!\",\"EndNotification\":\"Only two hours left to power up your classic cards with Retro Royale Stack Offers!\"}"//"{\"Title\":\"Тестовое предложение\",\"Subtitle\":\"Тестовое предложение\",\"ShopOffers\":[{\"Rewards\":[{\"Type\":\"gems\",\"Amount\":10000}],\"Multiplier\":2,\"Image\":{\"Path\":\"\\/6f64e932ac74096596f6dcfc3ca9d1ec\",\"Checksum\":\"6f64e932ac74096596f6dcfc3ca9d1ec\",\"File\":\"2v2_double_01.png\"},\"CostType\":\"IAP\",\"CostIAP\":\"com.supercell.scroll.specialoffertier1\",\"Template\":\"shop_item2_no_text\"},{\"Rewards\":[{\"Type\":\"gold\",\"Amount\":6000}],\"Multiplier\":2,\"Image\":{\"Path\":\"/047a47702dff2d04c204232c9d7f07db\",\"Checksum\":\"047a47702dff2d04c204232c9d7f07db\",\"File\":\"2v2_double_02.png\"},\"CostType\":\"IAP\",\"CostIAP\":\"com.supercell.scroll.specialoffertier2\",\"Template\":\"shop_item2_no_text\"}],\"EndNotification\":\"Начинай яй!\",\"StartNotification\":\"ЧТО?\"}"
@@ -141,10 +132,6 @@ public class OwnHomeData extends Message {
 				typeOfCard (can be 00/01/02) (1 = upgradable , 2 = card is new)
 			]
 		*/
-
-        String deckCards = "1,8,0,1162,0,0,0,6,2,0,1023,0,0,0,8,1,0,23,0,0,0,10,1,0,39,0,0,0,21,4,0,31,0,0,0,43,1,0,10,0,0,0,46,2,0,39,0,0,0,49,2,0,10,0,0,0";
-        String playerCards = "";
-
         String[] deckCardsArray = deckCards.split(",");
         String[] playerCardsArray = playerCards.split(",");
 
@@ -243,22 +230,7 @@ public class OwnHomeData extends Message {
         // 45 - SuperMagicChest
 
         //SCID chestID = new SCID(19, 45);
-
         // STRUCT: 04 = means that now will chest?, 1 = start slot?, (19 ChestID) == SCID (1900000045), ChestStatus, (<= 08 = opening) time to open, time to open, timestamp, unk)
-		/*int[] chestsPacket = new int[]{
-				0, 4, 1, chestID.getHigh(), chestID.getLow(), 8, homeChests[0].ticksToOpen, homeChests[0].openTicks,(int) System.currentTimeMillis(), 1,
-				1, 0, 0,
-				0, 4, chestID.getHigh(), chestID.getLow(), 8, homeChests[0].ticksToOpen, homeChests[0].openTicks,(int) System.currentTimeMillis(), 2,
-				1, 1, 0,
-				0, 4, chestID.getHigh(), chestID.getLow(), 8, homeChests[0].ticksToOpen, homeChests[0].openTicks,(int) System.currentTimeMillis(), 3,
-				1, 2, 0,
-				0, 4, chestID.getHigh(), chestID.getLow(), 8, homeChests[0].ticksToOpen, homeChests[0].openTicks,(int) System.currentTimeMillis(), 4,
-				1, 3, 0,
-		};*/
-
-        //for (int i = 0; i < chestsPacket.length; i++) {
-        //	stream.putRrsInt32(chestsPacket[i]);
-        //}
 
         homeChests[0].encode(stream);
         homeChests[1].encode(stream);
@@ -269,7 +241,7 @@ public class OwnHomeData extends Message {
         stream.put(Hex.toByteArray("000098ef1a9ca41d91e6f1900b00007f0000000000000000001dbeae2ba1400900a8802884d4d20195baf2900ba8ee8701a0a0d201b59ff7900b00a8850a80c33da5faf0900b030000000000000002"));
 
         // Последний известный уровень. Если поставить например 8 (а у тебя 9), то будет анимация улучшения уровня.
-        stream.putRrsInt32(13);
+        stream.putRrsInt32(level);
 
         // unk
         stream.putByte((byte) 36);
@@ -285,17 +257,17 @@ public class OwnHomeData extends Message {
         stream.putRrsLong(homeId);
 
         // username
-        stream.putString(name);
+        stream.putString(username);
 
         stream.putRrsInt32(0); // changes of username. Если 1, то нельзя будет сменить
 
         // тут вот интересно, т.к легендарная арена вышла перед джунглей, то:
         // legendary arena - 8
         // jungle - 9
-        stream.putRrsInt32(8); // arena
+        stream.putRrsInt32(arena); // arena
 
         // trophies
-        stream.putRrsInt32(3500);
+        stream.putRrsInt32(trophies);
 
         // unk
         stream.putRrsInt32(657);
@@ -338,12 +310,12 @@ public class OwnHomeData extends Message {
 
         Map<String, Integer> mp = new HashMap<String, Integer>();
 
-        mp.put("Gold", 15000);
+        mp.put("Gold", gold);
         mp.put("ChallengesWins", 0);
         mp.put("ChestCount", 3);
         mp.put("StarCount", 0);
 
-        mp.put("FreeGold", 15000);
+        mp.put("FreeGold", gold);
         mp.put("Unk_0", 827);
 
         mp.put("RewardGold", 0);
@@ -390,14 +362,14 @@ public class OwnHomeData extends Message {
         stream.put(Hex.toByteArray("050885010509a2eae518050a99e301050b1f05140b0515881b051b0a88011a00001a01001a02001a03001a04001a05001a06001a07001a08001a09001a0a001a0b001a0c001a0d001a0e001a0f001a10001a11001a12001a13001a14001a15001a16001a17001a18001a19001a1a001a1b001a1c001a1d221a1e001a1f001a20001a21001a22001a23001a24001a25001a26001a27001a28001a29001a2aa2021a2b001a2d001a2e001b00001b01001b02001b03001b04001b05001b06001b07001b08001b09001b0a001c00001c01001c02001c03001c04001c05001c06001c07001c08001c09001c0a001c0b001c0c001c0d001c100900"));
 
         // gems
-        stream.putRrsInt32(10000);
-        stream.putRrsInt32(10000); // free
+        stream.putRrsInt32(gems);
+        stream.putRrsInt32(gems); // free
 
         // exp (from database)
-        stream.putRrsInt32(0);
+        stream.putRrsInt32(levelExperience);
 
         // level (from db)
-        stream.putRrsInt32(13);
+        stream.putRrsInt32(level);
 
         stream.putRrsInt32(1);
 
