@@ -19,6 +19,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import royaleserver.csv.Table;
 
 public class Server {
 	private static Logger logger = LogManager.getLogger(Server.class);
@@ -32,20 +33,7 @@ public class Server {
 	protected String resourceFingerprint = "";
 
 	public Server() throws ServerException {
-		try {
-			File file = new File("assets/fingerprint.json");
-			if (!file.exists()) {
-				throw new ServerException("Fingerprint file does not exists.");
-			}
-
-			FileInputStream fis = new FileInputStream(file);
-			byte[] buffer = new byte[fis.available()];
-			fis.read(buffer);
-			fis.close();
-
-			resourceFingerprint = new String(buffer, Charset.forName("UTF-8"));
-		} catch (IOException ignored) {}
-
+		resourceFingerprint = new String(getResource("fingerprint.json"), Charset.forName("UTF-8"));
 		start();
 	}
 
@@ -113,6 +101,27 @@ public class Server {
 
 	protected void tick() {
 
+	}
+
+	public byte[] getResource(String path) throws ServerException {
+		File file = new File("assets/" + path);
+		if (!file.exists()) {
+			throw new ServerException("Resource does not exists.");
+		}
+
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			byte[] buffer = new byte[fis.available()];
+			fis.read(buffer);
+			fis.close();
+			return buffer;
+		} catch (IOException ignored) {
+			throw new ServerException("Failed to fetch the resource.");
+		}
+	}
+
+	public Table getCSVResource(String path) throws ServerException {
+		return new Table(getResource(path));
 	}
 
 	public String getResourceFingerprint() {
@@ -320,7 +329,10 @@ loop:
 				if (header.decrypted == null) {
 					logger.error("Failed to decrypt packet %d, encrypted payload:\n%s", header.id, Hex.dump(header.payload));
 				} else {
-					String name = Info.messagesMap.getOrDefault(header.id, null);
+					String name = null;
+					if (Info.messagesMap.containsKey(header.id)) {
+						name = Info.messagesMap.get(header.id);
+					}
 
 					if (name == null) {
 						logger.warn("Received unknown packet %d:\n%s", header.id, Hex.dump(header.decrypted));
