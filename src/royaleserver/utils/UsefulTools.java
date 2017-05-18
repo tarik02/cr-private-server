@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UsefulTools {
-    
-    // возвращает номер ресурса
     public static int getTypeRes(String resourceName)
     {
         Map<String, Integer> map = new HashMap<String, Integer>();
