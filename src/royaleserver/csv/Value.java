@@ -34,12 +34,17 @@ public class Value {
 		return table.getValueValue(column, row);
 	}
 
+	public String[] getValues() {
+		return getValue().split(System.getProperty("line.separator"));
+	}
+
+
 	public String asString() {
 		return getValue();
 	}
 
 	public boolean asBool() {
-		return getValue() == "TRUE";
+		return getValue().equals("TRUE");
 	}
 
 	public int asInt() {
@@ -48,5 +53,43 @@ public class Value {
 
 	public float asFloat() {
 		return Float.valueOf(getValue());
+	}
+
+
+	public String[] asStringArray() {
+		return getValues();
+	}
+
+	public boolean[] asBooleanArray() {
+		String[] values = getValues();
+		boolean[] results = new boolean[values.length];
+
+		for (int i = 0; i < values.length; ++i) {
+			results[i] = values[i].equals("TRUE");
+		}
+
+		return results;
+	}
+
+	public int[] asIntArray() {
+		String[] values = getValues();
+		int[] results = new int[values.length];
+
+		for (int i = 0; i < values.length; ++i) {
+			results[i] = Integer.valueOf(values[i]);
+		}
+
+		return results;
+	}
+
+	public float[] asFloatArray() {
+		String[] values = getValues();
+		float[] results = new float[values.length];
+
+		for (int i = 0; i < values.length; ++i) {
+			results[i] = Float.valueOf(values[i]);
+		}
+
+		return results;
 	}
 }
