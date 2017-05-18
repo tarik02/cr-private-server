@@ -10,8 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class CommandFactory {
-	private CommandFactory() {
-	}
+	private CommandFactory() {}
 
 	private static Map<Integer, Class<? extends Command>> registeredCommands = new HashMap<>();
 
@@ -40,9 +39,7 @@ public class CommandFactory {
 
 		Command command = null;
 		try {
-			Class[] paramTypes = new Class[]{Session.class};
-
-			command = (Command) clazz.getConstructor().newInstance();
+			command = (Command)clazz.getConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
