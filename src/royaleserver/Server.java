@@ -23,7 +23,9 @@ import java.nio.charset.Charset;
 import royaleserver.csv.Table;
 
 public class Server {
-	private static Logger logger = LogManager.getLogger(Server.class);
+	private static Logger logger;
+
+	protected File workingDirectory;
 
 	protected boolean running = false;
 	protected long tickCounter = 0;
@@ -34,6 +36,22 @@ public class Server {
 	protected String resourceFingerprint = "";
 
 	public Server() throws ServerException {
+		this(null);
+	}
+
+	public Server(File workingDirectory) throws ServerException {
+		if (workingDirectory == null) {
+			workingDirectory = new File(".");
+		}
+		this.workingDirectory = workingDirectory;
+
+		if (!workingDirectory.exists() || !workingDirectory.isDirectory()) {
+			throw new ServerException("The working directory is not exists.");
+		}
+
+		LogManager.initMainLogger(new File(workingDirectory, "server.log"));
+		logger = LogManager.getLogger(Server.class);
+
 		resourceFingerprint = new String(getResource("fingerprint.json"), Charset.forName("UTF-8"));
 		start();
 	}
@@ -81,8 +99,8 @@ public class Server {
 		running = false;
 
 		logger.info("Stopping the server...");
-
 		logger.info("Disconnecting the clients...");
+		// TODO: Disconnect clients
 
 		try {
 			logger.info("Closing the server socket...");
@@ -109,7 +127,7 @@ public class Server {
 	}
 
 	public byte[] getResource(String path) throws ServerException {
-		File file = new File("assets/" + path);
+		File file = new File(workingDirectory, "assets/" + path);
 		if (!file.exists()) {
 			throw new ServerException("Resource does not exists.");
 		}
