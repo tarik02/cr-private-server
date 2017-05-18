@@ -2,6 +2,8 @@ package royaleserver;
 
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
+import royaleserver.logic.Card;
+import royaleserver.logic.Rarity;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.MessageHeader;
 import royaleserver.protocol.Session;
@@ -9,7 +11,6 @@ import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.MessageFactory;
 import royaleserver.protocol.messages.client.ClientHello;
 import royaleserver.protocol.messages.client.Login;
-import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.*;
 
@@ -37,7 +38,7 @@ public class Server {
 		start();
 	}
 
-	public void start() {
+	public void start() throws ServerException {
 		if (running) {
 			return;
 		}
@@ -45,6 +46,10 @@ public class Server {
 		tickCounter = 0;
 
 		logger.info("Starting the server...");
+
+		logger.info("Loading data...");
+		Rarity.init(this);
+		Card.init(this);
 
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();
@@ -378,7 +383,7 @@ loop:
 		}
 	}
 
-	protected static class ServerException extends Exception {
+	public static class ServerException extends Exception {
 		public ServerException(String message) {
 			super(message);
 		}
