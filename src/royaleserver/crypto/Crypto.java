@@ -1,14 +1,10 @@
 package royaleserver.crypto;
 
-import com.caligochat.nacl.Box;
 import com.caligochat.nacl.NaclException;
 import com.caligochat.nacl.SecretBox;
 import royaleserver.protocol.MessageHeader;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
 
 public abstract class Crypto {
 	public static class CryptoException extends Exception {

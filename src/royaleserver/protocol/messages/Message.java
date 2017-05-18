@@ -1,6 +1,5 @@
 package royaleserver.protocol.messages;
 
-import royaleserver.protocol.Handler;
 import royaleserver.utils.DataStream;
 
 public abstract class Message extends Component {
@@ -16,7 +15,7 @@ public abstract class Message extends Component {
 	@Override
 	public void decode(DataStream stream) {}
 
-	public boolean handle(Handler handler) throws Throwable {
+	public boolean handle(MessageHandler handler) throws Throwable {
 		return false;
 	}
 }

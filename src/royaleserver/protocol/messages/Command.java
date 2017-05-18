@@ -1,10 +1,8 @@
 package royaleserver.protocol.messages;
 
-
-import royaleserver.protocol.Session;
 import royaleserver.utils.DataStream;
 
-public class Command extends Component {
+public abstract class Command extends Component {
 	public final short id;
 
 	protected Command(short id) {
@@ -12,14 +10,12 @@ public class Command extends Component {
 	}
 
 	@Override
-	public void encode(DataStream stream) {
-	}
+	public void encode(DataStream stream) {}
 
 	@Override
-	public void decode(DataStream stream) {
-	}
+	public void decode(DataStream stream) {}
 
-	public void Execute(Session session) {
-
+	public boolean handle(CommandHandler handler) throws Throwable {
+		return false;
 	}
 }

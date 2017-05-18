@@ -237,29 +237,11 @@ loop:
 					loginOk.unknown_23 = 1;
 					writeMessage(loginOk);
 
-					OwnHomeData ownHomeData = new OwnHomeData();
-
-                    ownHomeData.homeId = login.accountId;
-                    ownHomeData.arena = 8;
-                    ownHomeData.lastArena = 8;
-                    ownHomeData.trophies = 3500;
-                    ownHomeData.username = "Tester";
-                    ownHomeData.gold = 10000;
-                    ownHomeData.gems = 10000;
-                    ownHomeData.levelExperience = 0;
-                    ownHomeData.level = 13;
-                    ownHomeData.lastLevel = 13;
-
-                    ownHomeData.cards = new Card[80]; // Fill it for testing
-					for (int i = 0; i < ownHomeData.cards.length; ++i) {
-						(ownHomeData.cards[i] = new Card()).cardId = i;
-					}
-
-					writeMessage(ownHomeData);
+					player = new Player(login.accountId, Server.this, this);
+					player.sendOwnHomeData();
 				}
 
 				logger.info("Player connected.");
-				player = new Player(Server.this, this);
 
 				while (true) {
 					message = readMessage();
@@ -336,9 +318,9 @@ loop:
 
 					if (name == null) {
 						logger.warn("Received unknown packet %d:\n%s", header.id, Hex.dump(header.decrypted));
-						if (header.id == 10099) {
+						/*if (header.id == 10099) {
 							player.disconnect("DEBUGGING"); // Sometimes I receive this packet
-						}
+						}*/
 					} else {
 						logger.warn("Received undefined packet %s:\n%s", name, Hex.dump(header.decrypted));
 					}

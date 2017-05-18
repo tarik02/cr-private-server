@@ -1,13 +1,10 @@
 package royaleserver.protocol.messages.command;
 
-import royaleserver.protocol.Info;
-import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
-import royaleserver.protocol.messages.server.AvailableServerCommand;
+import royaleserver.protocol.messages.CommandHandler;
 import royaleserver.utils.DataStream;
 
 public class OpenChest extends Command {
-
 	public static final short ID = 503;
 
 	public int tickStart;
@@ -15,9 +12,6 @@ public class OpenChest extends Command {
 	public long accountID;
 
 	public byte unknown_0;
-
-	// тут можно переделать
-	public Session session;
 
 	public OpenChest() {
 		super(ID);
@@ -34,11 +28,7 @@ public class OpenChest extends Command {
 	}
 
 	@Override
-	public void Execute(Session session) {
-		super.Execute(session);
-
-		AvailableServerCommand response = new AvailableServerCommand();
-		response.command.commandClass = new OpenChestOK();
-		session.sendMessage(response);
+	public boolean handle(CommandHandler handler) throws Throwable {
+		return handler.handleOpenChestCommand(this);
 	}
 }

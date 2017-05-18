@@ -1,8 +1,5 @@
 package royaleserver.protocol;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 public class MessageHeader {
 	public short id;
 	public byte[] payload;

@@ -1,16 +1,14 @@
 package royaleserver.protocol.messages.client;
 
-import royaleserver.protocol.Handler;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.component.CommandComponent;
 import royaleserver.utils.DataStream;
 
 public class EndClientTurn extends Message {
-
     public static final short ID = Info.END_CLIENT_TURN;
 
-    public int Subtick;
     public int tick;
     public int checksum;
     public byte unknown_3;
@@ -18,10 +16,6 @@ public class EndClientTurn extends Message {
     public byte unknown_5;
     public byte unknown_6;
     public CommandComponent[] commands;
-    
-    public DataStream stream;
-    
-    public int commandsCount;
 
     public EndClientTurn() {
         super(ID);
@@ -40,9 +34,10 @@ public class EndClientTurn extends Message {
 
         stream.putRrsInt32(tick);
         stream.putRrsInt32(checksum);
-        
-        for (int i = 0; i < commandsCount; i++) {
-            commands[i].encode(stream);
+
+        stream.putRrsInt32(commands.length);
+        for (CommandComponent command : commands) {
+            command.encode(stream);
         }
         
         stream.putByte(unknown_3);
@@ -54,23 +49,19 @@ public class EndClientTurn extends Message {
     @Override
     public void decode(DataStream stream) {
         super.decode(stream);
-        int id = 0;
-        
-        this.stream = stream;
 
         tick = stream.getRrsInt32();
         checksum = stream.getRrsInt32();
-        commandsCount = stream.getRrsInt32();
-        
-        commands = new CommandComponent[commandsCount];
 
+        int commandsCount = stream.getRrsInt32();
+        commands = new CommandComponent[commandsCount];
         for (int i = 0; i < commandsCount; i++) {
             commands[i] = new CommandComponent();
-            //commands[i].decode(stream);
+            commands[i].decode(stream);
         }
     }
 
-    public boolean handle(Handler handler) throws Throwable {
+    public boolean handle(MessageHandler handler) throws Throwable {
         return handler.handleEndClientTurn(this);
     }
 }

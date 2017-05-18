@@ -1,6 +1,6 @@
 package royaleserver.protocol.messages.client;
 
-import royaleserver.protocol.Handler;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.utils.DataStream;
@@ -54,7 +54,7 @@ public class DonateAllianceUnit extends Message {
 		streamID = stream.getBLong();
 	}
 
-	public boolean handle(Handler handler) throws Throwable {
+	public boolean handle(MessageHandler handler) throws Throwable {
 		return handler.handleDonateAllianceUnit(this);
 	}
 }

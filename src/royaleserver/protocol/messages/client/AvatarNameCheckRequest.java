@@ -1,11 +1,10 @@
 // 
 package royaleserver.protocol.messages.client;
 
-import royaleserver.protocol.Handler;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.utils.DataStream;
-import royaleserver.utils.Hex;
 
 public class AvatarNameCheckRequest extends Message {
 
@@ -31,7 +30,7 @@ public class AvatarNameCheckRequest extends Message {
         nUsername = stream.getString();
     }
 
-    public boolean handle(Handler handler) throws Throwable {
+    public boolean handle(MessageHandler handler) throws Throwable {
         return handler.handleAvatarNameCheckRequest(this);
     }
 }

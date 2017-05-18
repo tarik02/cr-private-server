@@ -2,7 +2,6 @@ package royaleserver.protocol.messages;
 
 import royaleserver.utils.DataStream;
 import org.reflections.Reflections;
-import com.google.common.collect.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -44,7 +43,7 @@ public class MessageFactory {
 			e.printStackTrace();
 		}
 
-		if ((message != null) && (stream != null)) {
+		if (message != null && stream != null) {
 			message.decode(stream);
 		}
 

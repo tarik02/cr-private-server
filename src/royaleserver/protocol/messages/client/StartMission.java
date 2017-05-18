@@ -1,9 +1,8 @@
 package royaleserver.protocol.messages.client;
 
-import royaleserver.protocol.Handler;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
-import static royaleserver.protocol.messages.client.SearchAlliances.ID;
 import royaleserver.utils.DataStream;
 
 import royaleserver.utils.SCID;
@@ -30,7 +29,7 @@ public class StartMission extends Message {
 
     }
 
-    public boolean handle(Handler handler) throws Throwable {
+    public boolean handle(MessageHandler handler) throws Throwable {
         return handler.handleStartMission(this);
     }
 

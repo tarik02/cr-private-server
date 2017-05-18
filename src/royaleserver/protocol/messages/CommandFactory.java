@@ -3,7 +3,6 @@ package royaleserver.protocol.messages;
 import royaleserver.protocol.Session;
 import royaleserver.utils.DataStream;
 import org.reflections.Reflections;
-import com.google.common.collect.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -42,6 +41,10 @@ public class CommandFactory {
 			command = (Command) clazz.getConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
+		}
+
+		if (command != null && stream != null) {
+			command.decode(stream);
 		}
 
 		return command;

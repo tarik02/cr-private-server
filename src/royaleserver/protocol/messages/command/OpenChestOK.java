@@ -1,12 +1,8 @@
 package royaleserver.protocol.messages.command;
 
-import royaleserver.protocol.Info;
-import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.component.ChestItem;
-import royaleserver.protocol.messages.server.AvailableServerCommand;
 import royaleserver.utils.DataStream;
-import royaleserver.utils.Hex;
 
 public class OpenChestOK extends Command {
 
@@ -20,7 +16,7 @@ public class OpenChestOK extends Command {
 	public OpenChestOK() {
 		super(ID);
 
-		cardsCount = 8;
+		cardsCount = 40;
 
 		gold = 1000;
 		gems = 1500;
@@ -43,23 +39,23 @@ public class OpenChestOK extends Command {
 	public void encode(DataStream stream) {
 		super.encode(stream);
 
-		stream.putByte((byte) 1);
-		stream.putByte((byte) 0);
+		stream.putByte((byte)1);
+		stream.putByte((byte)0);
 
-		stream.putByte((byte) chestItems.length);
+		stream.putRrsInt32(chestItems.length);
 
 		for (ChestItem chestItem : chestItems) {
 			chestItem.encode(stream);
 		}
 
-		stream.putByte((byte) 127);
+		stream.putByte((byte)127);
 
 		stream.putRrsInt32(gold);
 		stream.putRrsInt32(gems);
 
 		stream.putRrsInt32(500);
 
-		stream.putByte((byte) 2);
-		stream.putByte((byte) 2);
+		stream.putByte((byte)2);
+		stream.putByte((byte)2);
 	}
 }

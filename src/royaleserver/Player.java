@@ -1,18 +1,27 @@
 package royaleserver;
 
-import royaleserver.protocol.Handler;
+import royaleserver.protocol.messages.CommandHandler;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.client.*;
+import royaleserver.protocol.messages.command.BuyChest;
+import royaleserver.protocol.messages.command.OpenChest;
+import royaleserver.protocol.messages.command.OpenChestOK;
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
+import royaleserver.protocol.messages.component.Card;
+import royaleserver.protocol.messages.component.CommandComponent;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.SCID;
 
-public class Player implements Handler {
+public class Player implements MessageHandler, CommandHandler {
 	protected Server server;
 	protected Session session;
 
-	public Player(Server server, Session session) {
+	protected long accountId;
+
+	public Player(long accountId, Server server, Session session) {
+		this.accountId = accountId;
 		this.server = server;
 		this.session = session;
 	}
@@ -62,28 +71,30 @@ public class Player implements Handler {
 
 	@Override
 	public boolean handleEndClientTurn(EndClientTurn message) throws Throwable {
-		if (message.commandsCount > 0) {
-			for (int i = 0; i < message.commandsCount; i++) {
+		boolean handled = true;
 
-				message.commands[i].decode(message.stream);
+		for (CommandComponent commandComponent : message.commands) {
+			Command command = commandComponent.command;
 
-				Command command = message.commands[i].command;
-
-				if (command != null) {
-					command.Execute(this.session);
-				}
+			if (command == null) {
+				handled = false;
+				continue;
 			}
+
+			handled = handled && command.handle(this);
 		}
-		return true;
+
+		return handled;
 	}
 
 	@Override
 	public boolean handleVisitHome(VisitHome message) throws Throwable {
-		VisitedHomeData response = new VisitedHomeData(this);
+		VisitedHomeData response = new VisitedHomeData();
 
 		response.homeID = message.accountID;
 		response.arena = 8;
 		response.trophies = 3500;
+		response.level = 13;
 		response.username = "Tester";
 
 		session.sendMessage(response);
@@ -212,6 +223,25 @@ public class Player implements Handler {
 		return false;
 	}
 
+
+	@Override
+	public boolean handleBuyChestCommand(BuyChest command) throws Throwable {
+		AvailableServerCommand response = new AvailableServerCommand();
+		response.command.command = new OpenChestOK();
+		session.sendMessage(response);
+
+		return true;
+	}
+
+	@Override
+	public boolean handleOpenChestCommand(OpenChest command) throws Throwable {
+		AvailableServerCommand response = new AvailableServerCommand();
+		response.command.command = new OpenChestOK();
+		session.sendMessage(response);
+
+		return true;
+	}
+
 	public void disconnect(String reason) {
 		LoginFailed loginFailed = new LoginFailed();
 		loginFailed.errorCode = 7;
@@ -225,5 +255,27 @@ public class Player implements Handler {
 		loginFailed.unknown_8 = "";
 		session.sendMessage(loginFailed);
 		session.close();
+	}
+
+	public void sendOwnHomeData() {
+		OwnHomeData ownHomeData = new OwnHomeData();
+
+		ownHomeData.homeId = accountId;
+		ownHomeData.arena = 8;
+		ownHomeData.lastArena = 8;
+		ownHomeData.trophies = 3500;
+		ownHomeData.username = "Tester";
+		ownHomeData.gold = 10000;
+		ownHomeData.gems = 10000;
+		ownHomeData.levelExperience = 0;
+		ownHomeData.level = 13;
+		ownHomeData.lastLevel = 13;
+
+		ownHomeData.cards = new Card[80]; // Fill it for testing
+		for (int i = 0; i < ownHomeData.cards.length; ++i) {
+			(ownHomeData.cards[i] = new Card()).cardId = i;
+		}
+
+		session.sendMessage(ownHomeData);
 	}
 }

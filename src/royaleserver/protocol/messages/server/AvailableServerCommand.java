@@ -1,11 +1,9 @@
 package royaleserver.protocol.messages.server;
 
-import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.utils.DataStream;
 
 import royaleserver.protocol.messages.component.ServerCommandComponent;
-import royaleserver.utils.Hex;
 
 public class AvailableServerCommand extends Message {
 	public static final short ID = 24111;
@@ -32,8 +30,8 @@ public class AvailableServerCommand extends Message {
 
 		command.encode(stream);
 
-		stream.putByte((byte) 127);
-		stream.putByte((byte) 127);
+		stream.putByte((byte)127);
+		stream.putByte((byte)127);
 		stream.putByte(unknown_3);
 		stream.putByte(unknown_4);
 	}

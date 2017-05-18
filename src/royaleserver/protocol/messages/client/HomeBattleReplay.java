@@ -1,6 +1,6 @@
 package royaleserver.protocol.messages.client;
 
-import royaleserver.protocol.Handler;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.utils.DataStream;
@@ -60,7 +60,7 @@ public class HomeBattleReplay extends Message {
 		arena = stream.getSCID();
 	}
 
-	public boolean handle(Handler handler) throws Throwable {
+	public boolean handle(MessageHandler handler) throws Throwable {
 		return handler.handleHomeBattleReplay(this);
 	}
 }

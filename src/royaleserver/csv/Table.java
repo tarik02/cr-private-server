@@ -2,7 +2,6 @@ package royaleserver.csv;
 
 import royaleserver.utils.CSVConverter;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
