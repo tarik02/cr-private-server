@@ -29,7 +29,11 @@ public class CommandFactory {
 	}
 
 	public static Command create(int id, DataStream stream) {
-		Class<?> clazz = registeredCommands.getOrDefault(id, null);
+		Class<?> clazz = null;
+		if (registeredCommands.containsKey(id)) {
+			clazz = registeredCommands.get(id);
+		}
+
 		if (clazz == null) {
 			return null;
 		}
