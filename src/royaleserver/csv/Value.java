@@ -44,7 +44,11 @@ public class Value {
 	}
 
 	public String asString() {
-		return getValue();
+		return asString(false);
+	}
+
+	public String asString(boolean nullIfEmpty) {
+		return (nullIfEmpty && empty()) ? null : getValue();
 	}
 
 	public boolean asBool() {
