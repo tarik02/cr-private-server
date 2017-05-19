@@ -59,8 +59,16 @@ public class Value {
 		return Integer.valueOf(getValue());
 	}
 
+	public Integer asIntNullable() {
+		return empty() ? null : Integer.valueOf(getValue());
+	}
+
 	public float asFloat() {
 		return Float.valueOf(getValue());
+	}
+
+	public Float asFloatNullable() {
+		return empty() ? null : Float.valueOf(getValue());
 	}
 
 
