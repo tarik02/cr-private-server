@@ -39,6 +39,10 @@ public class Value {
 	}
 
 
+	public boolean empty() {
+		return getValue().trim().length() == 0;
+	}
+
 	public String asString() {
 		return getValue();
 	}
