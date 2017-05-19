@@ -5,6 +5,7 @@ import java.io.*;
 public class LogManager {
 	private LogManager() {}
 
+	private static final File DEFAULT_LOG_FILE = new File("server.log");
 	private static MainLogger mainLogger = null;
 
 	public static Logger getLogger(Class clazz) {
@@ -12,13 +13,21 @@ public class LogManager {
 	}
 
 	private static MainLogger getMainLogger() {
+		initMainLogger();
+
+		return mainLogger;
+	}
+
+	public static void initMainLogger() {
+		initMainLogger(DEFAULT_LOG_FILE);
+	}
+
+	public static void initMainLogger(File file) {
 		if (mainLogger == null) {
 			mainLogger = new MainLogger(false);
 			mainLogger.addHandler(System.out);
 
 			try {
-				File file = new File("server.log");
-
 				if (!file.exists()) {
 					file.createNewFile();
 				}
@@ -30,7 +39,5 @@ public class LogManager {
 
 			mainLogger.start();
 		}
-
-		return mainLogger;
 	}
 }
