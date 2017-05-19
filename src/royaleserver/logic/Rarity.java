@@ -91,7 +91,7 @@ public class Rarity {
 		initialized = true;
 	}
 
-	public Rarity by(String name) {
+	public static Rarity by(String name) {
 		return values.get(name);
 	}
 }

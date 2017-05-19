@@ -2,6 +2,7 @@ package royaleserver;
 
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
+import royaleserver.logic.Arena;
 import royaleserver.logic.Card;
 import royaleserver.logic.Rarity;
 import royaleserver.protocol.Info;
@@ -67,6 +68,7 @@ public class Server {
 
 		logger.info("Loading data...");
 		Rarity.init(this);
+		Arena.init(this);
 		Card.init(this);
 
 		logger.info("Starting the network thread...");
