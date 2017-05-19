@@ -20,6 +20,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import royaleserver.csv.Table;
+import royaleserver.database.DataManager;
+import royaleserver.database.provider.DataProvider;
+import royaleserver.database.provider.MySQLDataProvider;
 
 public class Server {
 	private static Logger logger;
@@ -31,6 +34,7 @@ public class Server {
 
 	protected ServerSocket serverSocket = null;
 	protected NetworkThread networkThread = null;
+	protected DataManager dataManager = null;
 
 	protected String resourceFingerprint = "";
 
@@ -55,7 +59,7 @@ public class Server {
 		start();
 	}
 
-	public void start() {
+	public void start() throws ServerException {
 		if (running) {
 			return;
 		}
@@ -67,6 +71,18 @@ public class Server {
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();
 		networkThread.start();
+		
+		logger.info("Initializing data manager...");
+		DataProvider dataProvider = null;
+		switch ("mysql") { // TODO: From config
+		case "mysql":
+			dataProvider = new MySQLDataProvider();
+			break;
+		}
+		if (dataProvider == null) {
+			throw new ServerException("Failed to initialize data provider.");
+		}
+		dataManager = new DataManager(dataProvider);
 
 		logger.info("Server started!");
 
