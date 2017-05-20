@@ -20,3 +20,6 @@
 /server.log
 /workdir/server.log
 /out
+
+/config.json
+/clashroyale.db

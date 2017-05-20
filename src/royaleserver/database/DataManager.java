@@ -1,11 +1,18 @@
 package royaleserver.database;
 
+import royaleserver.Server;
 import royaleserver.database.provider.DataProvider;
+import royaleserver.utils.LogManager;
+import royaleserver.utils.Logger;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.Queue;
 
 public class DataManager {
+	private static final Logger logger = LogManager.getLogger(DataManager.class);
+
+	public static final int DATABASE_VERSION = 1;
+
 	private DataProvider dataProvider;
 
 	private Queue<Task> tasksToFetch = new ConcurrentLinkedQueue<>();
@@ -21,7 +28,7 @@ public class DataManager {
 		}
 
 		fetchThread = new FetchThread();
-		fetchThread.run();
+		fetchThread.start();
 	}
 
 	public void stop() {
@@ -29,6 +36,22 @@ public class DataManager {
 		try {
 			fetchThread.join();
 		} catch (InterruptedException ignored) {}
+	}
+
+	public void update(int version) throws Server.ServerException {
+		int currentVersion = dataProvider.fetchVersion();
+
+		for (int i = currentVersion + 1; i <= version; ++i) {
+			logger.info("Applying migration #%d...", i);
+
+			if (!dataProvider.applyMigration("migrations.version_" + i)) {
+				logger.error("Failed to apply migration #%d!", i);
+				throw new Server.ServerException("Failed to apply migrations.");
+			}
+
+			logger.error("Migration #%d has applied.", i);
+			dataProvider.updateVersion(i);
+		}
 	}
 
 	public void handleTasks() {

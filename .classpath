@@ -1,11 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?><classpath>
-<classpathentry kind="src" path="src"/>
-<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.7.0_45"/>
-<classpathentry kind="output" path="out"/>
-<classpathentry kind="lib" path="libs/guava-20.0.jar"/>
-<classpathentry kind="lib" path="libs/javassist-3.21.0-GA.jar"/>
-<classpathentry kind="lib" path="libs/jsr305-3.0.1.jar"/>
-<classpathentry kind="lib" path="libs/nacl-1.0.2.jar"/>
-<classpathentry kind="lib" path="libs/ove.blake2b-alpha.0.jar"/>
-<classpathentry kind="lib" path="libs/reflections-0.9.11.jar"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.7.0_45"/>
+	<classpathentry kind="output" path="out"/>
+	<classpathentry kind="lib" path="libs/guava-20.0.jar"/>
+	<classpathentry kind="lib" path="libs/javassist-3.21.0-GA.jar"/>
+	<classpathentry kind="lib" path="libs/jsr305-3.0.1.jar"/>
+	<classpathentry kind="lib" path="libs/nacl-1.0.2.jar"/>
+	<classpathentry kind="lib" path="libs/ove.blake2b-alpha.0.jar"/>
+	<classpathentry kind="lib" path="libs/reflections-0.9.11.jar"/>
+	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.42-bin.jar"/>
+	<classpathentry kind="lib" path="libs/sqlite-jdbc-3.18.0.jar"/>
+	<classpathentry kind="lib" path="libs/gson-2.8.0.jar"/>
 </classpath>
