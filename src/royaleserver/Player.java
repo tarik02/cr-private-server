@@ -210,11 +210,27 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleStartMission(StartMission message) throws Throwable {
+		SectorState response = new SectorState();
+
+		response.homeID = accountId;
+		response.username = "Tester";
+		response.wins = 100;
+		response.looses = 100;
+		response.arena = 8;
+		response.trophies = 3500;
+		response.gold = 10000;
+		response.gems = 10000;
+		response.levelExperience = 0;
+		response.level = 13;
+
+		session.sendMessage(response);
+		System.out.println("SEND!");
 		return false;
 	}
 
 	@Override
 	public boolean handleGoHome(GoHome message) throws Throwable {
+		sendOwnHomeData();
 		return false;
 	}
 
