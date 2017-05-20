@@ -82,30 +82,29 @@ public class SectorState extends Message {
 	public void encode(DataStream stream) {
 		super.encode(stream);
 
-		DataStream preStream = new DataStream();
-		preStream.put(Hex.toByteArray("00217f0b004b46ee86c0ea82820d017f7f7f7f000000000000"));
+		stream.put(Hex.toByteArray("00217f0b004b46ee86c0ea82820d017f7f7f7f000000000000"));
 
-		preStream.putRrsInt32(8); // training arena
-		preStream.putRrsInt32(3400);
-		preStream.put(Hex.toByteArray("000000000000000000000000"));
-		preStream.putRrsInt32(7);
-		preStream.put(Hex.toByteArray("000000000000"));
-		preStream.putRrsInt32(0);
-		preStream.putRrsInt32(10);
-		preStream.put(Hex.toByteArray("00000000000000000000"));
-		preStream.putRrsInt32(4);
+		stream.putRrsInt32(8); // training arena
+		stream.putRrsInt32(3400);
+		stream.put(Hex.toByteArray("000000000000000000000000"));
+		stream.putRrsInt32(7);
+		stream.put(Hex.toByteArray("000000000000"));
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(10);
+		stream.put(Hex.toByteArray("00000000000000000000"));
+		stream.putRrsInt32(4);
 
-		preStream.putRrsLong(homeID);
-		preStream.putRrsLong(homeID);
-		preStream.putRrsLong(homeID);
+		stream.putRrsLong(homeID);
+		stream.putRrsLong(homeID);
+		stream.putRrsLong(homeID);
 
-		preStream.putString(username);
-		preStream.putRrsInt32(arena); // Arena
-		preStream.putRrsInt32(trophies);
-		preStream.putRrsInt32(512);
-		preStream.put(Hex.toByteArray("0000000000"));
-		preStream.put(Hex.toByteArray("1f0000000000"));
-		preStream.putRrsInt32(7);
+		stream.putString(username);
+		stream.putRrsInt32(arena); // Arena
+		stream.putRrsInt32(trophies);
+		stream.putRrsInt32(512);
+		stream.put(Hex.toByteArray("0000000000"));
+		stream.put(Hex.toByteArray("1f0000000000"));
+		stream.putRrsInt32(7);
 
 		homeResources.resources.put(HomeResources.RESOURCE_GOLD, gold);
 		homeResources.resources.put(HomeResources.RESOURCE_CHALLENGE_WINS, 0);
@@ -120,18 +119,18 @@ public class SectorState extends Message {
 		homeResources.resources.put(HomeResources.RESOURCE_UNK_5, 13);
 		homeResources.resources.put(HomeResources.RESOURCE_UNK_6, 0);
 		homeResources.resources.put(HomeResources.RESOURCE_GAME_MODE, 72000009); // 72000009 - pvp with trainer?
-		homeResources.encode(preStream);
+		homeResources.encode(stream);
 
-		preStream.putRrsInt32(0);
-		preStream.putRrsInt32(0);
-		preStream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
 
 		homeResources.resources.put(HomeResources.RESOURCE_HIGHEST_TROPHIES, trophies);
 		homeResources.resources.put(HomeResources.RESOURCE_THREE_CROWNS_WIN, 0);
 		homeResources.resources.put(HomeResources.RESOURCE_UNK_N11, 31);
 		homeResources.resources.put(HomeResources.RESOURCE_MAX_CHALLENGE_WINS, 0);
 		homeResources.resources.put(HomeResources.RESOURCE_UNK_N27, 0);
-		homeResources.encode(preStream);
+		homeResources.encode(stream);
 
 		// Unknown structure 2
 		int lengthOfStruct_2 = 46;
@@ -139,91 +138,91 @@ public class SectorState extends Message {
 		int lengthOfStruct_4 = 15;
 
 		// # COUNT OF RESOURCES #
-		preStream.putRrsInt32(lengthOfStruct_2 + lengthOfStruct_3 + lengthOfStruct_4);
+		stream.putRrsInt32(lengthOfStruct_2 + lengthOfStruct_3 + lengthOfStruct_4);
 
 		for (int i = 0; i < lengthOfStruct_2; i++) {
-			preStream.putByte((byte) 26);
-			preStream.putRrsInt32(i);
-			preStream.putRrsInt32(0);
+			stream.putByte((byte) 26);
+			stream.putRrsInt32(i);
+			stream.putRrsInt32(0);
 		}
 
 		for (int i = 0; i < lengthOfStruct_3; i++) {
-			preStream.putByte((byte) 27);
-			preStream.putRrsInt32(i);
-			preStream.putRrsInt32(0);
+			stream.putByte((byte) 27);
+			stream.putRrsInt32(i);
+			stream.putRrsInt32(0);
 		}
 
 		for (int i = 0; i < lengthOfStruct_4; i++) {
-			preStream.putByte((byte) 28);
-			preStream.putRrsInt32(i);
-			preStream.putRrsInt32(0);
+			stream.putByte((byte) 28);
+			stream.putRrsInt32(i);
+			stream.putRrsInt32(0);
 		}
 
-		preStream.putRrsInt32(0);
-		preStream.putRrsInt32(10);
-		preStream.putRrsInt32(2);
-		preStream.putRrsInt32(0);
-		preStream.putRrsInt32(30751); // Gold?
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(10);
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(30751); // Gold?
 
-		preStream.putString("BACK IN USSR"); // clan
-		preStream.putRrsInt32(150);
+		stream.putString("BACK IN USSR"); // clan
+		stream.putRrsInt32(150);
 
-		preStream.putRrsInt32(2035);
-		preStream.putRrsInt32(1744);
+		stream.putRrsInt32(2035);
+		stream.putRrsInt32(1744);
 
-		preStream.putRrsInt32(0);
+		stream.putRrsInt32(0);
 
-		preStream.putRrsInt32(wins);
-		preStream.putRrsInt32(looses);
+		stream.putRrsInt32(wins);
+		stream.putRrsInt32(looses);
 
-		preStream.putRrsInt32(1);
-		preStream.putRrsInt32(211);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(211);
 
-		preStream.putRrsInt32(23);
-		preStream.putRrsInt32(0);
-		preStream.putRrsInt32(0);
+		stream.putRrsInt32(23);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
 
-		preStream.putRrsInt32(2);
-		preStream.putRrsInt32(2);
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(2);
 
-		preStream.putRrsInt32(40);
-		preStream.putRrsInt32(1);
+		stream.putRrsInt32(40);
+		stream.putRrsInt32(1);
 
 		// Enemy id?
-		preStream.putRrsInt32(-64); // null
-		preStream.putRrsInt32(-64); // null
+		stream.putRrsInt32(-64); // null
+		stream.putRrsInt32(-64); // null
 
-		preStream.putRrsInt32(0);
+		stream.putRrsInt32(0);
 
-		preStream.putRrsLong(homeID);
-		preStream.put(Hex.toByteArray("00000000000000000000"));
+		stream.putRrsLong(homeID);
+		stream.put(Hex.toByteArray("00000000000000000000"));
 
 		// IsTrainer
-		preStream.putRrsInt32(1);
+		stream.putRrsInt32(1);
 
-		preStream.put(Hex.toByteArray("000000"));
-		preStream.putRrsInt32(142);
+		stream.put(Hex.toByteArray("000000"));
+		stream.putRrsInt32(142);
 
-		preStream.put(Hex.toByteArray("f27d0000"));
+		stream.put(Hex.toByteArray("f27d0000"));
 
-		preStream.putRrsInt32(6);
-		preStream.putRrsInt32(6);
+		stream.putRrsInt32(6);
+		stream.putRrsInt32(6);
 
 		// Trainer strategy?!
 		int[] sixStruct_1 = new int[]{1, 1, 1, 1, 0, 0};
 		int[] sixStruct_2 = new int[]{1, 0, 1, 0, 0, 1};
 
 		for (int i = 0; i < 6; i++) {
-			preStream.putRrsInt32(35);
-			preStream.putRrsInt32(sixStruct_1[i]);
+			stream.putRrsInt32(35);
+			stream.putRrsInt32(sixStruct_1[i]);
 		}
 
 		for (int i = 0; i < 6; i++)
-			preStream.putRrsInt32(sixStruct_2[i]);
+			stream.putRrsInt32(sixStruct_2[i]);
 
 		for (int i = 0; i < 6; i++) {
-			preStream.putRrsInt32(5);
-			preStream.putRrsInt32(i);
+			stream.putRrsInt32(5);
+			stream.putRrsInt32(i);
 		}
 
 		// Coordinates of towers
@@ -246,82 +245,67 @@ public class SectorState extends Message {
 				};
 
 		for (int i = 0; i < coordinates.length; i++) {
-			preStream.putRrsInt32(12); // level
-			preStream.putRrsInt32(13); // Prefix
-			preStream.putRrsInt32(coordinates[i][0]); // x
-			preStream.putRrsInt32(coordinates[i][1]); // y
-			preStream.put(Hex.toByteArray(stamps[i]));
-			preStream.put(Hex.toByteArray("a40100000000020000000000000000"));
+			stream.putRrsInt32(12); // level
+			stream.putRrsInt32(13); // Prefix
+			stream.putRrsInt32(coordinates[i][0]); // x
+			stream.putRrsInt32(coordinates[i][1]); // y
+			stream.put(Hex.toByteArray(stamps[i]));
+			stream.put(Hex.toByteArray("a40100000000020000000000000000"));
 		}
 
-		preStream.put(Hex.toByteArray("000504057c027f0404060007007f7f0000000500000000007f7f7f7f7f7f7f7f"));
+		stream.put(Hex.toByteArray("000504057c027f0404060007007f7f0000000500000000007f7f7f7f7f7f7f7f"));
 
-		preStream.putRrsInt32(12); // my level
-		preStream.putRrsInt32(13); // my Prefix
-		preStream.putRrsInt32(9000); // x
-		preStream.putRrsInt32(29000); // y
-		preStream.put(Hex.toByteArray("0000c07c00"));
-		preStream.put(Hex.toByteArray("a40100000000020000000000000000"));
+		stream.putRrsInt32(12); // my level
+		stream.putRrsInt32(13); // my Prefix
+		stream.putRrsInt32(9000); // x
+		stream.putRrsInt32(29000); // y
+		stream.put(Hex.toByteArray("0000c07c00"));
+		stream.put(Hex.toByteArray("a40100000000020000000000000000"));
 
-		preStream.put(Hex.toByteArray("000504020201010403000107"));
-		preStream.put(Hex.toByteArray("007f7f000000"));
+		stream.put(Hex.toByteArray("000504020201010403000107"));
+		stream.put(Hex.toByteArray("007f7f000000"));
 
-		preStream.putRrsInt32(10); // start elixir
-		preStream.put(Hex.toByteArray("00000000007f7f7f7f7f7f7f7f"));
+		stream.putRrsInt32(10); // start elixir
+		stream.put(Hex.toByteArray("00000000007f7f7f7f7f7f7f7f"));
 
-		preStream.put(Hex.toByteArray("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+		stream.put(Hex.toByteArray("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
 
-		preStream.putRrsInt32(3668); // Right Tower (my)
-		preStream.putRrsInt32(3668); // Left Tower (enemy)
+		stream.putRrsInt32(3668); // Right Tower (my)
+		stream.putRrsInt32(3668); // Left Tower (enemy)
 
-		preStream.putRrsInt32(3668); // Left Tower (my)
-		preStream.putRrsInt32(3668); // Right Tower (enemy)
+		stream.putRrsInt32(3668); // Left Tower (my)
+		stream.putRrsInt32(3668); // Right Tower (enemy)
 
-		preStream.putRrsInt32(5832); // enemy King Tower
-		preStream.putRrsInt32(5832); // my King Tower
+		stream.putRrsInt32(5832); // enemy King Tower
+		stream.putRrsInt32(5832); // my King Tower
 
 		for (int i = 0; i < 6; i++)
-			preStream.put(Hex.toByteArray("00000000000000a401a401"));
+			stream.put(Hex.toByteArray("00000000000000a401a401"));
 
-		preStream.put(Hex.toByteArray("ff01"));
+		stream.put(Hex.toByteArray("ff01"));
 
 		GameDeck botDeck = new GameDeck();
-		botDeck.encode(preStream);
+		botDeck.encode(stream);
 
-		preStream.put(Hex.toByteArray("00"));
-		preStream.put(Hex.toByteArray("fe03"));
+		stream.put(Hex.toByteArray("00"));
+		stream.put(Hex.toByteArray("fe03"));
 
 		GameDeck myDeck = new GameDeck();
-		myDeck.encode(preStream);
+		myDeck.encode(stream);
 
-		preStream.put(Hex.toByteArray("0000"));
+		stream.put(Hex.toByteArray("0000"));
 
-		preStream.putRrsInt32(5);
-		preStream.putRrsInt32(6);
-		preStream.putRrsInt32(2);
-		preStream.putRrsInt32(2);
-		preStream.putRrsInt32(4);
-		preStream.putRrsInt32(2);
-		preStream.putRrsInt32(1);
-		preStream.putRrsInt32(2);
+		stream.putRrsInt32(5);
+		stream.putRrsInt32(6);
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(4);
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(2);
 
-		preStream.put(Hex.toByteArray("00000000000000060901010000000000000000000000010000000000000000000000000c00000080e993c00b002a002b"));
+		stream.put(Hex.toByteArray("00000000000000060901010000000000000000000000010000000000000000000000000c00000080e993c00b002a002b"));
 
-		// Compress
-		Deflater compressor = new Deflater();
-		compressor.setInput(preStream.get());
-
-		stream.put(Hex.toByteArray("01B2030000"));
-
-		byte[] buf = new byte[1024];
-		int length = 0;
-
-		compressor.finish();
-		while (!compressor.finished()) {
-			int count = compressor.deflate(buf);
-			stream.put(buf, 0, count);
-			length += count;
-		}
-		compressor.end();
+		stream.zlibCompress();
 	}
 }
