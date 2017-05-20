@@ -1,5 +1,6 @@
 package royaleserver;
 
+import royaleserver.database.DataManager;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
@@ -13,9 +14,7 @@ public class Main {
 
 	public static void main(String[] args) throws Throwable {
 		try {
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			Class.forName("org.sqlite.JDBC").newInstance();
-
+			DataManager.init();
 
 			File configFile = new File("config.json");
 			if (!configFile.exists()) {

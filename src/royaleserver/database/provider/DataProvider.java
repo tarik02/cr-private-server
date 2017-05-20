@@ -1,6 +1,6 @@
 package royaleserver.database.provider;
 
-import royaleserver.database.data.PlayerData;
+import royaleserver.database.model.PlayerModel;
 
 public abstract class DataProvider {
 	public abstract boolean applyMigration(String name);
@@ -8,6 +8,10 @@ public abstract class DataProvider {
 	public abstract int fetchVersion();
 	public abstract void updateVersion(int version);
 
-	public abstract boolean fetchPlayerData(int id, PlayerData playerData);
+	public PlayerModel fetchPlayerById(int id) {
+		return fetchPlayerById(id, null);
+	}
+
+	public abstract PlayerModel fetchPlayerById(int id, int[] keys);
 }
 
