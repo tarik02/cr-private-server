@@ -1,5 +1,6 @@
 <project name="royale-private-server" basedir="." default="main">
 	<property name="lib.dir" value="libs" />
+	<property name="resources.dir" value="resources" />
 	<property name="src.dir" value="src" />
 
 	<property name="build.dir" value="out" />
@@ -9,7 +10,7 @@
 	<property name="main-class" value="royaleserver.Main" />
 
 	<path id="classpath">
-		<fileset dir="${lib.dir}" includes="**/*.jar"/>
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
 	</path>
 
 	<target name="clean">
@@ -23,17 +24,20 @@
 
 	<target name="jar" depends="compile">
 		<mkdir dir="${jar.dir}" />
-		<jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+		<jar destfile="${jar.dir}/${ant.project.name}.jar">
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}" />
 			</manifest>
+
+			<fileset dir="${classes.dir}" includes="**/*.class" />
+			<zipgroupfileset dir="${lib.dir}" includes="*.jar" />
+			<fileset dir="${resources.dir}" />
 		</jar>
 	</target>
 
 	<target name="run" depends="jar">
 		<java fork="true" classname="${main-class}">
 			<classpath>
-				<path refid="classpath" />
 				<path location="${jar.dir}/${ant.project.name}.jar" />
 			</classpath>
 		</java>
@@ -44,6 +48,7 @@
 			<classpath>
 				<path refid="classpath" />
 				<path location="${classes.dir}" />
+				<path location="${resources.dir}" />
 			</classpath>
 		</java>
 	</target>
