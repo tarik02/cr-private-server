@@ -12,4 +12,5 @@
 	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.42-bin.jar"/>
 	<classpathentry kind="lib" path="libs/sqlite-jdbc-3.18.0.jar"/>
 	<classpathentry kind="lib" path="libs/gson-2.8.0.jar"/>
+	<classpathentry kind="lib" path="libs/org.tukaani.xz.jar"/>
 </classpath>
