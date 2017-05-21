@@ -90,7 +90,7 @@ public class Card {
 			card.unlockArena = Arena.by(csv_UnlockArena.getValue(csv_card).asString());
 			card.rarity = Rarity.by(csv_Rarity.getValue(csv_card).asString());
 			card.elixirCost = csv_ManaCost.getValue(csv_card).asInt();
-			card.notInUse = csv_NotInUse.getValue(csv_card).asBool();
+			card.notInUse = csv_NotInUse.getValue(csv_card).asBoolean();
 
 			cards.put(card.name, card);
 			++indexCounter;

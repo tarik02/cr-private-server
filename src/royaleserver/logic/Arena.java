@@ -118,7 +118,7 @@ public class Arena {
 			arena.name = csv_arena.getValue(csv_Name).asString();
 			arena.arena = csv_arena.getValue(csv_Arena).asString();
 			arena.chestArena = csv_arena.getValue(csv_ChestArena).asString();
-			arena.isInUse = csv_arena.getValue(csv_IsInUse).asBool();
+			arena.isInUse = csv_arena.getValue(csv_IsInUse).asBoolean();
 			arena.trophyLimit = csv_arena.getValue(csv_TrophyLimit).asInt();
 			arena.demoteTrophyLimit = csv_arena.getValue(csv_DemoteTrophyLimit).asInt();
 			arena.seasonTrophyRequest = csv_arena.getValue(csv_SeasonTrophyReset).asIntNullable();

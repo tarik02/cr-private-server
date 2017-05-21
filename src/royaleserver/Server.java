@@ -6,6 +6,7 @@ import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
 import royaleserver.logic.Arena;
 import royaleserver.logic.Card;
+import royaleserver.logic.GameMode;
 import royaleserver.logic.Rarity;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.MessageHeader;
@@ -86,6 +87,7 @@ public class Server {
 		Rarity.init(this);
 		Arena.init(this);
 		Card.init(this);
+		GameMode.init(this);
 
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();
