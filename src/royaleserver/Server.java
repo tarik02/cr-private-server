@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import royaleserver.config.Config;
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
+import royaleserver.logic.Arena;
+import royaleserver.logic.Card;
+import royaleserver.logic.GameMode;
+import royaleserver.logic.Rarity;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.MessageHeader;
 import royaleserver.protocol.Session;
@@ -78,6 +82,12 @@ public class Server {
 			logger.error("Cannot read config.", e);
 			throw new ServerException("Cannot read config.");
 		}
+
+		logger.info("Loading data...");
+		Rarity.init(this);
+		Arena.init(this);
+		Card.init(this);
+		GameMode.init(this);
 
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();

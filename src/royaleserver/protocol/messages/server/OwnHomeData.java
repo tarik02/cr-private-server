@@ -1,5 +1,6 @@
 package royaleserver.protocol.messages.server;
 
+import royaleserver.logic.Arena;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.component.Card;
@@ -26,8 +27,8 @@ public class OwnHomeData extends Message {
 	public int gems;
 
 	public int trophies;
-	public int arena;
-	public int lastArena;
+	public Arena arena;
+	public Arena lastArena;
 
 	public int level;
 	public int lastLevel;
@@ -52,13 +53,12 @@ public class OwnHomeData extends Message {
 		offers = new String[] {};
 		challenges = new String[] {};
 
-		cards = new Card[0];
+		arena = Arena.by("TrainingCamp");
+		lastArena = Arena.by("TrainingCamp");
 
-		currentDeck = new Deck();
-		decks = new Deck[3];
-		for (int i = 0; i < 3; ++i) {
-			decks[i] = new Deck();
-		}
+		level = 0;
+		lastLevel = 0;
+		levelExperience = 0;
 
 		homeChests = new HomeChest[4];
 
@@ -86,6 +86,19 @@ public class OwnHomeData extends Message {
 		homeChests[3].status = HomeChest.STATUS_OPENING;
 		homeChests[3].ticksToOpen = 3 * 60 * 20 - 120;
 		homeChests[3].openTicks = 3 * 60 * 20;
+
+		cards = new Card[0];
+
+		currentDeck = new Deck();
+		currentDeck.cards = new Card[8];
+		for (int i = 0; i < 8; ++i) {
+			currentDeck.cards[i] = new Card();
+		}
+
+		decks = new Deck[3];
+		for (int i = 0; i < 3; ++i) {
+			decks[i] = new Deck();
+		}
 	}
 
 	@Override
@@ -108,19 +121,11 @@ public class OwnHomeData extends Message {
 
 		stream.putByte((byte)0);
 
-		stream.putRrsInt32(3);
-
-		int[][] decks = new int[][]{
-			{26000000, 28000001, 28000011, 27000003, 28000003, 28000004, 26000000, 26000041},
-			{26000032, 26000045, 28000004, 28000012, 28000006, 28000001, 26000012, 26000043},
-			{27000008, 26000030, 26000010, 26000031, 26000005, 28000000, 27000003, 28000011}
-		};
-
-		for (int i = 0; i < decks.length; i++) {
-			stream.putRrsInt32(decks[i].length);
-
-			for (int j = 0; j < decks[i].length; j++) {
-				stream.putRrsInt32(decks[i][j]);
+		stream.putRrsInt32(decks.length);
+		for (Deck deck : decks) {
+			stream.putRrsInt32(deck.cards.length);
+			for (Card card : deck.cards) {
+				stream.putRrsInt32((int)card.card.getScid().getValue());
 			}
 		}
 
@@ -218,7 +223,7 @@ public class OwnHomeData extends Message {
 
 		stream.putRrsInt32(lastLevel);
 		stream.putByte((byte)36); // unk
-		stream.putByte((byte)lastArena);
+		stream.putByte((byte)arena.getIndex());
 
 		stream.put(Hex.toByteArray("c5d9c1ba0902028cb56c8cb56c8ff186910b03018201020000000000001c0100018201020000000000001a1c01018201020000000000001a06020000007f00007f00007f1411b31f901b000381030800011a270109008e0c0000fa0716079ef3b0171f0108003d0689c3b21797030005002a08a9c4d317870c00070081010700050008000109009f050006000c0686e8ab17100005000f06b9a6ab171e0003002806809bb817b60200040002aeeae51890fcd91a02aeeae51890fcd91a00028ed2f83e8fd2f83e048dd2f83e8cd2f83e8ed2f83e9cd2f83e019dd2f83e019081a1fe0b00b90101018ae6bf3301139f0301a9410e7fb012880300000000000000"));
 
@@ -231,7 +236,7 @@ public class OwnHomeData extends Message {
 
 		stream.putRrsInt32(0); // changes of username. If 1 can't change
 
-		stream.putByte((byte)arena);
+		stream.putByte((byte)arena.getIndex());
 		stream.putRrsInt32(trophies);
 
 		// unk

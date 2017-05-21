@@ -39,20 +39,36 @@ public class Value {
 	}
 
 
-	public String asString() {
-		return getValue();
+	public boolean empty() {
+		return getValue().trim().length() == 0;
 	}
 
-	public boolean asBool() {
-		return getValue().equals("TRUE");
+	public String asString() {
+		return asString(false);
+	}
+
+	public String asString(boolean nullIfEmpty) {
+		return (nullIfEmpty && empty()) ? null : getValue();
+	}
+
+	public boolean asBoolean() {
+		return getValue().equalsIgnoreCase("TRUE");
 	}
 
 	public int asInt() {
 		return Integer.valueOf(getValue());
 	}
 
+	public Integer asIntNullable() {
+		return empty() ? null : Integer.valueOf(getValue());
+	}
+
 	public float asFloat() {
 		return Float.valueOf(getValue());
+	}
+
+	public Float asFloatNullable() {
+		return empty() ? null : Float.valueOf(getValue());
 	}
 
 
@@ -65,7 +81,7 @@ public class Value {
 		boolean[] results = new boolean[values.length];
 
 		for (int i = 0; i < values.length; ++i) {
-			results[i] = values[i].equals("TRUE");
+			results[i] = values[i].equalsIgnoreCase("TRUE");
 		}
 
 		return results;

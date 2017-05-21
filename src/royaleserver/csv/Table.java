@@ -118,8 +118,8 @@ public class Table {
 				String value = row[j];
 				String unquotedValue = value;
 
-				switch (type) {
-				case "String":
+				switch (type.toLowerCase()) {
+				case "string":
 				case "boolean":
 					unquotedValue = removeQuotes(value);
 					break;

@@ -7,11 +7,7 @@ public class Deck extends Component {
 	public Card cards[];
 
 	public Deck() {
-		cards = new Card[8];
-		for (int i = 0; i < 8; ++i) {
-			cards[i] = new Card();
-			cards[i].cardId = 1 + i;
-		}
+		cards = new Card[0];
 	}
 
 	@Override
@@ -19,7 +15,7 @@ public class Deck extends Component {
 		super.encode(stream);
 
 		if (cards.length != 8) {
-			throw new RuntimeException("cards.length must be 4");
+			throw new RuntimeException("cards.length must be 8");
 		}
 
 		for (Card card : cards) {
