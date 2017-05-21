@@ -51,8 +51,8 @@ public class Value {
 		return (nullIfEmpty && empty()) ? null : getValue();
 	}
 
-	public boolean asBool() {
-		return getValue().equals("TRUE");
+	public boolean asBoolean() {
+		return getValue().equalsIgnoreCase("TRUE");
 	}
 
 	public int asInt() {
@@ -81,7 +81,7 @@ public class Value {
 		boolean[] results = new boolean[values.length];
 
 		for (int i = 0; i < values.length; ++i) {
-			results[i] = values[i].equals("TRUE");
+			results[i] = values[i].equalsIgnoreCase("TRUE");
 		}
 
 		return results;
