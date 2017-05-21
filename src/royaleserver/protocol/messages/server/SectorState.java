@@ -1,5 +1,8 @@
 package royaleserver.protocol.messages.server;
 
+import royaleserver.logic.Arena;
+import royaleserver.logic.Card;
+import royaleserver.logic.GameMode;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.component.Deck;
@@ -12,14 +15,14 @@ import royaleserver.utils.SCID;
 import java.util.zip.Deflater;
 
 public class SectorState extends Message {
-
 	public static final short ID = Info.SECTOR_STATE;
 
 	public long homeID;
 	public String username;
 
-	public int place;
-	public int arena;
+	public GameMode gameMode;
+
+	public Arena arena;
 	public int trophies;
 	public int highestTrophies;
 
@@ -36,7 +39,7 @@ public class SectorState extends Message {
 	public Deck deck;
 	public int cardsFound;
 	public int cardsGiven;
-	public SCID favouriteCard;
+	public Card favouriteCard;
 
 	public int challengeMaxWins;
 	public int challengeCardsWon;
@@ -51,8 +54,9 @@ public class SectorState extends Message {
 		homeID = 0;
 		username = "";
 
-		place = 0;
-		arena = 1;
+		gameMode = GameMode.by("Training");
+
+		arena = Arena.by("TrainingCamp");
 		trophies = 0;
 		highestTrophies = 0;
 
@@ -99,7 +103,7 @@ public class SectorState extends Message {
 		stream.putRrsLong(homeID);
 
 		stream.putString(username);
-		stream.putRrsInt32(arena); // Arena
+		stream.putRrsInt32(arena.getIndex()); // Arena
 		stream.putRrsInt32(trophies);
 		stream.putRrsInt32(512);
 		stream.put(Hex.toByteArray("0000000000"));
@@ -118,7 +122,7 @@ public class SectorState extends Message {
 		homeResources.resources.put(HomeResources.RESOURCE_UNK_4, 1307334552);
 		homeResources.resources.put(HomeResources.RESOURCE_UNK_5, 13);
 		homeResources.resources.put(HomeResources.RESOURCE_UNK_6, 0);
-		homeResources.resources.put(HomeResources.RESOURCE_GAME_MODE, 72000009); // 72000009 - pvp with trainer?
+		homeResources.resources.put(HomeResources.RESOURCE_GAME_MODE, (int)gameMode.getScid().getValue());
 		homeResources.encode(stream);
 
 		stream.putRrsInt32(0);
