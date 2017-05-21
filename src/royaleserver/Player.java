@@ -1,5 +1,6 @@
 package royaleserver;
 
+import royaleserver.logic.Arena;
 import royaleserver.protocol.messages.CommandHandler;
 import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Session;
@@ -47,7 +48,6 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleCancelMatchmake(CancelMatchmake message) throws Throwable {
-
 		CancelMatchmakeDone response = new CancelMatchmakeDone();
 		session.sendMessage(response);
 
@@ -224,14 +224,13 @@ public class Player implements MessageHandler, CommandHandler {
 		response.level = 13;
 
 		session.sendMessage(response);
-		System.out.println("SEND!");
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean handleGoHome(GoHome message) throws Throwable {
 		sendOwnHomeData();
-		return false;
+		return true;
 	}
 
 	@Override
@@ -277,9 +276,9 @@ public class Player implements MessageHandler, CommandHandler {
 		OwnHomeData ownHomeData = new OwnHomeData();
 
 		ownHomeData.homeId = accountId;
-		ownHomeData.arena = 8;
-		ownHomeData.lastArena = 8;
-		ownHomeData.trophies = 3500;
+		ownHomeData.arena = Arena.by("Arena_T");
+		ownHomeData.lastArena = Arena.by("Arena_T");
+		ownHomeData.trophies = 4000;
 		ownHomeData.username = "Tester";
 		ownHomeData.gold = 10000;
 		ownHomeData.gems = 10000;
@@ -287,10 +286,10 @@ public class Player implements MessageHandler, CommandHandler {
 		ownHomeData.level = 13;
 		ownHomeData.lastLevel = 13;
 
-		ownHomeData.cards = new Card[80]; // Fill it for testing
+		/*ownHomeData.cards = new Card[80]; // Fill it for testing
 		for (int i = 0; i < ownHomeData.cards.length; ++i) {
-			(ownHomeData.cards[i] = new Card()).cardId = i;
-		}
+			//(ownHomeData.cards[i] = new Card()).cardId = i;
+		}*/
 
 		session.sendMessage(ownHomeData);
 	}

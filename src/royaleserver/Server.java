@@ -1,7 +1,13 @@
 package royaleserver;
 
+import com.google.gson.Gson;
+import royaleserver.config.Config;
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
+import royaleserver.logic.Arena;
+import royaleserver.logic.Card;
+import royaleserver.logic.GameMode;
+import royaleserver.logic.Rarity;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.MessageHeader;
 import royaleserver.protocol.Session;
@@ -9,7 +15,6 @@ import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.MessageFactory;
 import royaleserver.protocol.messages.client.ClientHello;
 import royaleserver.protocol.messages.client.Login;
-import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.*;
 
@@ -20,6 +25,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import royaleserver.csv.Table;
+import royaleserver.database.DataManager;
+import royaleserver.database.provider.DataProvider;
+import royaleserver.database.provider.SQLDataProvider;
 
 public class Server {
 	private static Logger logger;
@@ -31,8 +39,11 @@ public class Server {
 
 	protected ServerSocket serverSocket = null;
 	protected NetworkThread networkThread = null;
+	protected DataManager dataManager = null;
 
 	protected String resourceFingerprint = "";
+
+	protected Config config;
 
 	public Server() throws ServerException {
 		this(null);
@@ -55,7 +66,7 @@ public class Server {
 		start();
 	}
 
-	public void start() {
+	public void start() throws ServerException {
 		if (running) {
 			return;
 		}
@@ -64,9 +75,49 @@ public class Server {
 
 		logger.info("Starting the server...");
 
+		logger.info("Reading config...");
+		try {
+			config = (new Gson()).fromJson(new InputStreamReader(new FileInputStream(new File(workingDirectory, "config.json"))), Config.class);
+		} catch (Throwable e) {
+			logger.error("Cannot read config.", e);
+			throw new ServerException("Cannot read config.");
+		}
+
+		logger.info("Loading data...");
+		Rarity.init(this);
+		Arena.init(this);
+		Card.init(this);
+		GameMode.init(this);
+
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();
 		networkThread.start();
+		
+		logger.info("Initializing data manager...");
+		DataProvider dataProvider = null;
+		switch (config.database.provider) {
+		case "mysql":
+			dataProvider = new SQLDataProvider((new StringBuilder())
+				.append("jdbc:mysql://")
+				.append(config.database.mysql.host)
+				.append(":")
+				.append(config.database.mysql.port)
+				.append("/")
+				.append(config.database.mysql.database)
+				.toString(),
+				config.database.mysql.user,
+				config.database.mysql.password);
+			break;
+		case "sqlite":
+			dataProvider = new SQLDataProvider((new StringBuilder())
+				.append("jdbc:sqlite:").append(config.database.sqlite.database).toString(), null, null);
+			break;
+		}
+		if (dataProvider == null) {
+			throw new ServerException("Failed to initialize data provider.");
+		}
+		dataManager = new DataManager(dataProvider);
+		dataManager.update(DataManager.DATABASE_VERSION);
 
 		logger.info("Server started!");
 
@@ -111,14 +162,18 @@ public class Server {
 			e.printStackTrace();
 		}
 
+		logger.info("Stopping data manager...");
+		dataManager.stop();
+
 		serverSocket = null;
 		networkThread = null;
+		dataManager = null;
 
 		logger.info("Server stopped!");
 	}
 
 	protected void tick() {
-
+		dataManager.handleTasks();
 	}
 
 	public byte[] getResource(String path) throws ServerException {
@@ -396,7 +451,7 @@ loop:
 		}
 	}
 
-	protected static class ServerException extends Exception {
+	public static class ServerException extends Exception {
 		public ServerException(String message) {
 			super(message);
 		}

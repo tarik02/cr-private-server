@@ -8,7 +8,7 @@ public class Card extends Component {
 	public static final int LABEL_UPGRADABLE = 1;
 	public static final int LABEL_NEW = 2;
 
-	public int cardId;
+	public royaleserver.logic.Card card;
 	public int level;
 	public int count;
 	public int label;
@@ -17,7 +17,7 @@ public class Card extends Component {
 	public int unknown_3;
 
 	public Card() {
-		cardId = 1;
+		card = null;
 		level = 1;
 		unknown_1 = 0;
 		count = 0;
@@ -30,12 +30,12 @@ public class Card extends Component {
 	public void encode(DataStream stream) {
 		super.encode(stream);
 
-		stream.putRrsInt32(cardId);
+		stream.putRrsInt32(card == null ? 1 : card.getIndex()); // If 0 then crash
 		stream.putRrsInt32(level - 1);
 		stream.putRrsInt32(unknown_1);
 		stream.putRrsInt32(count);
 		stream.putRrsInt32(unknown_2);
-		stream.putByte((byte)label);
+		stream.putByte((byte) label);
 		stream.putRrsInt32(unknown_3);
 	}
 
