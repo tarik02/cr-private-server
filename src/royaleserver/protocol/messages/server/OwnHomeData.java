@@ -44,14 +44,13 @@ public class OwnHomeData extends Message {
 	public String[] offers; // JSON
 	public String[] challenges; // JSON
 
+	public Card[] shopCards;
+
 	public OwnHomeData() {
 		super(ID);
 
 		accountCreatedTime = (int)(System.currentTimeMillis() / 1000); // I think that it must be devided
 		loginTime = (int)(System.currentTimeMillis() / 1000); // It's also
-
-		offers = new String[] {};
-		challenges = new String[] {};
 
 		arena = Arena.by("TrainingCamp");
 		lastArena = Arena.by("TrainingCamp");
@@ -99,6 +98,11 @@ public class OwnHomeData extends Message {
 		for (int i = 0; i < 3; ++i) {
 			decks[i] = new Deck();
 		}
+
+		offers = new String[] {};
+		challenges = new String[] {};
+
+		shopCards = new Card[0];
 	}
 
 	@Override
@@ -225,7 +229,19 @@ public class OwnHomeData extends Message {
 		stream.putByte((byte)36); // unk
 		stream.putByte((byte)arena.getIndex());
 
-		stream.put(Hex.toByteArray("c5d9c1ba0902028cb56c8cb56c8ff186910b03018201020000000000001c0100018201020000000000001a1c01018201020000000000001a06020000007f00007f00007f1411b31f901b000381030800011a270109008e0c0000fa0716079ef3b0171f0108003d0689c3b21797030005002a08a9c4d317870c00070081010700050008000109009f050006000c0686e8ab17100005000f06b9a6ab171e0003002806809bb817b60200040002aeeae51890fcd91a02aeeae51890fcd91a00028ed2f83e8fd2f83e048dd2f83e8cd2f83e8ed2f83e9cd2f83e019dd2f83e019081a1fe0b00b90101018ae6bf3301139f0301a9410e7fb012880300000000000000"));
+		stream.put(Hex.toByteArray("c5d9c1ba0902028cb56c8cb56c8ff186910b"));
+
+		stream.putRrsInt32(shopCards.length);
+		for (Card card : shopCards) {
+			stream.putByte((byte)0x01); // Unknown, always 1
+			card.encode(stream);
+			stream.putByte((byte)0x00);
+			stream.putRrsInt32(card.card.getType());
+			stream.putRrsInt32(card.card.getScid().getLow());
+			stream.putByte((byte)0x00);
+		}
+
+		stream.put(Hex.toByteArray("0000007f00007f00007f1411b31f901b000381030800011a270109008e0c0000fa0716079ef3b0171f0108003d0689c3b21797030005002a08a9c4d317870c00070081010700050008000109009f050006000c0686e8ab17100005000f06b9a6ab171e0003002806809bb817b60200040002aeeae51890fcd91a02aeeae51890fcd91a00028ed2f83e8fd2f83e048dd2f83e8cd2f83e8ed2f83e9cd2f83e019dd2f83e019081a1fe0b00b90101018ae6bf3301139f0301a9410e7fb012880300000000000000"));
 
 		stream.putRrsLong(homeId);
 		stream.putRrsLong(homeId);

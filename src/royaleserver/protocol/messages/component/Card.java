@@ -12,14 +12,14 @@ public class Card extends Component {
 	public int level;
 	public int count;
 	public int label;
-	public int unknown_1;
+	public int boughtTimes; // in shop
 	public int unknown_2;
 	public int unknown_3;
 
 	public Card() {
 		card = null;
 		level = 1;
-		unknown_1 = 0;
+		boughtTimes = 0;
 		count = 0;
 		unknown_2 = 0;
 		label = LABEL_NEW;
@@ -32,10 +32,10 @@ public class Card extends Component {
 
 		stream.putRrsInt32(card == null ? 1 : card.getIndex()); // If 0 then crash
 		stream.putRrsInt32(level - 1);
-		stream.putRrsInt32(unknown_1);
+		stream.putRrsInt32(boughtTimes);
 		stream.putRrsInt32(count);
 		stream.putRrsInt32(unknown_2);
-		stream.putByte((byte) label);
+		stream.putByte((byte)label);
 		stream.putRrsInt32(unknown_3);
 	}
 
