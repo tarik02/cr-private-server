@@ -216,7 +216,7 @@ public class Player implements MessageHandler, CommandHandler {
 		response.username = "Tester";
 		response.wins = 100;
 		response.looses = 100;
-		response.arena = 8;
+		response.arena = Arena.by("Arena_T");
 		response.trophies = 3500;
 		response.gold = 10000;
 		response.gems = 10000;
