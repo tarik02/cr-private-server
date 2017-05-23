@@ -1,31 +1,6 @@
 package royaleserver.protocol.messages;
 
-import royaleserver.protocol.messages.client.ClientHello;
-import royaleserver.protocol.messages.client.Login;
-import royaleserver.protocol.messages.client.ClientCapabilities;
-import royaleserver.protocol.messages.client.KeepAlive;
-import royaleserver.protocol.messages.client.InboxOpened;
-import royaleserver.protocol.messages.client.EndClientTurn;
-import royaleserver.protocol.messages.client.VisitHome;
-import royaleserver.protocol.messages.client.HomeBattleReplay;
-import royaleserver.protocol.messages.client.AskForAllianceData;
-import royaleserver.protocol.messages.client.AskForJoinableAlliancesList;
-import royaleserver.protocol.messages.client.JoinAlliance;
-import royaleserver.protocol.messages.client.LeaveAlliance;
-import royaleserver.protocol.messages.client.DonateAllianceUnit;
-import royaleserver.protocol.messages.client.SearchAlliances;
-import royaleserver.protocol.messages.client.AskForAllianceRankingList;
-import royaleserver.protocol.messages.client.AskForTVContent;
-import royaleserver.protocol.messages.client.AskForAvatarRankingList;
-import royaleserver.protocol.messages.client.AskForAvatarLocalRanking;
-import royaleserver.protocol.messages.client.AskForAvatarStream;
-import royaleserver.protocol.messages.client.AskForBattleReplayStream;
-import royaleserver.protocol.messages.client.AskForJoinableTournaments;
-import royaleserver.protocol.messages.client.AvatarNameCheckRequest;
-import royaleserver.protocol.messages.client.CancelMatchmake;
-import royaleserver.protocol.messages.client.ChangeAvatarName;
-import royaleserver.protocol.messages.client.GoHome;
-import royaleserver.protocol.messages.client.StartMission;
+import royaleserver.protocol.messages.client.*;
 
 public interface MessageHandler {
 	boolean handleClientHello(ClientHello message) throws Throwable;

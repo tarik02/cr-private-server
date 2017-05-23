@@ -9,6 +9,7 @@ import royaleserver.protocol.messages.client.*;
 import royaleserver.protocol.messages.command.BuyChest;
 import royaleserver.protocol.messages.command.OpenChest;
 import royaleserver.protocol.messages.command.OpenChestOK;
+import royaleserver.protocol.messages.command.StartFight;
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
 import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.component.CommandComponent;
@@ -209,10 +210,32 @@ public class Player implements MessageHandler, CommandHandler {
 	}
 
 	@Override
+	public boolean handleStartFight(StartFight command) throws Throwable {
+		SectorState response = new SectorState();
+
+		response.homeID = accountId;
+		response.isTrainer = 0;
+		response.username = "Tester";
+		response.wins = 100;
+		response.looses = 100;
+		response.arena = Arena.by("Arena_T");
+		response.trophies = 3500;
+		response.gold = 10000;
+		response.gems = 10000;
+		response.levelExperience = 0;
+		response.level = 13;
+
+		session.sendMessage(response);
+
+		return false;
+	}
+
+	@Override
 	public boolean handleStartMission(StartMission message) throws Throwable {
 		SectorState response = new SectorState();
 
 		response.homeID = accountId;
+		response.isTrainer = 1;
 		response.username = "Tester";
 		response.wins = 100;
 		response.looses = 100;

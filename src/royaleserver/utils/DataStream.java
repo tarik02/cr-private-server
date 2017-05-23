@@ -140,7 +140,7 @@ public class DataStream {
 		compressor.setInput(this.get());
 
 		this.reset();
-		this.put(Hex.toByteArray("01B2030000"));
+		this.put(Hex.toByteArray("0178040000")); // size?!
 
 		byte[] buf = new byte[1024];
 		int length = 0;
