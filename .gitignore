@@ -16,10 +16,11 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 
+
 /temp
 /server.log
 /workdir/server.log
-/out
+/target
 
 /config.json
 /clashroyale.db
