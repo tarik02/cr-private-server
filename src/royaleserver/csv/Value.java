@@ -35,7 +35,7 @@ public class Value {
 	}
 
 	public String[] getValues() {
-		return getValue().split(System.getProperty("line.separator"));
+		return getValue().split("\n");
 	}
 
 

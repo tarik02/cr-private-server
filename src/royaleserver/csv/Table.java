@@ -91,12 +91,12 @@ public class Table {
 
 	protected void parse(String csv) {
 		String[] rows = csv.split(System.getProperty("line.separator"));
-		columns = rows[0].split(",");
+		columns = rows[0].split(",", -1);
 		for (int i = 0; i < columns.length; ++i) {
 			columns[i] = removeQuotes(columns[i]);
 		}
 
-		types = rows[1].split(",");
+		types = rows[1].split(",", -1);
 		for (int i = 0; i < types.length; ++i) {
 			types[i] = removeQuotes(types[i]);
 		}
@@ -104,7 +104,7 @@ public class Table {
 		List<String[]> resultRows = new ArrayList<>();
 		String[] tableRow = null;
 		for (int i = 2; i < rows.length; ++i) {
-			String[] row = rows[i].split(",");
+			String[] row = rows[i].split(",", -1);
 
 			if (row[0].trim().length() != 0) {
 				if (tableRow != null) {
