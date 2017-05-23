@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class HomeResources extends Component {
 	public static final int RESOURCE_GOLD = 1;
-	public static final int RESOURCE_MAX_CHALLENGE_WINS = 2;
+	public static final int RESOURCE_CHALLENGE_WINS = 2; // challenge wins (not max!)
 	public static final int RESOURCE_CHEST_COINT = 3;
 	public static final int RESOURCE_STAR_COUNT = 4; // ???
 	public static final int RESOURCE_FREE_GOLD = 5; // ???
@@ -25,7 +25,7 @@ public class HomeResources extends Component {
 	public static final int RESOURCE_CHALLENGE_CARDS_WON = 17;
 	public static final int RESOURCE_UNK_2 = 18;
 	public static final int RESOURCE_UNK_3 = 19;
-	public static final int RESOURCE_MAX_WINS = 20; // ???
+	public static final int RESOURCE_MAX_CHALLENGE_WINS = 20; // Challenge max wins
 	public static final int RESOURCE_CHALLENGE_CARDS_WON2 = 21; // Repeat?
 	public static final int RESOURCE_TOURNAMENT_CARDS_WON = 22;
 	public static final int RESOURCE_UNK_4 = 25;
@@ -50,5 +50,7 @@ public class HomeResources extends Component {
 			stream.putRrsInt32(entry.getKey());
 			stream.putRrsInt32(entry.getValue());
 		}
+
+		resources.clear();
 	}
 }
