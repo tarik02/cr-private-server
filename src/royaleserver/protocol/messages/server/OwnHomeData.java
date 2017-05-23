@@ -99,10 +99,28 @@ public class OwnHomeData extends Message {
 			decks[i] = new Deck();
 		}
 
-		offers = new String[] {};
-		challenges = new String[] {};
+		offers = new String[]{};
+		challenges = new String[]{};
 
-		shopCards = new Card[0];
+		shopCards = new Card[6];
+
+		shopCards[0] = new Card();
+		shopCards[0].card = royaleserver.logic.Card.by("Goblins");
+
+		shopCards[1] = new Card();
+		shopCards[1].card = royaleserver.logic.Card.by("Giant");
+
+		shopCards[2] = new Card();
+		shopCards[2].card = royaleserver.logic.Card.by("Zap");
+
+		shopCards[3] = new Card();
+		shopCards[3].card = royaleserver.logic.Card.by("Heal");
+
+		shopCards[4] = new Card();
+		shopCards[4].card = royaleserver.logic.Card.by("Balloon");
+
+		shopCards[5] = new Card();
+		shopCards[5].card = royaleserver.logic.Card.by("Log");
 	}
 
 	@Override
@@ -173,7 +191,7 @@ public class OwnHomeData extends Message {
 		stream.putRrsInt32(countOfOffers + countOfChallenges);
 
 		for (int i = 0; i < countOfOffers; i++) {
-			stream.putByte((byte) i);
+			stream.putByte((byte)i);
 			stream.putString("TestOffer");
 
 			// type
@@ -182,9 +200,9 @@ public class OwnHomeData extends Message {
 			stream.putRrsInt32(1);
 
 			// time
-			stream.putRrsInt32((int) System.currentTimeMillis()); // start
+			stream.putRrsInt32((int)System.currentTimeMillis()); // start
 			stream.putRrsInt32(1494930622); // end
-			stream.putRrsInt32((int) System.currentTimeMillis()); // start?
+			stream.putRrsInt32((int)System.currentTimeMillis()); // start?
 
 			stream.put(Hex.toByteArray("00 00 00 00 00 00 00 00"));
 
@@ -226,21 +244,29 @@ public class OwnHomeData extends Message {
 		stream.put(Hex.toByteArray("000098ef1a9ca41d91e6f1900b00007f0000000000000000001dbeae2ba1400900a8802884d4d20195baf2900ba8ee8701a0a0d201b59ff7900b00a8850a80c33da5faf0900b030000000000000002"));
 
 		stream.putRrsInt32(lastLevel);
-		stream.putByte((byte)36); // unk
+		stream.putByte((byte)36);
 		stream.putByte((byte)arena.getIndex());
 
-		stream.put(Hex.toByteArray("c5d9c1ba0902028cb56c8cb56c8ff186910b"));
+		stream.put(Hex.toByteArray("c5d9c1ba09"));
+
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(2);
+
+		// time ? seconds
+		stream.putRrsInt32(888140);
+		stream.putRrsInt32(888140);
+
+		// next update (timestamp)
+		stream.putRrsInt32((int)System.currentTimeMillis());
 
 		stream.putRrsInt32(shopCards.length);
-		for (Card card : shopCards) {
-			stream.putByte((byte)0x01); // Unknown, always 1
-			card.encode(stream);
-			stream.putByte((byte)0x00);
-			stream.putRrsInt32(card.card.getType());
-			stream.putRrsInt32(card.card.getScid().getLow());
-			stream.putByte((byte)0x00);
-		}
 
+		for (int i = 0; i < shopCards.length; ++i) {
+			stream.put(Hex.toByteArray("01820102000000000000")); // ?
+			stream.putRrsInt32((shopCards[i].card.getScid().getHigh()));
+			stream.putRrsInt32(shopCards[i].card.getScid().getLow());
+			stream.putRrsInt32(i);
+		}
 		stream.put(Hex.toByteArray("0000007f00007f00007f1411b31f901b000381030800011a270109008e0c0000fa0716079ef3b0171f0108003d0689c3b21797030005002a08a9c4d317870c00070081010700050008000109009f050006000c0686e8ab17100005000f06b9a6ab171e0003002806809bb817b60200040002aeeae51890fcd91a02aeeae51890fcd91a00028ed2f83e8fd2f83e048dd2f83e8cd2f83e8ed2f83e9cd2f83e019dd2f83e019081a1fe0b00b90101018ae6bf3301139f0301a9410e7fb012880300000000000000"));
 
 		stream.putRrsLong(homeId);
@@ -324,7 +350,7 @@ public class OwnHomeData extends Message {
 			String key = keys.toArray()[i].toString();
 			int typeOfItem = UsefulTools.getTypeRes(key);
 
-			stream.putByte((byte) 5);
+			stream.putByte((byte)5);
 			stream.putRrsInt32(typeOfItem);
 			stream.putRrsInt32(mp.get(key));
 		}
@@ -383,7 +409,7 @@ public class OwnHomeData extends Message {
 		stream.putRrsInt32(0);
 
 		// WinStreak
-		stream.putByte((byte) 127); // 127 = -64 (varint) = null
+		stream.putByte((byte)127); // 127 = -64 (varint) = null
 
 		// Tutorial Step (06 = setName , 08 = lastDone)
 		stream.putRrsInt32(8);
