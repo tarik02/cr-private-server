@@ -1,6 +1,5 @@
 package royaleserver;
 
-import royaleserver.database.DataManager;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
@@ -14,8 +13,6 @@ public class Main {
 
 	public static void main(String[] args) throws Throwable {
 		try {
-			DataManager.init();
-
 			File configFile = new File("config.json");
 			if (!configFile.exists()) {
 				InputStream configInputStream = Main.class.getResourceAsStream("/config.json");

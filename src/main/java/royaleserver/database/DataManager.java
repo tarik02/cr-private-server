@@ -1,70 +1,73 @@
 package royaleserver.database;
 
-import org.reflections.Reflections;
 import royaleserver.Server;
-import royaleserver.database.model.Model;
-import royaleserver.database.model.ModelInfo;
-import royaleserver.database.provider.DataProvider;
+import royaleserver.config.Database;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.*;
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class DataManager {
 	private static final Logger logger = LogManager.getLogger(DataManager.class);
-	public static final int DATABASE_VERSION = 1;
 
-	private DataProvider dataProvider;
+	private final EntityManager entityManager;
 
-	private LinkedBlockingQueue<Task> tasksToFetch = new LinkedBlockingQueue<>();
-	private Queue<Task> tasksToHandle = new ConcurrentLinkedQueue<>();
+	private final LinkedBlockingQueue<Task> tasksToFetch = new LinkedBlockingQueue<>();
+	private final Queue<Task> tasksToHandle = new ConcurrentLinkedQueue<>();
 
-	private boolean stopped = false;
-	private FetchThread fetchThread;
+	private final FetchThread fetchThread;
 
-	public DataManager(DataProvider provider) {
-		dataProvider = provider;
-		if (provider == null) {
-			throw new NullPointerException("provider");
+	public DataManager(Database config) throws Server.ServerException {
+		// Disable hibernate logging
+		@SuppressWarnings("unused")
+		org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger("org.hibernate");
+		java.util.logging.Logger.getLogger("org.hibernate").setLevel(java.util.logging.Level.WARNING);
+
+		// Disable c3p0 logging
+		Properties p = new Properties(System.getProperties());
+		p.put("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
+		p.put("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "WARNING");
+		System.setProperties(p);
+
+		Map<String, String> properties = new HashMap<>();
+
+		switch (config.provider) {
+		case "mysql":
+			properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect");
+			properties.put("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+			properties.put("hibernate.connection.url", (new StringBuilder())
+					.append("jdbc:mysql://")
+					.append(config.mysql.host)
+					.append(":")
+					.append(config.mysql.port)
+					.append("/")
+					.append(config.mysql.database)
+					.toString());
+			properties.put("hibernate.connection.username", config.mysql.user);
+			properties.put("hibernate.connection.password", config.mysql.password);
+			break;
+		default:
+			throw new Server.ServerException("Invalid data provider " + config.provider);
 		}
 
-		init();
+		entityManager = Persistence.createEntityManagerFactory("royaleserver", properties).createEntityManager();
 
 		fetchThread = new FetchThread();
 		fetchThread.start();
 	}
 
 	public void stop() {
-		stopped = true;
 		try {
 			tasksToFetch.put(null);
 			fetchThread.join();
 		} catch (InterruptedException ignored) {}
-	}
-
-	/**
-	 * @apiNote Internal usage only
-	 * @param version Target version
-	 * @throws Server.ServerException If can't be updated
-	 */
-	public void update(int version) throws Server.ServerException {
-		int currentVersion = dataProvider.fetchVersion();
-
-		for (int i = currentVersion + 1; i <= version; ++i) {
-			logger.info("Applying migration #%d...", i);
-
-			if (!dataProvider.applyMigration("migrations.version_" + i)) {
-				logger.error("Failed to apply migration #%d!", i);
-				throw new Server.ServerException("Failed to apply migrations.");
-			}
-
-			logger.info("Migration #%d has applied.", i);
-			dataProvider.updateVersion(i);
-		}
 	}
 
 	/**
@@ -89,79 +92,6 @@ public class DataManager {
 		}
 	}
 
-	private static final Map<Class<? extends Model>, ModelInfo> models = new HashMap<>();
-	private static boolean initialized = false;
-
-	public static void init() {
-		if (initialized) {
-			return;
-		}
-		initialized = true;
-
-		try {
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ignored) {
-			System.out.println("Please, add mysql jdbc driver.");
-		}
-
-		try {
-			Class.forName("org.sqlite.JDBC").newInstance();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ignored) {
-			System.out.println("Please, add sqlite jdbc driver.");
-		}
-
-		Reflections reflections = new Reflections("royaleserver.database.model");
-		Set<Class<? extends Model>> allClasses = reflections.getSubTypesOf(Model.class);
-		for (Class<? extends Model> clazz : allClasses) {
-			ArrayList<String> keys = new ArrayList<>();
-			String table;
-
-			int counter = 0;
-			for (Field field : clazz.getDeclaredFields()) {
-				int modifiers = field.getModifiers();
-
-				if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && Modifier.isPublic(modifiers) && field.getType().equals(int.class)) {
-					String name = field.getName();
-					if (name.startsWith("KEY_")) {
-						name = name.substring(4).toLowerCase();
-						int index = 0;
-						try {
-							index = field.getInt(null);
-						} catch (IllegalAccessException ignored) {
-							System.exit(-1);
-						}
-
-						if (index != counter) {
-							System.out.println("Key [" + clazz.getName() + "." + field.getName() + "] must be " + index + ".");
-							System.exit(-1);
-						}
-						++counter;
-
-						keys.add(name);
-					}
-				}
-			}
-
-			try {
-				table = (String)clazz.getDeclaredField("TABLE").get(null);
-			} catch (IllegalAccessException | NoSuchFieldException ignored) {
-				table = clazz.getName();
-				if (table.endsWith("Model")) {
-					table = table.substring(0, table.length() - 5);
-				}
-
-				table = table.toLowerCase() + "s";
-			}
-
-			models.put(clazz, new ModelInfo(table, clazz, keys.toArray(new String[0])));
-		}
-	}
-
-	public static ModelInfo getModelInfo(Class<? extends Model> clazz) {
-		return models.get(clazz);
-	}
-
-
 	public class FetchThread extends Thread {
 		@Override
 		public void run() {
@@ -169,7 +99,7 @@ public class DataManager {
 
 			try {
 				while ((task = tasksToFetch.take()) != null) {
-					task.fetch(dataProvider);
+					//task.fetch(dataProvider);
 					tasksToHandle.add(task);
 				}
 			} catch (InterruptedException ignored) {}

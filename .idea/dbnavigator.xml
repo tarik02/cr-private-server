@@ -23,10 +23,14 @@
     <autoscroll-to-editor value="false" />
     <autoscroll-from-editor value="true" />
     <show-object-properties value="true" />
-    <loaded-nodes />
+    <loaded-nodes>
+      <connection connection-id="b2d1f4d7-a63e-43e8-a396-7df32ba8c36a">
+        <schema name="clashroyale" object-types="column, constraint, function, index, procedure, table, dataset trigger, view" />
+      </connection>
+    </loaded-nodes>
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
-    <connection id="4931d39e-c1dc-4e48-9aa5-77d5689dec40">
+    <connection id="b2d1f4d7-a63e-43e8-a396-7df32ba8c36a">
       <console name="Connection" type="STANDARD" />
     </connection>
   </component>
@@ -56,27 +60,24 @@
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>
-      <connection id="4931d39e-c1dc-4e48-9aa5-77d5689dec40" active="true">
+      <connection id="b2d1f4d7-a63e-43e8-a396-7df32ba8c36a" active="true">
         <database>
           <name value="Connection" />
           <description value="" />
-          <database-type value="SQLITE" />
+          <database-type value="MYSQL" />
           <config-type value="BASIC" />
-          <database-version value="9999.0" />
+          <database-version value="5.7" />
           <driver-source value="BUILTIN" />
           <driver-library value="" />
           <driver value="" />
-          <url-type value="FILE" />
-          <host value="" />
-          <port value="" />
-          <database value="" />
-          <files>
-            <file path="$PROJECT_DIR$/clashroyale.db" schema="main" />
-          </files>
+          <url-type value="DATABASE" />
+          <host value="localhost" />
+          <port value="3306" />
+          <database value="clashroyale" />
           <os-authentication value="false" />
           <empty-password value="false" />
-          <user value="" />
-          <password value="" />
+          <user value="root" />
+          <password value="cGFyb2wxMjM=" />
         </database>
         <properties>
           <auto-commit value="true" />

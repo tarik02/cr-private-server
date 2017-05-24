@@ -1,13 +1,8 @@
 package royaleserver.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Config {
-	public Map<String, String> paths = new HashMap<>();
-	public Database database = new Database();
+	public static final int CONFIG_VERSION = 1;
 
-	public Config() {
-		paths.put("assets", "./assets");
-	}
+	public Integer version = 0;
+	public Database database = new Database();
 }

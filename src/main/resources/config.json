@@ -1,10 +1,8 @@
 {
-	"paths": {
-		"assets": "./assets"
-	},
+	"version": 1,
 
 	"database": {
-		"provider": "sqlite",
+		"provider": "mysql",
 
 		"mysql": {
 			"host": "localhost",
@@ -14,10 +12,6 @@
 			"password": "",
 
 			"database": "clashroyale"
-		},
-
-		"sqlite": {
-			"database": "clashroyale.db"
 		}
 	}
 }

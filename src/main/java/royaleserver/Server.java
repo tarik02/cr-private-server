@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import royaleserver.config.Config;
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
+import royaleserver.csv.Table;
+import royaleserver.database.DataManager;
 import royaleserver.logic.Arena;
 import royaleserver.logic.Card;
 import royaleserver.logic.GameMode;
@@ -15,7 +17,8 @@ import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.MessageFactory;
 import royaleserver.protocol.messages.client.ClientHello;
 import royaleserver.protocol.messages.client.Login;
-import royaleserver.protocol.messages.server.*;
+import royaleserver.protocol.messages.server.LoginOk;
+import royaleserver.protocol.messages.server.ServerHello;
 import royaleserver.utils.*;
 
 import java.io.*;
@@ -24,10 +27,6 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import royaleserver.csv.Table;
-import royaleserver.database.DataManager;
-import royaleserver.database.provider.DataProvider;
-import royaleserver.database.provider.SQLDataProvider;
 
 public class Server {
 	private static Logger logger;
@@ -79,8 +78,13 @@ public class Server {
 		try {
 			config = (new Gson()).fromJson(new InputStreamReader(new FileInputStream(new File(workingDirectory, "config.json"))), Config.class);
 		} catch (Throwable e) {
-			logger.error("Cannot read config.", e);
+			logger.fatal("Cannot read config.", e);
 			throw new ServerException("Cannot read config.");
+		}
+
+		if (config.version < Config.CONFIG_VERSION) {
+			logger.fatal("Config is too old.\n\tCurrent version: %d.\n\tRequired version: %d.", config.version, Config.CONFIG_VERSION);
+			throw new ServerException("Config is too old.");
 		}
 
 		logger.info("Loading data...");
@@ -94,30 +98,7 @@ public class Server {
 		networkThread.start();
 		
 		logger.info("Initializing data manager...");
-		DataProvider dataProvider = null;
-		switch (config.database.provider) {
-		case "mysql":
-			dataProvider = new SQLDataProvider((new StringBuilder())
-				.append("jdbc:mysql://")
-				.append(config.database.mysql.host)
-				.append(":")
-				.append(config.database.mysql.port)
-				.append("/")
-				.append(config.database.mysql.database)
-				.toString(),
-				config.database.mysql.user,
-				config.database.mysql.password);
-			break;
-		case "sqlite":
-			dataProvider = new SQLDataProvider((new StringBuilder())
-				.append("jdbc:sqlite:").append(config.database.sqlite.database).toString(), null, null);
-			break;
-		}
-		if (dataProvider == null) {
-			throw new ServerException("Failed to initialize data provider.");
-		}
-		dataManager = new DataManager(dataProvider);
-		dataManager.update(DataManager.DATABASE_VERSION);
+		dataManager = new DataManager(config.database);
 
 		logger.info("Server started!");
 
