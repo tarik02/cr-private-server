@@ -2,27 +2,17 @@ package royaleserver.database;
 
 import royaleserver.Server;
 import royaleserver.config.Database;
-import royaleserver.utils.LogManager;
-import royaleserver.utils.Logger;
+import royaleserver.database.service.PlayerService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class DataManager {
-	private static final Logger logger = LogManager.getLogger(DataManager.class);
-
 	private final EntityManager entityManager;
-
-	private final LinkedBlockingQueue<Task> tasksToFetch = new LinkedBlockingQueue<>();
-	private final Queue<Task> tasksToHandle = new ConcurrentLinkedQueue<>();
-
-	private final FetchThread fetchThread;
+	private final DataServices services;
 
 	public DataManager(Database config) throws Server.ServerException {
 		// Disable hibernate logging
@@ -58,51 +48,16 @@ public class DataManager {
 		}
 
 		entityManager = Persistence.createEntityManagerFactory("royaleserver", properties).createEntityManager();
-
-		fetchThread = new FetchThread();
-		fetchThread.start();
+		services = new DataServices(
+				new PlayerService(entityManager)
+		);
 	}
 
-	public void stop() {
-		try {
-			tasksToFetch.put(null);
-			fetchThread.join();
-		} catch (InterruptedException ignored) {}
+	public DataServices getServices() {
+		return services;
 	}
 
-	/**
-	 * @apiNote Internal usage only
-	 */
-	public void handleTasks() {
-		Task task;
-		while ((task = tasksToHandle.poll()) != null) {
-			task.handle();
-		}
-	}
-
-	/**
-	 * Add task to execution queue
-	 * @param task Task to execute
-	 */
-	public void task(Task task) {
-		try {
-			tasksToFetch.put(task);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public class FetchThread extends Thread {
-		@Override
-		public void run() {
-			Task task;
-
-			try {
-				while ((task = tasksToFetch.take()) != null) {
-					//task.fetch(dataProvider);
-					tasksToHandle.add(task);
-				}
-			} catch (InterruptedException ignored) {}
-		}
+	public PlayerService getPlayerService() {
+		return services.playerService;
 	}
 }

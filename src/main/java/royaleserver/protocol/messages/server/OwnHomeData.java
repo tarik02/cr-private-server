@@ -274,7 +274,11 @@ public class OwnHomeData extends Message {
 		stream.putRrsLong(homeId);
 
 		// username
-		stream.putString(username);
+		if (username == null) {
+			stream.putString(""); // Username is not set
+		} else {
+			stream.putString(username);
+		}
 
 		stream.putRrsInt32(0); // changes of username. If 1 can't change
 
@@ -412,7 +416,11 @@ public class OwnHomeData extends Message {
 		stream.putByte((byte)127); // 127 = -64 (varint) = null
 
 		// Tutorial Step (06 = setName , 08 = lastDone)
-		stream.putRrsInt32(8);
+		if (username == null) { // Temponary solution
+			stream.putRrsInt32(6);
+		} else {
+			stream.putRrsInt32(8);
+		}
 
 		// Tournament?
 		stream.putRrsInt32(0);

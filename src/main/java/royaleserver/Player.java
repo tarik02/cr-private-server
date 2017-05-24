@@ -1,17 +1,17 @@
 package royaleserver;
 
+import royaleserver.database.entity.PlayerEntity;
 import royaleserver.logic.Arena;
-import royaleserver.protocol.messages.CommandHandler;
-import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
+import royaleserver.protocol.messages.CommandHandler;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.messages.client.*;
 import royaleserver.protocol.messages.command.BuyChest;
 import royaleserver.protocol.messages.command.OpenChest;
 import royaleserver.protocol.messages.command.OpenChestOK;
 import royaleserver.protocol.messages.command.StartFight;
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
-import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.component.CommandComponent;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.SCID;
@@ -20,10 +20,10 @@ public class Player implements MessageHandler, CommandHandler {
 	protected Server server;
 	protected Session session;
 
-	protected long accountId;
+	protected PlayerEntity entity;
 
-	public Player(long accountId, Server server, Session session) {
-		this.accountId = accountId;
+	public Player(PlayerEntity entity, Server server, Session session) {
+		this.entity = entity;
 		this.server = server;
 		this.session = session;
 	}
@@ -114,7 +114,8 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleAvatarNameCheckRequest(AvatarNameCheckRequest message) throws Throwable {
-		return false;
+		entity.setName(message.username); // Change???
+		return true;
 	}
 
 	@Override
@@ -213,7 +214,7 @@ public class Player implements MessageHandler, CommandHandler {
 	public boolean handleStartFight(StartFight command) throws Throwable {
 		SectorState response = new SectorState();
 
-		response.homeID = accountId;
+		response.homeID = entity.getId();
 		response.isTrainer = 0;
 		response.username = "Tester";
 		response.wins = 100;
@@ -234,7 +235,7 @@ public class Player implements MessageHandler, CommandHandler {
 	public boolean handleStartMission(StartMission message) throws Throwable {
 		SectorState response = new SectorState();
 
-		response.homeID = accountId;
+		response.homeID = entity.getId();
 		response.isTrainer = 1;
 		response.username = "Tester";
 		response.wins = 100;
@@ -298,13 +299,13 @@ public class Player implements MessageHandler, CommandHandler {
 	public void sendOwnHomeData() {
 		OwnHomeData ownHomeData = new OwnHomeData();
 
-		ownHomeData.homeId = accountId;
+		ownHomeData.homeId = entity.getId();
 		ownHomeData.arena = Arena.by("Arena_T");
 		ownHomeData.lastArena = Arena.by("Arena_T");
 		ownHomeData.trophies = 4000;
-		ownHomeData.username = "Tester";
-		ownHomeData.gold = 10000;
-		ownHomeData.gems = 10000;
+		ownHomeData.username = entity.getName();
+		ownHomeData.gold = entity.getGold();
+		ownHomeData.gems = entity.getGems();
 		ownHomeData.levelExperience = 0;
 		ownHomeData.level = 13;
 		ownHomeData.lastLevel = 13;

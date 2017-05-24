@@ -6,6 +6,8 @@ import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
 import royaleserver.csv.Table;
 import royaleserver.database.DataManager;
+import royaleserver.database.entity.PlayerEntity;
+import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
 import royaleserver.logic.Card;
 import royaleserver.logic.GameMode;
@@ -93,12 +95,12 @@ public class Server {
 		Card.init(this);
 		GameMode.init(this);
 
+		logger.info("Initializing data manager...");
+		dataManager = new DataManager(config.database);
+
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();
 		networkThread.start();
-		
-		logger.info("Initializing data manager...");
-		dataManager = new DataManager(config.database);
 
 		logger.info("Server started!");
 
@@ -143,9 +145,6 @@ public class Server {
 			e.printStackTrace();
 		}
 
-		logger.info("Stopping data manager...");
-		dataManager.stop();
-
 		serverSocket = null;
 		networkThread = null;
 		dataManager = null;
@@ -154,7 +153,7 @@ public class Server {
 	}
 
 	protected void tick() {
-		dataManager.handleTasks();
+
 	}
 
 	public byte[] getResource(String path) throws ServerException {
@@ -176,6 +175,10 @@ public class Server {
 
 	public Table getCSVResource(String path) throws ServerException {
 		return new Table(getResource(path));
+	}
+
+	public DataManager getDataManager() {
+		return dataManager;
 	}
 
 	public String getResourceFingerprint() {
@@ -266,8 +269,15 @@ loop:
 					}*/
 					message = null;
 
+					PlayerService playerService = dataManager.getPlayerService();
+					PlayerEntity playerEntity = login.accountId == 0 ? null : playerService.get(login.accountId);
+					if (playerEntity == null) {
+						playerEntity = new PlayerEntity();
+						playerEntity = playerService.add(playerEntity);
+					}
+
 					LoginOk loginOk = new LoginOk();
-					loginOk.userId = loginOk.homeId = 1515; // TODO: Get it from store
+					loginOk.userId = loginOk.homeId = playerEntity.getId();
 					loginOk.userToken = "8zn8t2bjy8cnk26re8899c3mhc9xa7pg7tb4yk3m"; // TODO: Get it from store
 					loginOk.gameCenterId = "";
 					loginOk.facebookId = "";
@@ -291,7 +301,7 @@ loop:
 					loginOk.unknown_23 = 1;
 					writeMessage(loginOk);
 
-					player = new Player(login.accountId, Server.this, this);
+					player = new Player(playerEntity, Server.this, this);
 					player.sendOwnHomeData();
 				}
 

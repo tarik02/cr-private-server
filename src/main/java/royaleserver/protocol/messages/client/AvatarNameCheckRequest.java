@@ -1,21 +1,21 @@
 // 
 package royaleserver.protocol.messages.client;
 
-import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.utils.DataStream;
 
 public class AvatarNameCheckRequest extends Message {
 
     public static final short ID = Info.AVATAR_NAME_CHECK_REQUEST;
     
-    public String nUsername;
+    public String username;
 
     public AvatarNameCheckRequest() {
         super(ID);
         
-        nUsername = "";
+        username = "";
     }
     
     @Override
@@ -27,7 +27,7 @@ public class AvatarNameCheckRequest extends Message {
     public void decode(DataStream stream) {
         super.decode(stream);
         
-        nUsername = stream.getString();
+        username = stream.getString();
     }
 
     public boolean handle(MessageHandler handler) throws Throwable {
