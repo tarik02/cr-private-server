@@ -91,6 +91,10 @@ public class Player implements MessageHandler, CommandHandler {
 		}
 		closed = true;
 
+		PlayerService playerService = server.getDataManager().getPlayerService();
+		playerService.update(entity);
+		entity = null;
+
 		if (reason == null) {
 			reason = "";
 		}
