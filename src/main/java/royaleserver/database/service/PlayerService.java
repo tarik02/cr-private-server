@@ -1,6 +1,7 @@
 package royaleserver.database.service;
 
 import royaleserver.database.entity.PlayerEntity;
+import royaleserver.utils.StringUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -11,6 +12,12 @@ public class PlayerService {
 
 	public PlayerService(EntityManager entityManager) {
 		this.entityManager = entityManager;
+	}
+
+	public PlayerEntity create() {
+		PlayerEntity playerEntity = new PlayerEntity();
+		playerEntity.setPassToken(StringUtils.randomString(32, 64));
+		return add(playerEntity);
 	}
 
 	public PlayerEntity add(PlayerEntity entity){

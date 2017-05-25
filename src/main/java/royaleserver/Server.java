@@ -253,7 +253,7 @@ loop:
 
 				{
 					Login login = (Login)message;
-					/*if (login.resourceSha.equals("65dded3fcfd249dec11f4db84c05a4b37cd7a427")) {
+					/*if (login.resourceSha.equals("863227dfdea3a47d55da528a39c6123d17c961be")) {
 						LoginFailed loginFailed = new LoginFailed();
 						loginFailed.errorCode = 7;
 						loginFailed.resourceFingerprintData = resourceFingerprint;
@@ -271,14 +271,13 @@ loop:
 
 					PlayerService playerService = dataManager.getPlayerService();
 					PlayerEntity playerEntity = login.accountId == 0 ? null : playerService.get(login.accountId);
-					if (playerEntity == null) {
-						playerEntity = new PlayerEntity();
-						playerEntity = playerService.add(playerEntity);
+					if (playerEntity == null || !login.passToken.equals(playerEntity.getPassToken())) {
+						playerEntity = playerService.create();
 					}
 
 					LoginOk loginOk = new LoginOk();
 					loginOk.userId = loginOk.homeId = playerEntity.getId();
-					loginOk.userToken = "8zn8t2bjy8cnk26re8899c3mhc9xa7pg7tb4yk3m"; // TODO: Get it from store
+					loginOk.userToken = playerEntity.getPassToken();
 					loginOk.gameCenterId = "";
 					loginOk.facebookId = "";
 					loginOk.serverMajorVersion = 3; // TODO: Make it constant
@@ -322,7 +321,6 @@ loop:
 					message = null;
 				}
 			} catch (EOFException ignored) {
-
 			} catch (Exception e) {
 				logger.error("Error while looping client.", e);
 			}
@@ -334,7 +332,7 @@ loop:
 			}
 
 			if (player != null) {
-				player.close();
+				player.close("", false);
 			}
 
 			socket = null;

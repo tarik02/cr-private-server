@@ -1,6 +1,7 @@
 package royaleserver;
 
 import royaleserver.database.entity.PlayerEntity;
+import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
 import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
@@ -20,17 +21,100 @@ public class Player implements MessageHandler, CommandHandler {
 	protected Server server;
 	protected Session session;
 
+	protected boolean closed;
+
 	protected PlayerEntity entity;
 
 	public Player(PlayerEntity entity, Server server, Session session) {
 		this.entity = entity;
 		this.server = server;
 		this.session = session;
+
+		this.closed = false;
 	}
 
-	public void close() {
-
+	public void disconnect(String reason) {
+		close(reason, true);
 	}
+
+	/**
+	 * @apiNote For internal usage only
+	 */
+	public void sendOwnHomeData() {
+		OwnHomeData ownHomeData = new OwnHomeData();
+
+		ownHomeData.homeId = entity.getId();
+		ownHomeData.arena = Arena.by("Arena_T");
+		ownHomeData.lastArena = Arena.by("Arena_T");
+		ownHomeData.trophies = 4000;
+		ownHomeData.username = entity.getName();
+		ownHomeData.gold = entity.getGold();
+		ownHomeData.gems = entity.getGems();
+		ownHomeData.levelExperience = 0;
+		ownHomeData.level = 13;
+		ownHomeData.lastLevel = 13;
+
+		/*ownHomeData.cards = new Card[80]; // Fill it for testing
+		for (int i = 0; i < ownHomeData.cards.length; ++i) {
+			//(ownHomeData.cards[i] = new Card()).cardId = i;
+		}*/
+
+		session.sendMessage(ownHomeData);
+	}
+
+	/**
+	 * @apiNote For internal usage only
+	 * @return true if closing is success
+	 */
+	public boolean close() {
+		return close(null, true);
+	}
+
+	/**
+	 * @apiNote For internal usage only
+	 * @param reason Reason of closing
+	 * @return true if closing is success
+	 */
+	public boolean close(final String reason) {
+		return close(reason, true);
+	}
+
+	/**
+	 * @apiNote For internal usage only
+	 * @param reason Reason of closing
+	 * @param sendDisconnect If true, then server will send LoginFailed packet
+	 * @return true if closing is success
+	 */
+	public boolean close(String reason, final boolean sendDisconnect) {
+		if (closed) {
+			return false;
+		}
+		closed = true;
+
+		if (reason == null) {
+			reason = "";
+		}
+
+		if (sendDisconnect) {
+			LoginFailed loginFailed = new LoginFailed();
+			loginFailed.errorCode = 7;
+			loginFailed.resourceFingerprintData = server.getResourceFingerprint();
+			loginFailed.redirectDomain = "";
+			loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
+			loginFailed.updateURL = "";
+			loginFailed.reason = reason;
+			loginFailed.secondsUntilMaintenanceEnd = 0;
+			loginFailed.unknown_7 = (byte) 0;
+			loginFailed.unknown_8 = "";
+			session.sendMessage(loginFailed);
+			session.close();
+		}
+
+		return true;
+	}
+
+
+	// Handlers
 
 	@Override
 	public boolean handleClientHello(ClientHello message) throws Throwable {
@@ -91,12 +175,24 @@ public class Player implements MessageHandler, CommandHandler {
 	@Override
 	public boolean handleVisitHome(VisitHome message) throws Throwable {
 		VisitedHomeData response = new VisitedHomeData();
+		PlayerEntity responseEntity;
 
-		response.homeID = message.accountID;
-		response.arena = 8;
-		response.trophies = 3500;
-		response.level = 13;
-		response.username = "Tester";
+		if (message.accountID == entity.getId()) {
+			responseEntity = entity;
+			response.isMyProfile = true;
+		} else {
+			PlayerService playerService = server.getDataManager().getPlayerService();
+			responseEntity = playerService.get(message.accountID);
+			response.isMyProfile = false;
+		}
+
+		if (responseEntity != null) {
+			response.homeID = responseEntity.getId();
+			response.arena = 8;
+			response.trophies = 3500;
+			response.level = 13;
+			response.username = responseEntity.getName();
+		}
 
 		session.sendMessage(response);
 		return true;
@@ -279,42 +375,5 @@ public class Player implements MessageHandler, CommandHandler {
 		session.sendMessage(response);
 
 		return true;
-	}
-
-	public void disconnect(String reason) {
-		LoginFailed loginFailed = new LoginFailed();
-		loginFailed.errorCode = 7;
-		loginFailed.resourceFingerprintData = server.getResourceFingerprint();
-		loginFailed.redirectDomain = "";
-		loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
-		loginFailed.updateURL = "";
-		loginFailed.reason = reason;
-		loginFailed.secondsUntilMaintenanceEnd = 0;
-		loginFailed.unknown_7 = (byte) 0;
-		loginFailed.unknown_8 = "";
-		session.sendMessage(loginFailed);
-		session.close();
-	}
-
-	public void sendOwnHomeData() {
-		OwnHomeData ownHomeData = new OwnHomeData();
-
-		ownHomeData.homeId = entity.getId();
-		ownHomeData.arena = Arena.by("Arena_T");
-		ownHomeData.lastArena = Arena.by("Arena_T");
-		ownHomeData.trophies = 4000;
-		ownHomeData.username = entity.getName();
-		ownHomeData.gold = entity.getGold();
-		ownHomeData.gems = entity.getGems();
-		ownHomeData.levelExperience = 0;
-		ownHomeData.level = 13;
-		ownHomeData.lastLevel = 13;
-
-		/*ownHomeData.cards = new Card[80]; // Fill it for testing
-		for (int i = 0; i < ownHomeData.cards.length; ++i) {
-			//(ownHomeData.cards[i] = new Card()).cardId = i;
-		}*/
-
-		session.sendMessage(ownHomeData);
 	}
 }

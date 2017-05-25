@@ -22,6 +22,9 @@ public class PlayerEntity {
 	@Column(nullable = false)
 	private int gems;
 
+	@Column(length = 64, nullable = false)
+	private String passToken; // Account security, like password
+
 	public long getId() {
 		return id;
 	}
@@ -55,6 +58,15 @@ public class PlayerEntity {
 
 	public PlayerEntity setGems(int gems) {
 		this.gems = gems;
+		return this;
+	}
+
+	public String getPassToken() {
+		return passToken;
+	}
+
+	public PlayerEntity setPassToken(String passToken) {
+		this.passToken = passToken;
 		return this;
 	}
 }
