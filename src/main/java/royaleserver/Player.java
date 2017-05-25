@@ -8,10 +8,7 @@ import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.CommandHandler;
 import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.messages.client.*;
-import royaleserver.protocol.messages.command.BuyChest;
-import royaleserver.protocol.messages.command.OpenChest;
-import royaleserver.protocol.messages.command.OpenChestOK;
-import royaleserver.protocol.messages.command.StartFight;
+import royaleserver.protocol.messages.command.*;
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
 import royaleserver.protocol.messages.component.CommandComponent;
 import royaleserver.protocol.messages.server.*;
@@ -215,6 +212,13 @@ public class Player implements MessageHandler, CommandHandler {
 	@Override
 	public boolean handleAvatarNameCheckRequest(AvatarNameCheckRequest message) throws Throwable {
 		entity.setName(message.username); // Change???
+
+		SetNickname command = new SetNickname();
+		command.nickname = message.username;
+		AvailableServerCommand response = new AvailableServerCommand();
+		response.command.command = command;
+		session.sendMessage(response);
+
 		return true;
 	}
 
