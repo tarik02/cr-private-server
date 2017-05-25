@@ -61,7 +61,7 @@ public class Rarity {
 			return;
 		}
 
-		Table csv_rarities = server.getCSVResource("csv_logic/rarities.csv");
+		Table csv_rarities = server.getAssetManager().open("csv_logic/rarities.csv").csv();
 		Column csv_Name = csv_rarities.getColumn("Name");
 		Column csv_LevelCount = csv_rarities.getColumn("LevelCount");
 		Column csv_DonateCapacity = csv_rarities.getColumn("DonateCapacity");

@@ -1,9 +1,13 @@
 package royaleserver.utils;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Random;
 
 public final class StringUtils {
 	private StringUtils() {}
+
+	private static final Charset charset = Charset.forName("UTF-8");
 
 	private static final char[] symbols;
 	private static final Random random = new Random();
@@ -56,5 +60,18 @@ public final class StringUtils {
 		}
 
 		return new String(buffer, 0, length);
+	}
+
+	public static String from(InputStream is) {
+		return from(is, true);
+	}
+
+	public static String from(InputStream is, boolean close) {
+		byte[] buffer = IO.getByteArray(is, close);
+		if (buffer == null) {
+			return null;
+		}
+
+		return new String(buffer, charset);
 	}
 }

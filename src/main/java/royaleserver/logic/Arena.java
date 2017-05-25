@@ -92,7 +92,7 @@ public class Arena {
 			return;
 		}
 
-		Table csv_arenas = server.getCSVResource("csv_logic/arenas.csv");
+		Table csv_arenas = server.getAssetManager().open("csv_logic/arenas.csv").csv();
 		Column csv_Name = csv_arenas.getColumn("Name");
 		Column csv_Arena = csv_arenas.getColumn("Arena");
 		Column csv_ChestArena = csv_arenas.getColumn("ChestArena");

@@ -1,10 +1,11 @@
 package royaleserver;
 
 import com.google.gson.Gson;
+import royaleserver.assets.AssetManager;
+import royaleserver.assets.FolderAssetManager;
 import royaleserver.config.Config;
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
-import royaleserver.csv.Table;
 import royaleserver.database.DataManager;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
@@ -28,7 +29,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 
 public class Server {
 	private static Logger logger;
@@ -39,8 +39,9 @@ public class Server {
 	protected long tickCounter = 0;
 
 	protected ServerSocket serverSocket = null;
-	protected NetworkThread networkThread = null;
+	protected AssetManager assetManager = null;
 	protected DataManager dataManager = null;
+	protected NetworkThread networkThread = null;
 
 	protected String resourceFingerprint = "";
 
@@ -63,7 +64,6 @@ public class Server {
 		LogManager.initMainLogger(new File(workingDirectory, "server.log"));
 		logger = LogManager.getLogger(Server.class);
 
-		resourceFingerprint = new String(getResource("fingerprint.json"), Charset.forName("UTF-8"));
 		start();
 	}
 
@@ -88,6 +88,9 @@ public class Server {
 			logger.fatal("Config is too old.\n\tCurrent version: %d.\n\tRequired version: %d.", config.version, Config.CONFIG_VERSION);
 			throw new ServerException("Config is too old.");
 		}
+
+		assetManager = new FolderAssetManager(new File(workingDirectory, "assets"));
+		resourceFingerprint = assetManager.open("fingerprint.json").content();
 
 		logger.info("Loading data...");
 		Rarity.init(this);
@@ -156,25 +159,8 @@ public class Server {
 
 	}
 
-	public byte[] getResource(String path) throws ServerException {
-		File file = new File(workingDirectory, "assets/" + path);
-		if (!file.exists()) {
-			throw new ServerException("Resource does not exists.");
-		}
-
-		try {
-			FileInputStream fis = new FileInputStream(file);
-			byte[] buffer = new byte[fis.available()];
-			fis.read(buffer);
-			fis.close();
-			return buffer;
-		} catch (IOException ignored) {
-			throw new ServerException("Failed to fetch the resource.");
-		}
-	}
-
-	public Table getCSVResource(String path) throws ServerException {
-		return new Table(getResource(path));
+	public AssetManager getAssetManager() {
+		return assetManager;
 	}
 
 	public DataManager getDataManager() {

@@ -67,7 +67,7 @@ public class GameMode {
 			return;
 		}
 
-		Table csv_game_modes = server.getCSVResource("csv_logic/game_modes.csv");
+		Table csv_game_modes = server.getAssetManager().open("csv_logic/game_modes.csv").csv();
 		Column csv_Name = csv_game_modes.getColumn("Name");
 		Column csv_OvertimeSeconds = csv_game_modes.getColumn("OvertimeSeconds");
 		Column csv_ElixirProductionMultiplier = csv_game_modes.getColumn("ElixirProductionMultiplier");

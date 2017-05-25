@@ -61,9 +61,9 @@ public class Card {
 
 		int indexCounter = 1;
 
-		indexCounter = loadCards(TYPE_CHARACTER, server.getCSVResource("csv_logic/spells_characters.csv"), indexCounter);
-		indexCounter = loadCards(TYPE_BUILDING, server.getCSVResource("csv_logic/spells_buildings.csv"), indexCounter);
-		indexCounter = loadCards(TYPE_SPELL, server.getCSVResource("csv_logic/spells_other.csv"), indexCounter);
+		indexCounter = loadCards(TYPE_CHARACTER, server.getAssetManager().open("csv_logic/spells_characters.csv").csv(), indexCounter);
+		indexCounter = loadCards(TYPE_BUILDING, server.getAssetManager().open("csv_logic/spells_buildings.csv").csv(), indexCounter);
+		indexCounter = loadCards(TYPE_SPELL, server.getAssetManager().open("csv_logic/spells_other.csv").csv(), indexCounter);
 
 		initialized = true;
 	}
