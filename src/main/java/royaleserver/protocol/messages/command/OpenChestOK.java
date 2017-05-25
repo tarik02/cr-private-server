@@ -5,8 +5,8 @@ import royaleserver.protocol.messages.component.ChestItem;
 import royaleserver.utils.DataStream;
 
 public class OpenChestOK extends Command {
-
 	public static final short ID = 210;
+
 	public ChestItem[] chestItems;
 	int cardsCount;
 

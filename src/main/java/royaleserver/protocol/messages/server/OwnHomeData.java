@@ -121,6 +121,7 @@ public class OwnHomeData extends Message {
 
 		shopCards[5] = new Card();
 		shopCards[5].card = royaleserver.logic.Card.by("Log");
+		shopCards[5].boughtTimes = 1;
 	}
 
 	@Override
@@ -262,11 +263,16 @@ public class OwnHomeData extends Message {
 		stream.putRrsInt32(shopCards.length);
 
 		for (int i = 0; i < shopCards.length; ++i) {
-			stream.put(Hex.toByteArray("01820102000000000000")); // ?
-			stream.putRrsInt32((shopCards[i].card.getScid().getHigh()));
-			stream.putRrsInt32(shopCards[i].card.getScid().getLow());
+			Card card = shopCards[i];
+
+			stream.putByte((byte)0x01);
+			card.encode(stream);
+			stream.putByte((byte)0x00);
+			stream.putRrsInt32(card.card.getType());
+			stream.putRrsInt32(card.card.getScid().getLow());
 			stream.putRrsInt32(i);
 		}
+
 		stream.put(Hex.toByteArray("0000007f00007f00007f1411b31f901b000381030800011a270109008e0c0000fa0716079ef3b0171f0108003d0689c3b21797030005002a08a9c4d317870c00070081010700050008000109009f050006000c0686e8ab17100005000f06b9a6ab171e0003002806809bb817b60200040002aeeae51890fcd91a02aeeae51890fcd91a00028ed2f83e8fd2f83e048dd2f83e8cd2f83e8ed2f83e9cd2f83e019dd2f83e019081a1fe0b00b90101018ae6bf3301139f0301a9410e7fb012880300000000000000"));
 
 		stream.putRrsLong(homeId);
@@ -416,11 +422,11 @@ public class OwnHomeData extends Message {
 		stream.putByte((byte)127); // 127 = -64 (varint) = null
 
 		// Tutorial Step (06 = setName , 08 = lastDone)
-		if (username == null) { // Temponary solution
-			stream.putRrsInt32(6);
-		} else {
+		//if (username == null) { // Temponary solution
+		//	stream.putRrsInt32(6);
+		//} else {
 			stream.putRrsInt32(8);
-		}
+		//}
 
 		// Tournament?
 		stream.putRrsInt32(0);
