@@ -221,12 +221,11 @@ public class Player implements MessageHandler, CommandHandler {
 	@Override
 	public boolean handleSetNickname(SetNickname command) throws Throwable {
 
+		// delete it
 		// Очень много действий выполняются при смене ника. Можно конечно делать, как ты, сразу же менять его при первом только нажатии, но в клиенте происходят противоречия, из-за которых ->
 		// -> в дальнейшем происходят ошибки. Так что именно тут надо менять ник. Это конечный пункт.
-		System.out.println("handleSetNickname: " + command.nickname);
 
 		entity.setName(command.nickname);
-		System.out.println(entity.getName());
 		return true;
 	}
 
