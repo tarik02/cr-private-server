@@ -30,10 +30,6 @@ public class Player implements MessageHandler, CommandHandler {
 		this.closed = false;
 	}
 
-	public void disconnect(String reason) {
-		close(reason, true);
-	}
-
 	/**
 	 * @apiNote For internal usage only
 	 */
@@ -57,6 +53,19 @@ public class Player implements MessageHandler, CommandHandler {
 		}*/
 
 		session.sendMessage(ownHomeData);
+	}
+
+	/**
+	 * @param nickname to check
+	 * @return true if nickname is allowed to use
+	 */
+	public boolean checkNickname(String nickname) {
+		// TODO: More checks
+		return nickname.length() > 0 && nickname.length() < 32;
+	}
+
+	public void disconnect(String reason) {
+		close(reason, true);
 	}
 
 	/**
@@ -212,7 +221,11 @@ public class Player implements MessageHandler, CommandHandler {
 	@Override
 	public boolean handleAvatarNameCheckRequest(AvatarNameCheckRequest message) throws Throwable {
 		AvatarNameCheckResponse response = new AvatarNameCheckResponse();
-		response.username = message.username;
+		if (checkNickname(message.username)) {
+			response.username = message.username;
+		} else {
+			response.username = entity.getName(); // Return old nickname back
+		}
 		session.sendMessage(response);
 
 		return true;
@@ -220,20 +233,22 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleSetNickname(SetNickname command) throws Throwable {
+		if (checkNickname(command.nickname)) {
+			entity.setName(command.nickname);
+		}
 
-		// delete it
-		// Очень много действий выполняются при смене ника. Можно конечно делать, как ты, сразу же менять его при первом только нажатии, но в клиенте происходят противоречия, из-за которых ->
-		// -> в дальнейшем происходят ошибки. Так что именно тут надо менять ник. Это конечный пункт.
-
-		entity.setName(command.nickname);
 		return true;
 	}
 
 	@Override
 	public boolean handleChangeAvatarName(ChangeAvatarName message) throws Throwable {
-
 		SetNickname command = new SetNickname();
-		command.nickname = message.nUsername;
+
+		if (checkNickname(message.username)) {
+			command.nickname = message.username;
+		} else {
+			command.nickname = entity.getName();
+		}
 
 		AvailableServerCommand response = new AvailableServerCommand();
 		response.command.command = command;
@@ -244,7 +259,6 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleAskForJoinableAlliancesList(AskForJoinableAlliancesList message) throws Throwable {
-
 		JoinableAllianceList response = new JoinableAllianceList();
 
 		response.alliances = new AllianceHeaderEntry[1];
