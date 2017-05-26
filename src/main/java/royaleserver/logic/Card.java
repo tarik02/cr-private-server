@@ -6,7 +6,9 @@ import royaleserver.csv.Row;
 import royaleserver.csv.Table;
 import royaleserver.utils.SCID;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Card {
@@ -33,7 +35,9 @@ public class Card {
 		return name;
 	}
 
-	public int getIndex() { return index; }
+	public int getIndex() {
+		return index;
+	}
 
 	public SCID getScid() {
 		return scid;
@@ -99,6 +103,26 @@ public class Card {
 		return indexCounter;
 	}
 
+	public static Map<Integer, Map<String, Card>> getValues() {
+		return values;
+	}
+
+	public static List<Card> getAllBy(Rarity rarity) {
+
+		List<Card> cards = new ArrayList<>();
+
+		for (Map<String, Card> type : values.values()) {
+			for (Card card : type.values()) {
+				if (card.rarity == rarity && card.notInUse != true) {
+					cards.add(card);
+				}
+
+			}
+		}
+
+		return cards;
+	}
+
 	public static Card by(String name) {
 		for (Map<String, Card> type : values.values()) {
 			if (type.containsKey(name)) {
@@ -108,4 +132,17 @@ public class Card {
 
 		return null;
 	}
+
+	public static Card by(int id) {
+		for (Map<String, Card> type : values.values()) {
+			for (Card card : type.values()) {
+				if (card.getIndex() == id) {
+					return card;
+				}
+			}
+		}
+
+		return null;
+	}
+
 }
