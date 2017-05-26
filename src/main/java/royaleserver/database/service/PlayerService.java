@@ -17,6 +17,7 @@ public class PlayerService {
 	public PlayerEntity create() {
 		PlayerEntity playerEntity = new PlayerEntity();
 		playerEntity.setPassToken(StringUtils.randomString(32, 64));
+		playerEntity.setName("");
 		return add(playerEntity);
 	}
 

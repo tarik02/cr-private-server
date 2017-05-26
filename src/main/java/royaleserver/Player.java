@@ -60,27 +60,27 @@ public class Player implements MessageHandler, CommandHandler {
 	}
 
 	/**
-	 * @apiNote For internal usage only
 	 * @return true if closing is success
+	 * @apiNote For internal usage only
 	 */
 	public boolean close() {
 		return close(null, true);
 	}
 
 	/**
-	 * @apiNote For internal usage only
 	 * @param reason Reason of closing
 	 * @return true if closing is success
+	 * @apiNote For internal usage only
 	 */
 	public boolean close(final String reason) {
 		return close(reason, true);
 	}
 
 	/**
-	 * @apiNote For internal usage only
-	 * @param reason Reason of closing
+	 * @param reason         Reason of closing
 	 * @param sendDisconnect If true, then server will send LoginFailed packet
 	 * @return true if closing is success
+	 * @apiNote For internal usage only
 	 */
 	public boolean close(String reason, final boolean sendDisconnect) {
 		if (closed) {
@@ -105,7 +105,7 @@ public class Player implements MessageHandler, CommandHandler {
 			loginFailed.updateURL = "";
 			loginFailed.reason = reason;
 			loginFailed.secondsUntilMaintenanceEnd = 0;
-			loginFailed.unknown_7 = (byte) 0;
+			loginFailed.unknown_7 = (byte)0;
 			loginFailed.unknown_8 = "";
 			session.sendMessage(loginFailed);
 			session.close();
@@ -211,10 +211,31 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleAvatarNameCheckRequest(AvatarNameCheckRequest message) throws Throwable {
-		entity.setName(message.username); // Change???
+		AvatarNameCheckResponse response = new AvatarNameCheckResponse();
+		response.username = message.username;
+		session.sendMessage(response);
+
+		return true;
+	}
+
+	@Override
+	public boolean handleSetNickname(SetNickname command) throws Throwable {
+
+		// Очень много действий выполняются при смене ника. Можно конечно делать, как ты, сразу же менять его при первом только нажатии, но в клиенте происходят противоречия, из-за которых ->
+		// -> в дальнейшем происходят ошибки. Так что именно тут надо менять ник. Это конечный пункт.
+		System.out.println("handleSetNickname: " + command.nickname);
+
+		entity.setName(command.nickname);
+		System.out.println(entity.getName());
+		return true;
+	}
+
+	@Override
+	public boolean handleChangeAvatarName(ChangeAvatarName message) throws Throwable {
 
 		SetNickname command = new SetNickname();
-		command.nickname = message.username;
+		command.nickname = message.nUsername;
+
 		AvailableServerCommand response = new AvailableServerCommand();
 		response.command.command = command;
 		session.sendMessage(response);
@@ -258,7 +279,7 @@ public class Player implements MessageHandler, CommandHandler {
 		TournamentListSend response = new TournamentListSend();
 		session.sendMessage(response);
 
-		return false;
+		return true;
 	}
 
 	@Override
@@ -359,11 +380,6 @@ public class Player implements MessageHandler, CommandHandler {
 	public boolean handleGoHome(GoHome message) throws Throwable {
 		sendOwnHomeData();
 		return true;
-	}
-
-	@Override
-	public boolean handleChangeAvatarName(ChangeAvatarName message) throws Throwable {
-		return false;
 	}
 
 
