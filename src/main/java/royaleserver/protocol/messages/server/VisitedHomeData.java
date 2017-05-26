@@ -1,11 +1,13 @@
 package royaleserver.protocol.messages.server;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
+import royaleserver.protocol.messages.component.Card;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 import royaleserver.protocol.messages.component.Deck;
@@ -71,6 +73,14 @@ public class VisitedHomeData extends Message {
 		looses = 0;
 
 		deck = new Deck();
+		deck.cards = new Card[8];
+
+		for (int i = 0; i < deck.cards.length; i++) {
+			deck.cards[i] = new Card();
+			deck.cards[i].card = royaleserver.logic.Card.by(i + 1);
+			deck.cards[i].level = 1;
+		}
+
 		cardsFound = 0;
 		cardsGiven = 0;
 		favouriteCard = null;
@@ -102,7 +112,13 @@ public class VisitedHomeData extends Message {
 		stream.putRrsLong(homeID);
 		stream.putRrsLong(homeID);
 
-		stream.putString(username);
+		// username
+		if (username == null) {
+			stream.putString(""); // Username is not set
+		} else {
+			stream.putString(username);
+		}
+
 		stream.putRrsInt32(0); // name changes count
 		stream.putRrsInt32(arena);
 
@@ -144,13 +160,13 @@ public class VisitedHomeData extends Message {
 		stream.putRrsInt32(0);
 
 		int[] statItems = new int[]{
-			26, cardsGiven, cardsGiven, cardsGiven,
-			10, 10, 10,
-			cardsFound, cardsFound, cardsFound,
-			1, tournamentCardsWon, tournamentCardsWon, tournamentCardsWon,
-			1, 1, 1, 726, challengeMaxWins, challengeMaxWins, challengeMaxWins,
-			121, 121, 121, 14, 14, 14,
-			cardsGiven, cardsGiven, cardsGiven
+				26, cardsGiven, cardsGiven, cardsGiven,
+				10, 10, 10,
+				cardsFound, cardsFound, cardsFound,
+				1, tournamentCardsWon, tournamentCardsWon, tournamentCardsWon,
+				1, 1, 1, 726, challengeMaxWins, challengeMaxWins, challengeMaxWins,
+				121, 121, 121, 14, 14, 14,
+				cardsGiven, cardsGiven, cardsGiven
 		};
 
 		stream.putRrsInt32(statItems.length);

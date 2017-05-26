@@ -90,8 +90,11 @@ public class OwnHomeData extends Message {
 
 		currentDeck = new Deck();
 		currentDeck.cards = new Card[8];
-		for (int i = 0; i < 8; ++i) {
+
+		for (int i = 0; i < currentDeck.cards.length; i++) {
 			currentDeck.cards[i] = new Card();
+			currentDeck.cards[i].card = royaleserver.logic.Card.by(i + 1);
+			currentDeck.cards[i].level = 1;
 		}
 
 		decks = new Deck[3];

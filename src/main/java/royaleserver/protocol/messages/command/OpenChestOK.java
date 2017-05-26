@@ -112,7 +112,6 @@ public class OpenChestOK extends Command {
 		stream.putByte((byte)0);
 
 		stream.putRrsInt32(chestItems.length);
-
 		for (ChestItem chestItem : chestItems) {
 			chestItem.encode(stream);
 		}
