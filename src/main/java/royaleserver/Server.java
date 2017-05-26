@@ -92,14 +92,14 @@ public class Server {
 		assetManager = new FolderAssetManager(new File(workingDirectory, "assets"));
 		resourceFingerprint = assetManager.open("fingerprint.json").content();
 
+		logger.info("Initializing data manager...");
+		dataManager = new DataManager(config.database);
+
 		logger.info("Loading data...");
 		Rarity.init(this);
 		Arena.init(this);
 		Card.init(this);
 		GameMode.init(this);
-
-		logger.info("Initializing data manager...");
-		dataManager = new DataManager(config.database);
 
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();

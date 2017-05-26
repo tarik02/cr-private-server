@@ -3,7 +3,8 @@ package royaleserver.database.service;
 import royaleserver.database.entity.AssetEntity;
 
 import javax.persistence.EntityManager;
-import java.sql.Timestamp;
+import javax.persistence.NoResultException;
+import java.util.Date;
 
 public class AssetService {
 	private final EntityManager entityManager;
@@ -13,13 +14,23 @@ public class AssetService {
 	}
 
 	public AssetEntity get(String name) {
-		return (AssetEntity)entityManager.createNamedQuery("getAssetByName")
-				.setParameter("name", name)
-				.getSingleResult();
+		AssetEntity entity;
+
+		try {
+			entity = (AssetEntity)entityManager.createNamedQuery("getAssetByName")
+					.setParameter("name", name)
+					.getSingleResult();
+		} catch (NoResultException ignored) {
+			entity = new AssetEntity();
+			entity.setName(name);
+			entity.setLastUpdated(new Date(System.currentTimeMillis()));
+		}
+
+		return entity;
 	}
 
 	public void update(AssetEntity entity) {
-		entity.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+		entity.setLastUpdated(new Date(System.currentTimeMillis()));
 
 		entityManager.getTransaction().begin();
 		entityManager.merge(entity);
