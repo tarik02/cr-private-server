@@ -71,6 +71,11 @@ public final class MainLogger extends Logger {
 		}
 
 		sb.append(": ");
+
+		if (message == null) {
+			message = "null";
+		}
+
 		sb.append(String.format(message, format));
 		sb.append('\n');
 
