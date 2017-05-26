@@ -1,7 +1,7 @@
 package royaleserver.database.entity;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
 
 @Entity
 @Table(name = "assets")
@@ -16,7 +16,7 @@ public class AssetEntity {
 
 	@Temporal(value = TemporalType.TIMESTAMP)
 	@Column(nullable = false)
-	private Timestamp lastUpdated;
+	private Date lastUpdated;
 
 	public long getId() {
 		return id;
@@ -36,11 +36,11 @@ public class AssetEntity {
 		return this;
 	}
 
-	public Timestamp getLastUpdated() {
+	public Date getLastUpdated() {
 		return lastUpdated;
 	}
 
-	public AssetEntity setLastUpdated(Timestamp lastUpdated) {
+	public AssetEntity setLastUpdated(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
 		return this;
 	}
