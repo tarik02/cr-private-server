@@ -1,6 +1,8 @@
 package royaleserver.database.entity;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "players")
@@ -11,6 +13,7 @@ import javax.persistence.*;
 public class PlayerEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	private long id;
 
 	@Column(length = 32, unique = true, nullable = true)
@@ -24,6 +27,11 @@ public class PlayerEntity {
 
 	@Column(length = 64, nullable = false)
 	private String passToken; // Account security, like password
+
+	@Column(nullable = false)
+	@OneToMany(mappedBy = "player")
+	private Set<PlayerCardEntity> cards = new HashSet<>();
+
 
 	public long getId() {
 		return id;
@@ -67,6 +75,15 @@ public class PlayerEntity {
 
 	public PlayerEntity setPassToken(String passToken) {
 		this.passToken = passToken;
+		return this;
+	}
+
+	public Set<PlayerCardEntity> getCards() {
+		return cards;
+	}
+
+	public PlayerEntity setCards(Set<PlayerCardEntity> cards) {
+		this.cards = cards;
 		return this;
 	}
 }
