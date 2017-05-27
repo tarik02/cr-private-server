@@ -4,6 +4,7 @@ import royaleserver.Server;
 import royaleserver.config.Database;
 import royaleserver.database.service.AssetService;
 import royaleserver.database.service.CardService;
+import royaleserver.database.service.PlayerCardService;
 import royaleserver.database.service.PlayerService;
 
 import javax.persistence.EntityManager;
@@ -53,6 +54,7 @@ public class DataManager {
 		services = new DataServices(
 				new AssetService(entityManager),
 				new CardService(entityManager),
+				new PlayerCardService(entityManager),
 				new PlayerService(entityManager)
 		);
 	}

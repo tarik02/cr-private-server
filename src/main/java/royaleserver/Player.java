@@ -1,5 +1,6 @@
 package royaleserver;
 
+import royaleserver.database.entity.PlayerCardEntity;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
@@ -10,6 +11,7 @@ import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.messages.client.*;
 import royaleserver.protocol.messages.command.*;
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
+import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.component.CommandComponent;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.SCID;
@@ -47,10 +49,15 @@ public class Player implements MessageHandler, CommandHandler {
 		ownHomeData.level = 13;
 		ownHomeData.lastLevel = 13;
 
-		/*ownHomeData.cards = new Card[80]; // Fill it for testing
-		for (int i = 0; i < ownHomeData.cards.length; ++i) {
-			//(ownHomeData.cards[i] = new Card()).cardId = i;
-		}*/
+		ownHomeData.cards = new Card[entity.getCards().size()];
+
+		int i = 0;
+		for (PlayerCardEntity cardEntity : entity.getCards()) {
+			Card card = ownHomeData.cards[i++] = new Card();
+			card.card = cardEntity.getLogicCard();
+			card.level = cardEntity.getLevel();
+			card.count = cardEntity.getLevel();
+		}
 
 		session.sendMessage(ownHomeData);
 	}

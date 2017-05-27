@@ -1,10 +1,9 @@
 package royaleserver.database.service;
 
 import royaleserver.database.entity.CardEntity;
-import royaleserver.logic.Card;
 
 import javax.persistence.EntityManager;
-import java.util.List;
+import javax.persistence.NoResultException;
 
 public class CardService {
 	private final EntityManager entityManager;
@@ -13,19 +12,28 @@ public class CardService {
 		this.entityManager = entityManager;
 	}
 
-	public void update() {
-		List<Card> cards = Card.cards();
+	public void beginResolve() {
+		entityManager.getTransaction().begin();
+	}
 
-		for (Card card : cards) {
-			CardEntity cardEntity = new CardEntity();
-			cardEntity
-					.setType(card.getType())
-					.setIndex(card.getIndex())
-					.setScid(card.getScid())
-					.setName(card.getName());
-			entityManager.getTransaction().begin();
-			entityManager.merge(cardEntity);
-			entityManager.getTransaction().commit();
+	public void endResolve() {
+		entityManager.getTransaction().commit();
+	}
+
+	public CardEntity resolve(String name) {
+		CardEntity entity;
+
+		try {
+			entity = (CardEntity)entityManager.createNamedQuery("getByName")
+					.setParameter("name", name)
+					.getSingleResult();
+		} catch (NoResultException ignored) {
+			entity = new CardEntity();
+			entity.setName(name);
+
+			entityManager.merge(entity);
 		}
+
+		return entity;
 	}
 }

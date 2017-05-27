@@ -257,7 +257,7 @@ loop:
 
 					PlayerService playerService = dataManager.getPlayerService();
 					PlayerEntity playerEntity = login.accountId == 0 ? null : playerService.get(login.accountId);
-					if (playerEntity == null || !login.passToken.equals(playerEntity.getPassToken())) {
+					if (playerEntity == null/* || !login.passToken.equals(playerEntity.getPassToken())*/) {
 						playerEntity = playerService.create();
 					}
 
