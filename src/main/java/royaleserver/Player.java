@@ -92,7 +92,7 @@ public class Player implements MessageHandler, CommandHandler {
 	 */
 	public boolean checkNickname(String nickname) {
 		// TODO: More checks
-		return nickname.length() > 0 && nickname.length() < 32;
+		return nickname.length() > 0 && nickname.length() < 16;
 	}
 
 	public void disconnect(String reason) {
