@@ -66,6 +66,10 @@ public class PlayerCardEntity implements java.io.Serializable {
 		return Card.byDB(card.getId());
 	}
 
+	public PlayerCardEntity setLogicCard(Card card) {
+		return setCard(new CardEntity().setId(card.getDbId()));
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
