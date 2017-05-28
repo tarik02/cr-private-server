@@ -56,7 +56,7 @@ public class Player implements MessageHandler, CommandHandler {
 		int i = 0;
 		for (HomeChestEntity homeChestEntity : entity.getHomeChests()) {
 			HomeChest homeChest = ownHomeData.homeChests[i] = new HomeChest();
-			homeChest.slot = i;
+			homeChest.slot = homeChestEntity.getSlot();
 			homeChest.chest = homeChestEntity.getLogicChest();
 			switch (homeChestEntity.getStatus()) {
 			case IDLE:
