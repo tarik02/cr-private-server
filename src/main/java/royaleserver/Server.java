@@ -9,10 +9,7 @@ import royaleserver.crypto.ServerCrypto;
 import royaleserver.database.DataManager;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
-import royaleserver.logic.Arena;
-import royaleserver.logic.Card;
-import royaleserver.logic.GameMode;
-import royaleserver.logic.Rarity;
+import royaleserver.logic.*;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.MessageHeader;
 import royaleserver.protocol.Session;
@@ -100,6 +97,7 @@ public class Server {
 		Arena.init(this);
 		Card.init(this);
 		GameMode.init(this);
+		Chest.init(this);
 
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();
