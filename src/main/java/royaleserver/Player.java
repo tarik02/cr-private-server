@@ -1,6 +1,7 @@
 package royaleserver;
 
 import royaleserver.database.entity.HomeChestEntity;
+import royaleserver.database.entity.HomeChestStatus;
 import royaleserver.database.entity.PlayerCardEntity;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
@@ -55,7 +56,7 @@ public class Player implements MessageHandler, CommandHandler {
 		ownHomeData.homeChests = new HomeChest[entity.getHomeChests().size()];
 		int i = 0;
 		for (HomeChestEntity homeChestEntity : entity.getHomeChests()) {
-			HomeChest homeChest = ownHomeData.homeChests[i] = new HomeChest();
+			HomeChest homeChest = ownHomeData.homeChests[i++] = new HomeChest();
 			homeChest.slot = homeChestEntity.getSlot();
 			homeChest.chest = homeChestEntity.getLogicChest();
 			switch (homeChestEntity.getStatus()) {
@@ -63,15 +64,18 @@ public class Player implements MessageHandler, CommandHandler {
 				homeChest.status = HomeChest.STATUS_STATIC;
 				break;
 			case OPENING:
-				homeChest.status = HomeChest.STATUS_OPENING;
-				homeChest.ticksToOpen = (int)((System.currentTimeMillis() - homeChestEntity.getOpenEnd().getTime()) / 50); // Convert millis to ticks
-				break;
+				if (homeChestEntity.getOpenEnd().getTime() < System.currentTimeMillis()) {
+					homeChestEntity.setStatus(HomeChestStatus.OPENED);
+					server.getDataManager().getHomeChestService().put(homeChestEntity);
+				} else {
+					homeChest.status = HomeChest.STATUS_OPENING;
+					homeChest.ticksToOpen = (int)((homeChestEntity.getOpenEnd().getTime() - System.currentTimeMillis()) / 50); // Convert millis to ticks
+					break;
+				}
 			case OPENED:
 				homeChest.status = HomeChest.STATUS_OPENED;
 				break;
 			}
-
-			++i;
 		}
 
 		ownHomeData.cards = new Card[entity.getCards().size()];
