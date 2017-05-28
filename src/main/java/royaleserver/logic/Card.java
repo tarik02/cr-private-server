@@ -116,10 +116,6 @@ public class Card {
 		return indexCounter;
 	}
 
-	public static List<Card> cards() {
-		return cards;
-	}
-
 	public static Card by(String name) {
 		for (Card card : cards) {
 			if (card.getName().equals(name)) {

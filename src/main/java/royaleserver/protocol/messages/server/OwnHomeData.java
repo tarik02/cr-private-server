@@ -52,8 +52,8 @@ public class OwnHomeData extends Message {
 		accountCreatedTime = (int)(System.currentTimeMillis() / 1000); // I think that it must be devided
 		loginTime = (int)(System.currentTimeMillis() / 1000); // It's also
 
-		arena = Arena.by("TrainingCamp");
-		lastArena = Arena.by("TrainingCamp");
+		arena = Arena.by("Arena1");
+		lastArena = Arena.by("Arena1");
 
 		level = 0;
 		lastLevel = 0;
@@ -90,8 +90,11 @@ public class OwnHomeData extends Message {
 
 		currentDeck = new Deck();
 		currentDeck.cards = new Card[8];
-		for (int i = 0; i < 8; ++i) {
+
+		for (int i = 0; i < currentDeck.cards.length; i++) {
 			currentDeck.cards[i] = new Card();
+			currentDeck.cards[i].card = royaleserver.logic.Card.byDB(i + 1); // Temponary solution
+			currentDeck.cards[i].level = 1;
 		}
 
 		decks = new Deck[3];
