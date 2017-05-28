@@ -5,12 +5,17 @@ import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
 import royaleserver.database.service.ChestService;
+import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Chest implements Cloneable {
+	public static final int SCID_HIGH = 19;
+
 	private long dbId;
+
+	private SCID scid;
 
 	private String name;
 	private Arena arena;
@@ -21,17 +26,83 @@ public class Chest implements Cloneable {
 	private Card[] guaranteedSpells;
 	private int minGoldPerCard, maxGoldPerCard;
 
-
 	private Chest() {}
 
 	public long getDbId() {
 		return dbId;
 	}
 
+	public SCID getScid() {
+		return scid;
+	}
+
 	public String getName() {
 		return name;
 	}
 
+	public Arena getArena() {
+		return arena;
+	}
+
+	public boolean isInShop() {
+		return inShop;
+	}
+
+	public boolean isInArenaInfo() {
+		return inArenaInfo;
+	}
+
+	public int getTimeTakenDays() {
+		return timeTakenDays;
+	}
+
+	public int getTimeTakesHours() {
+		return timeTakesHours;
+	}
+
+	public int getTimeTakenMinutes() {
+		return timeTakenMinutes;
+	}
+
+	public int getTimeTakenSeconds() {
+		return timeTakenSeconds;
+	}
+
+	public int getRandomSpells() {
+		return randomSpells;
+	}
+
+	public int getDifferentSpells() {
+		return differentSpells;
+	}
+
+	public int getRareChance() {
+		return rareChance;
+	}
+
+	public int getEpicCance() {
+		return epicCance;
+	}
+
+	public int getLegendaryChance() {
+		return legendaryChance;
+	}
+
+	public Card[] getGuaranteedSpells() {
+		return guaranteedSpells;
+	}
+
+	public int getMinGoldPerCard() {
+		return minGoldPerCard;
+	}
+
+	public int getMaxGoldPerCard() {
+		return maxGoldPerCard;
+	}
+
+	public int getOpenTicks() {
+		return (((timeTakenDays * 24 + timeTakesHours) * 60 + timeTakenMinutes) * 60 + timeTakenSeconds) * 20;
+	}
 
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
@@ -89,6 +160,8 @@ public class Chest implements Cloneable {
 					}
 				}
 			}
+
+			chest.scid = new SCID(SCID_HIGH, i++);
 
 			chest.name = csv_chest.getValue(csv_Name).asString();
 			chest.arena = Arena.by(csv_chest.getValue(csv_Arena).asString(chest.arena == null ? "" : chest.arena.getName()));
