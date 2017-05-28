@@ -51,12 +51,24 @@ public class Value {
 		return (nullIfEmpty && empty()) ? null : getValue();
 	}
 
+	public String asString(String def) {
+		return empty() ? def : asString();
+	}
+
 	public boolean asBoolean() {
 		return getValue().equalsIgnoreCase("TRUE");
 	}
 
+	public boolean asBoolean(boolean def) {
+		return empty() ? def : asBoolean();
+	}
+
 	public int asInt() {
 		return Integer.valueOf(getValue());
+	}
+
+	public int asInt(int def) {
+		return empty() ? def : asInt();
 	}
 
 	public Integer asIntNullable() {
@@ -65,6 +77,10 @@ public class Value {
 
 	public float asFloat() {
 		return Float.valueOf(getValue());
+	}
+
+	public float asFloat(float def) {
+		return empty() ? def : asFloat();
 	}
 
 	public Float asFloatNullable() {
