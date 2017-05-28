@@ -1,5 +1,6 @@
 package royaleserver;
 
+import royaleserver.database.entity.HomeChestEntity;
 import royaleserver.database.entity.PlayerCardEntity;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
@@ -13,6 +14,7 @@ import royaleserver.protocol.messages.command.*;
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
 import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.component.CommandComponent;
+import royaleserver.protocol.messages.component.HomeChest;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.SCID;
 
@@ -50,9 +52,30 @@ public class Player implements MessageHandler, CommandHandler {
 		ownHomeData.level = 13;
 		ownHomeData.lastLevel = 13;
 
-		ownHomeData.cards = new Card[entity.getCards().size()];
-
+		ownHomeData.homeChests = new HomeChest[entity.getHomeChests().size()];
 		int i = 0;
+		for (HomeChestEntity homeChestEntity : entity.getHomeChests()) {
+			HomeChest homeChest = ownHomeData.homeChests[i] = new HomeChest();
+			homeChest.slot = i;
+			homeChest.chest = homeChestEntity.getLogicChest();
+			switch (homeChestEntity.getStatus()) {
+			case IDLE:
+				homeChest.status = HomeChest.STATUS_STATIC;
+				break;
+			case OPENING:
+				homeChest.status = HomeChest.STATUS_OPENING;
+				homeChest.ticksToOpen = (int)((System.currentTimeMillis() - homeChestEntity.getOpenEnd().getTime()) / 50); // Convert millis to ticks
+				break;
+			case OPENED:
+				homeChest.status = HomeChest.STATUS_OPENED;
+				break;
+			}
+
+			++i;
+		}
+
+		ownHomeData.cards = new Card[entity.getCards().size()];
+		i = 0;
 		for (PlayerCardEntity cardEntity : entity.getCards()) {
 			Card card = ownHomeData.cards[i++] = new Card();
 			card.card = cardEntity.getLogicCard();

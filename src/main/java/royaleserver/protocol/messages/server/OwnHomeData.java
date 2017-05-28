@@ -8,7 +8,6 @@ import royaleserver.protocol.messages.component.Deck;
 import royaleserver.protocol.messages.component.HomeChest;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
-import royaleserver.utils.SCID;
 import royaleserver.utils.UsefulTools;
 
 import java.util.HashMap;
@@ -59,7 +58,8 @@ public class OwnHomeData extends Message {
 		lastLevel = 0;
 		levelExperience = 0;
 
-		homeChests = new HomeChest[4];
+		homeChests = new HomeChest[0];
+		/*homeChests = new HomeChest[4];
 
 		homeChests[0] = new HomeChest();
 		homeChests[0].chestID = new SCID(19, 45);
@@ -84,7 +84,7 @@ public class OwnHomeData extends Message {
 		homeChests[3].slot = 4;
 		homeChests[3].status = HomeChest.STATUS_OPENING;
 		homeChests[3].ticksToOpen = 3 * 60 * 20 - 120;
-		homeChests[3].openTicks = 3 * 60 * 20;
+		homeChests[3].openTicks = 3 * 60 * 20;*/
 
 		cards = new Card[0];
 
@@ -130,10 +130,6 @@ public class OwnHomeData extends Message {
 	@Override
 	public void encode(DataStream stream) {
 		super.encode(stream);
-
-		if (homeChests.length != 4) {
-			throw new RuntimeException("homeChests.length must be 4");
-		}
 
 		stream.putBLong(homeId);
 
@@ -240,8 +236,11 @@ public class OwnHomeData extends Message {
 		// year[4]-month[2]-day[2]
 		stream.putString("{\"ID\":\"CARD_RELEASE\",\"Params\":{\"Assassin\":\"20170324\",\"Heal\":\"20170501\"}}");
 
-		for (HomeChest chest : homeChests) {
-			chest.encode(stream);
+		if (homeChests.length != 0) {
+			homeChests[0].first = true;
+			for (HomeChest chest : homeChests) {
+				chest.encode(stream);
+			}
 		}
 
 		// Not decoded yet

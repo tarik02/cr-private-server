@@ -1,65 +1,59 @@
 package royaleserver.protocol.messages.component;
 
+import royaleserver.logic.Chest;
 import royaleserver.protocol.messages.Component;
 import royaleserver.utils.DataStream;
-import royaleserver.utils.SCID;
 
 public class HomeChest extends Component {
-    public static final byte STATUS_STATIC = 0;
-    public static final byte STATUS_OPENED = 1;
-    public static final byte STATUS_OPENING = 8;
+	public static final byte STATUS_STATIC = 0;
+	public static final byte STATUS_OPENED = 1;
+	public static final byte STATUS_OPENING = 8;
 
-    public static final SCID CHEST_SUPER_MAGICAL_TRAINING_CAMP = new SCID(19, 45);
+	public boolean first;
+	public int slot;
+	public Chest chest;
+	public byte status;
+	public int ticksToOpen; // Remains ticks to open
 
-    public boolean first;
-    public SCID chestID;
-    public int slot; // from 1
-    public byte status;
-    public int ticksToOpen; // Remains ticks to open
-    public int openTicks; // Ticks to open from zero
+	public HomeChest() {
+		first = false;
+		slot = 0;
+		chest = Chest.by("Silver");
+		status = STATUS_STATIC;
+		ticksToOpen = 0;
+	}
 
-    public HomeChest() {
-        first = false;
-        chestID = CHEST_SUPER_MAGICAL_TRAINING_CAMP;
-        slot = 1;
-        status = STATUS_STATIC;
-        ticksToOpen = 0;
-        openTicks = 0;
-    }
+	@Override
+	public void encode(DataStream stream) {
+		super.encode(stream);
 
-    @Override
-    public void encode(DataStream stream) {
-        super.encode(stream);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(4);
 
-        // means, that now will chest
-        stream.putRrsInt32(0);
-        stream.putRrsInt32(4);
+		if (first) {
+			stream.putRrsInt32(1);
+		}
 
-        // startChest place?
-        if (first)
-            stream.putRrsInt32(1);
+		stream.putSCID(chest.getScid());
 
-        stream.putSCID(chestID);
+		stream.putByte(status);
+		if (status == STATUS_OPENING) {
+			stream.putRrsInt32(ticksToOpen);
+			stream.putRrsInt32(chest.getOpenTicks());
 
-        stream.putRrsInt32(status);
-        if (status == STATUS_OPENING) {
-            stream.putRrsInt32(ticksToOpen);
-            stream.putRrsInt32(openTicks);
+			stream.putRrsInt32((int)System.currentTimeMillis());
+		}
 
-            // timestamp
-            stream.putRrsInt32((int)System.currentTimeMillis());
-        }
+		stream.putRrsInt32(slot + 1);
 
-        stream.putRrsInt32(slot);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(slot);
+		stream.putRrsInt32(0);
+	}
 
-        stream.putRrsInt32(1);
-        stream.putRrsInt32(slot - 1);
-        stream.putRrsInt32(0);
-    }
-
-    @Override
-    public void decode(DataStream stream) {
-        super.decode(stream);
-    }
+	@Override
+	public void decode(DataStream stream) {
+		super.decode(stream);
+	}
 }
 
