@@ -22,6 +22,14 @@ public class PlayerService {
 		return add(playerEntity);
 	}
 
+	public PlayerEntity create(long id, String passToken) {
+		PlayerEntity playerEntity = new PlayerEntity();
+		playerEntity.setId(id);
+		playerEntity.setPassToken(passToken);
+		playerEntity.setLogicArena(Arena.by("Arena1"));
+		return add(playerEntity);
+	}
+
 	public PlayerEntity add(PlayerEntity entity){
 		entityManager.getTransaction().begin();
 		PlayerEntity fromDB = entityManager.merge(entity);
