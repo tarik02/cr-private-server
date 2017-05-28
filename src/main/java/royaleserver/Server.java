@@ -255,8 +255,12 @@ loop:
 
 					PlayerService playerService = dataManager.getPlayerService();
 					PlayerEntity playerEntity = login.accountId == 0 ? null : playerService.get(login.accountId);
-					if (playerEntity == null/* || !login.passToken.equals(playerEntity.getPassToken())*/) {
-						playerEntity = playerService.create();
+					if (playerEntity == null) { // TODO: DO SOMETHING TO CHECK THIS PASS TOKEN
+						if (login.accountId == 0) {
+							playerEntity = playerService.create();
+						} else {
+							playerEntity = playerService.create(login.accountId, login.passToken);
+						}
 					}
 
 					LoginOk loginOk = new LoginOk();
