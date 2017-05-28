@@ -1,6 +1,7 @@
 package royaleserver.database.service;
 
 import royaleserver.database.entity.PlayerEntity;
+import royaleserver.logic.Arena;
 import royaleserver.utils.StringUtils;
 
 import javax.persistence.EntityManager;
@@ -17,7 +18,7 @@ public class PlayerService {
 	public PlayerEntity create() {
 		PlayerEntity playerEntity = new PlayerEntity();
 		playerEntity.setPassToken(StringUtils.randomString(32, 64));
-		playerEntity.setName("");
+		playerEntity.setLogicArena(Arena.by("Arena1"));
 		return add(playerEntity);
 	}
 

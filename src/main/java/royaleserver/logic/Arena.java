@@ -4,15 +4,19 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.service.ArenaService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Arena {
+	private long dbId;
+
 	private int index;
 
 	private String name;
-	private String arena, chestArena;
+	private int arena;
+	private String chestArena;
 	private boolean isInUse;
 	private int trophyLimit, demoteTrophyLimit;
 	private Integer seasonTrophyRequest;
@@ -24,6 +28,10 @@ public class Arena {
 
 	private Arena() {}
 
+	public long getDbId() {
+		return dbId;
+	}
+
 	public int getIndex() {
 		return index;
 	}
@@ -32,7 +40,7 @@ public class Arena {
 		return name;
 	}
 
-	public String getArena() {
+	public int getArena() {
 		return arena;
 	}
 
@@ -85,12 +93,14 @@ public class Arena {
 	}
 
 	private static boolean initialized = false;
-	private static Map<String, Arena> values = new HashMap<>();
+	private static List<Arena> values = new ArrayList<>();
 
 	public static void init(Server server) throws Server.ServerException {
 		if (initialized) {
 			return;
 		}
+
+		ArenaService arenaService = server.getDataManager().getArenaService();
 
 		Table csv_arenas = server.getAssetManager().open("csv_logic/arenas.csv").csv();
 		Column csv_Name = csv_arenas.getColumn("Name");
@@ -110,13 +120,14 @@ public class Arena {
 		Column csv_ReleaseDate = csv_arenas.getColumn("ReleaseDate");
 		Column csv_SeasonRewardChest = csv_arenas.getColumn("SeasonRewardChest");
 
+		arenaService.beginResolve();
 		int i = 0;
 		for (Row csv_arena : csv_arenas.getRows()) {
 			Arena arena = new Arena();
 
 			arena.index = i++;
 			arena.name = csv_arena.getValue(csv_Name).asString();
-			arena.arena = csv_arena.getValue(csv_Arena).asString();
+			arena.arena = csv_arena.getValue(csv_Arena).asInt();
 			arena.chestArena = csv_arena.getValue(csv_ChestArena).asString();
 			arena.isInUse = csv_arena.getValue(csv_IsInUse).asBoolean();
 			arena.trophyLimit = csv_arena.getValue(csv_TrophyLimit).asInt();
@@ -130,13 +141,32 @@ public class Arena {
 			arena.battleRewardGold = csv_arena.getValue(csv_BattleRewardGold).asInt();
 			arena.releaseDate = csv_arena.getValue(csv_ReleaseDate).asString(true);
 
-			values.put(arena.name, arena);
+			arena.dbId = arenaService.resolve(arena.name).getId();
+
+			values.add(arena);
 		}
+		arenaService.endResolve();
 
 		initialized = true;
 	}
 
 	public static Arena by(String name) {
-		return values.get(name);
+		for (Arena arena : values) {
+			if (arena.name.equals(name)) {
+				return arena;
+			}
+		}
+
+		return null;
+	}
+
+	public static Arena byDB(long id) {
+		for (Arena arena : values) {
+			if (arena.dbId == id) {
+				return arena;
+			}
+		}
+
+		return null;
 	}
 }

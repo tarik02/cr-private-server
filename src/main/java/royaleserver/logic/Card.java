@@ -1,15 +1,15 @@
 package royaleserver.logic;
 
 import royaleserver.Server;
+import royaleserver.assets.Asset;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.service.CardService;
 import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Card {
 	public static final int TYPE_CHARACTER = 26;
@@ -19,6 +19,8 @@ public class Card {
 	private int type;
 	private int index;
 	private SCID scid;
+
+	private long dbId;
 
 	private String name;
 	private Arena unlockArena;
@@ -31,16 +33,22 @@ public class Card {
 		return type;
 	}
 
+	public int getIndex() { return index; }
+
+	public SCID getScid() {
+		return scid;
+	}
+
+	public long getDbId() {
+		return dbId;
+	}
+
 	public String getName() {
 		return name;
 	}
 
-	public int getIndex() {
-		return index;
-	}
-
-	public SCID getScid() {
-		return scid;
+	public Arena getUnlockArena() {
+		return unlockArena;
 	}
 
 	public Rarity getRarity() {
@@ -56,7 +64,7 @@ public class Card {
 	}
 
 	private static boolean initialized = false;
-	private static Map<Integer, Map<String, Card>> values = new HashMap<>();
+	private static List<Card> cards = new ArrayList<>();
 
 	public static void init(Server server) throws Server.ServerException {
 		if (initialized) {
@@ -65,24 +73,26 @@ public class Card {
 
 		int indexCounter = 1;
 
-		indexCounter = loadCards(TYPE_CHARACTER, server.getAssetManager().open("csv_logic/spells_characters.csv").csv(), indexCounter);
-		indexCounter = loadCards(TYPE_BUILDING, server.getAssetManager().open("csv_logic/spells_buildings.csv").csv(), indexCounter);
-		indexCounter = loadCards(TYPE_SPELL, server.getAssetManager().open("csv_logic/spells_other.csv").csv(), indexCounter);
+		indexCounter = loadCards(server, TYPE_CHARACTER, server.getAssetManager().open("csv_logic/spells_characters.csv"), indexCounter);
+		indexCounter = loadCards(server, TYPE_BUILDING, server.getAssetManager().open("csv_logic/spells_buildings.csv"), indexCounter);
+		indexCounter = loadCards(server, TYPE_SPELL, server.getAssetManager().open("csv_logic/spells_other.csv"), indexCounter);
 
 		initialized = true;
 	}
 
-	private static int loadCards(int type, Table csv_cards, int indexCounter) throws Server.ServerException {
+	private static int loadCards(Server server, int type, Asset asset, int indexCounter) throws Server.ServerException {
+		CardService cardService = server.getDataManager().getCardService();
+
+		Table csv_cards = asset.csv();
 		Column csv_Name = csv_cards.getColumn("Name");
 		Column csv_UnlockArena = csv_cards.getColumn("UnlockArena");
 		Column csv_Rarity = csv_cards.getColumn("Rarity");
 		Column csv_ManaCost = csv_cards.getColumn("ManaCost");
 		Column csv_NotInUse = csv_cards.getColumn("NotInUse");
 
-		Map<String, Card> cards = new HashMap<>();
-		values.put(type, cards);
-
 		int cardIndex = 0;
+
+		cardService.beginResolve();
 		for (Row csv_card : csv_cards.getRows()) {
 			Card card = new Card();
 
@@ -96,53 +106,33 @@ public class Card {
 			card.elixirCost = csv_ManaCost.getValue(csv_card).asInt();
 			card.notInUse = csv_NotInUse.getValue(csv_card).asBoolean();
 
-			cards.put(card.name, card);
+			card.dbId = cardService.resolve(card.name).getId();
+
+			cards.add(card);
 			++indexCounter;
 		}
+		cardService.endResolve();
 
 		return indexCounter;
 	}
 
-	public static Map<Integer, Map<String, Card>> getValues() {
-		return values;
-	}
-
-	public static List<Card> getAllBy(Rarity rarity) {
-
-		List<Card> cards = new ArrayList<>();
-
-		for (Map<String, Card> type : values.values()) {
-			for (Card card : type.values()) {
-				if (card.rarity == rarity && card.notInUse != true) {
-					cards.add(card);
-				}
-
-			}
-		}
-
-		return cards;
-	}
-
 	public static Card by(String name) {
-		for (Map<String, Card> type : values.values()) {
-			if (type.containsKey(name)) {
-				return type.get(name);
+		for (Card card : cards) {
+			if (card.getName().equals(name)) {
+				return card;
 			}
 		}
 
 		return null;
 	}
 
-	public static Card by(int id) {
-		for (Map<String, Card> type : values.values()) {
-			for (Card card : type.values()) {
-				if (card.getIndex() == id) {
-					return card;
-				}
+	public static Card byDB(long id) {
+		for (Card card : cards) {
+			if (card.getDbId() == id) {
+				return card;
 			}
 		}
 
 		return null;
 	}
-
 }

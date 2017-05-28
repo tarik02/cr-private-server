@@ -1,6 +1,10 @@
 package royaleserver.database.entity;
 
+import royaleserver.logic.Arena;
+
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "players")
@@ -11,6 +15,7 @@ import javax.persistence.*;
 public class PlayerEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	private long id;
 
 	@Column(length = 32, unique = true, nullable = true)
@@ -24,6 +29,18 @@ public class PlayerEntity {
 
 	@Column(length = 64, nullable = false)
 	private String passToken; // Account security, like password
+
+	@Column(nullable = false)
+	@OneToMany(mappedBy = "player")
+	private Set<PlayerCardEntity> cards = new HashSet<>();
+
+	@Column(nullable = false)
+	private int trophies = 0;
+
+	@JoinColumn(name = "arena_id")
+	@ManyToOne(optional = false)
+	private ArenaEntity arena;
+
 
 	public long getId() {
 		return id;
@@ -68,5 +85,40 @@ public class PlayerEntity {
 	public PlayerEntity setPassToken(String passToken) {
 		this.passToken = passToken;
 		return this;
+	}
+
+	public Set<PlayerCardEntity> getCards() {
+		return cards;
+	}
+
+	public PlayerEntity setCards(Set<PlayerCardEntity> cards) {
+		this.cards = cards;
+		return this;
+	}
+
+	public int getTrophies() {
+		return trophies;
+	}
+
+	public PlayerEntity setTrophies(int trophies) {
+		this.trophies = trophies;
+		return this;
+	}
+
+	public ArenaEntity getArena() {
+		return arena;
+	}
+
+	public PlayerEntity setArena(ArenaEntity arena) {
+		this.arena = arena;
+		return this;
+	}
+
+	public Arena getLogicArena() {
+		return Arena.byDB(arena.getId());
+	}
+
+	public PlayerEntity setLogicArena(Arena arena) {
+		return setArena(new ArenaEntity().setId(arena.getDbId()));
 	}
 }

@@ -52,8 +52,8 @@ public class OwnHomeData extends Message {
 		accountCreatedTime = (int)(System.currentTimeMillis() / 1000); // I think that it must be devided
 		loginTime = (int)(System.currentTimeMillis() / 1000); // It's also
 
-		arena = Arena.by("TrainingCamp");
-		lastArena = Arena.by("TrainingCamp");
+		arena = Arena.by("Arena1");
+		lastArena = Arena.by("Arena1");
 
 		level = 0;
 		lastLevel = 0;
@@ -93,7 +93,7 @@ public class OwnHomeData extends Message {
 
 		for (int i = 0; i < currentDeck.cards.length; i++) {
 			currentDeck.cards[i] = new Card();
-			currentDeck.cards[i].card = royaleserver.logic.Card.by(i + 1);
+			currentDeck.cards[i].card = royaleserver.logic.Card.byDB(i + 1); // Temponary solution
 			currentDeck.cards[i].level = 1;
 		}
 
@@ -249,7 +249,7 @@ public class OwnHomeData extends Message {
 
 		stream.putRrsInt32(lastLevel);
 		stream.putByte((byte)36);
-		stream.putByte((byte)arena.getIndex());
+		stream.putByte((byte)lastArena.getArena());
 
 		stream.put(Hex.toByteArray("c5d9c1ba09"));
 
@@ -291,7 +291,7 @@ public class OwnHomeData extends Message {
 
 		stream.putRrsInt32(0); // changes of username. If 1 can't change
 
-		stream.putByte((byte)arena.getIndex());
+		stream.putByte((byte)arena.getArena());
 		stream.putRrsInt32(trophies);
 
 		// unk

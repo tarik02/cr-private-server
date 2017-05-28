@@ -2,7 +2,7 @@ package royaleserver.database;
 
 import royaleserver.Server;
 import royaleserver.config.Database;
-import royaleserver.database.service.PlayerService;
+import royaleserver.database.service.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
@@ -49,12 +49,32 @@ public class DataManager {
 
 		entityManager = Persistence.createEntityManagerFactory("royaleserver", properties).createEntityManager();
 		services = new DataServices(
+				new ArenaService(entityManager),
+				new AssetService(entityManager),
+				new CardService(entityManager),
+				new PlayerCardService(entityManager),
 				new PlayerService(entityManager)
 		);
 	}
 
 	public DataServices getServices() {
 		return services;
+	}
+
+	public ArenaService getArenaService() {
+		return services.arenaService;
+	}
+
+	public AssetService getAssetService() {
+		return services.assetService;
+	}
+
+	public CardService getCardService() {
+		return services.cardService;
+	}
+
+	public PlayerCardService getPlayerCardService() {
+		return services.playerCardService;
 	}
 
 	public PlayerService getPlayerService() {

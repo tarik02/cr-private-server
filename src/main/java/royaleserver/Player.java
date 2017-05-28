@@ -1,5 +1,6 @@
 package royaleserver;
 
+import royaleserver.database.entity.PlayerCardEntity;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
@@ -10,6 +11,7 @@ import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.messages.client.*;
 import royaleserver.protocol.messages.command.*;
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
+import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.component.CommandComponent;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.SCID;
@@ -30,20 +32,17 @@ public class Player implements MessageHandler, CommandHandler {
 		this.closed = false;
 	}
 
-	public void disconnect(String reason) {
-		close(reason, true);
-	}
-
 	/**
 	 * @apiNote For internal usage only
 	 */
 	public void sendOwnHomeData() {
 		OwnHomeData ownHomeData = new OwnHomeData();
 
+		Arena arena = entity.getLogicArena();
 		ownHomeData.homeId = entity.getId();
-		ownHomeData.arena = Arena.by("Arena_T");
-		ownHomeData.lastArena = Arena.by("Arena_T");
-		ownHomeData.trophies = 4000;
+		ownHomeData.arena = arena;
+		ownHomeData.lastArena = arena;
+		ownHomeData.trophies = entity.getTrophies();
 		ownHomeData.username = entity.getName();
 		ownHomeData.gold = entity.getGold();
 		ownHomeData.gems = entity.getGems();
@@ -51,12 +50,30 @@ public class Player implements MessageHandler, CommandHandler {
 		ownHomeData.level = 13;
 		ownHomeData.lastLevel = 13;
 
-		/*ownHomeData.cards = new Card[80]; // Fill it for testing
-		for (int i = 0; i < ownHomeData.cards.length; ++i) {
-			//(ownHomeData.cards[i] = new Card()).cardId = i;
-		}*/
+		ownHomeData.cards = new Card[entity.getCards().size()];
+
+		int i = 0;
+		for (PlayerCardEntity cardEntity : entity.getCards()) {
+			Card card = ownHomeData.cards[i++] = new Card();
+			card.card = cardEntity.getLogicCard();
+			card.level = cardEntity.getLevel();
+			card.count = cardEntity.getCount();
+		}
 
 		session.sendMessage(ownHomeData);
+	}
+
+	/**
+	 * @param nickname to check
+	 * @return true if nickname is allowed to use
+	 */
+	public boolean checkNickname(String nickname) {
+		// TODO: More checks
+		return nickname.length() > 0 && nickname.length() < 32;
+	}
+
+	public void disconnect(String reason) {
+		close(reason, true);
 	}
 
 	/**
@@ -188,9 +205,10 @@ public class Player implements MessageHandler, CommandHandler {
 		}
 
 		if (responseEntity != null) {
+			Arena arena = responseEntity.getLogicArena();
 			response.homeID = responseEntity.getId();
-			response.arena = 8;
-			response.trophies = 3500;
+			response.arena = arena;
+			response.trophies = responseEntity.getTrophies();
 			response.level = 13;
 			response.username = responseEntity.getName();
 		}
@@ -212,7 +230,11 @@ public class Player implements MessageHandler, CommandHandler {
 	@Override
 	public boolean handleAvatarNameCheckRequest(AvatarNameCheckRequest message) throws Throwable {
 		AvatarNameCheckResponse response = new AvatarNameCheckResponse();
-		response.username = message.username;
+		if (checkNickname(message.username)) {
+			response.username = message.username;
+		} else {
+			response.username = entity.getName(); // Return old nickname back
+		}
 		session.sendMessage(response);
 
 		return true;
@@ -220,20 +242,22 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleSetNickname(SetNickname command) throws Throwable {
+		if (checkNickname(command.nickname)) {
+			entity.setName(command.nickname);
+		}
 
-		// delete it
-		// Очень много действий выполняются при смене ника. Можно конечно делать, как ты, сразу же менять его при первом только нажатии, но в клиенте происходят противоречия, из-за которых ->
-		// -> в дальнейшем происходят ошибки. Так что именно тут надо менять ник. Это конечный пункт.
-
-		entity.setName(command.nickname);
 		return true;
 	}
 
 	@Override
 	public boolean handleChangeAvatarName(ChangeAvatarName message) throws Throwable {
-
 		SetNickname command = new SetNickname();
-		command.nickname = message.nUsername;
+
+		if (checkNickname(message.username)) {
+			command.nickname = message.username;
+		} else {
+			command.nickname = entity.getName();
+		}
 
 		AvailableServerCommand response = new AvailableServerCommand();
 		response.command.command = command;
@@ -244,7 +268,6 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleAskForJoinableAlliancesList(AskForJoinableAlliancesList message) throws Throwable {
-
 		JoinableAllianceList response = new JoinableAllianceList();
 
 		response.alliances = new AllianceHeaderEntry[1];

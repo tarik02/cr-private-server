@@ -1,10 +1,12 @@
 package royaleserver.assets;
 
 import royaleserver.csv.Table;
+import royaleserver.database.entity.AssetEntity;
 import royaleserver.utils.IO;
 import royaleserver.utils.StringUtils;
 
 import java.io.InputStream;
+import java.util.Date;
 
 public abstract class Asset {
 	public abstract InputStream open();
@@ -23,7 +25,15 @@ public abstract class Asset {
 		return new Table(bytes());
 	}
 
-	public final boolean isOlderThan(long time) {
+	public final boolean isNewerThan(long time) {
 		return lastUpdated() < time;
+	}
+
+	public final boolean isNewerThan(Date date) {
+		return isNewerThan(date.getTime());
+	}
+
+	public final boolean isNewerThan(AssetEntity assetEntity) {
+		return isNewerThan(assetEntity.getLastUpdated());
 	}
 }
