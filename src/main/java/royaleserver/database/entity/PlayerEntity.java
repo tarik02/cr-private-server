@@ -1,5 +1,7 @@
 package royaleserver.database.entity;
 
+import org.hibernate.annotations.GenericGenerator;
+import royaleserver.database.util.Identifiable;
 import royaleserver.logic.Arena;
 
 import javax.persistence.*;
@@ -12,11 +14,17 @@ import java.util.Set;
 		@NamedQuery(name = ".getAll", query = "SELECT c from PlayerEntity c"),
 		@NamedQuery(name = ".clear", query = "DELETE FROM PlayerEntity p")
 })
-public class PlayerEntity {
+public class PlayerEntity implements Identifiable<Long> {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private long id;
+	@GenericGenerator(
+			name = "assigned-identity",
+			strategy = "royaleserver.database.util.AssignedIdentityGenerator"
+	)
+	@GeneratedValue(
+			generator = "assigned-identity",
+			strategy = GenerationType.IDENTITY
+	)
+	private Long id;
 
 	@Column(length = 32, unique = true, nullable = true)
 	private String name;
@@ -41,12 +49,16 @@ public class PlayerEntity {
 	@ManyToOne(optional = false)
 	private ArenaEntity arena;
 
+	@Column(nullable = false)
+	@OneToMany(mappedBy = "player")
+	private Set<HomeChestEntity> homeChests = new HashSet<>();
 
-	public long getId() {
+
+	public Long getId() {
 		return id;
 	}
 
-	public PlayerEntity setId(long id) {
+	public PlayerEntity setId(Long id) {
 		this.id = id;
 		return this;
 	}
@@ -120,5 +132,14 @@ public class PlayerEntity {
 
 	public PlayerEntity setLogicArena(Arena arena) {
 		return setArena(new ArenaEntity().setId(arena.getDbId()));
+	}
+
+	public Set<HomeChestEntity> getHomeChests() {
+		return homeChests;
+	}
+
+	public PlayerEntity setHomeChests(Set<HomeChestEntity> homeChests) {
+		this.homeChests = homeChests;
+		return this;
 	}
 }

@@ -52,6 +52,8 @@ public class DataManager {
 				new ArenaService(entityManager),
 				new AssetService(entityManager),
 				new CardService(entityManager),
+				new ChestService(entityManager),
+				new HomeChestService(entityManager),
 				new PlayerCardService(entityManager),
 				new PlayerService(entityManager)
 		);
@@ -71,6 +73,14 @@ public class DataManager {
 
 	public CardService getCardService() {
 		return services.cardService;
+	}
+
+	public ChestService getChestService() {
+		return services.chestService;
+	}
+
+	public HomeChestService getHomeChestService() {
+		return services.homeChestService;
 	}
 
 	public PlayerCardService getPlayerCardService() {
