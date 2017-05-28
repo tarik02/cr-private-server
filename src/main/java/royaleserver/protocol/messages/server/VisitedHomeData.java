@@ -1,15 +1,12 @@
 package royaleserver.protocol.messages.server;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
+import royaleserver.logic.Arena;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
-import royaleserver.utils.DataStream;
-import royaleserver.utils.Hex;
 import royaleserver.protocol.messages.component.Deck;
 import royaleserver.protocol.messages.component.HomeResources;
+import royaleserver.utils.DataStream;
+import royaleserver.utils.Hex;
 import royaleserver.utils.SCID;
 
 public class VisitedHomeData extends Message {
@@ -22,7 +19,7 @@ public class VisitedHomeData extends Message {
 	public String username;
 
 	public int place;
-	public int arena;
+	public Arena arena;
 	public int trophies;
 	public int highestTrophies;
 
@@ -57,7 +54,7 @@ public class VisitedHomeData extends Message {
 		username = "";
 
 		place = 0;
-		arena = 1;
+		arena = Arena.by("TrainingCamp");
 		trophies = 0;
 		highestTrophies = 0;
 
@@ -104,7 +101,7 @@ public class VisitedHomeData extends Message {
 
 		stream.putString(username);
 		stream.putRrsInt32(0); // name changes count
-		stream.putRrsInt32(arena);
+		stream.putByte((byte)arena.getIndex());
 
 		stream.putRrsInt32(trophies);
 		stream.putRrsInt32(657); // unk_6

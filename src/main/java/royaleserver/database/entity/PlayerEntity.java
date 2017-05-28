@@ -1,5 +1,7 @@
 package royaleserver.database.entity;
 
+import royaleserver.logic.Arena;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +33,13 @@ public class PlayerEntity {
 	@Column(nullable = false)
 	@OneToMany(mappedBy = "player")
 	private Set<PlayerCardEntity> cards = new HashSet<>();
+
+	@Column(nullable = false)
+	private int trophies = 0;
+
+	@JoinColumn(name = "arena_id")
+	@ManyToOne(optional = false)
+	private ArenaEntity arena;
 
 
 	public long getId() {
@@ -85,5 +94,31 @@ public class PlayerEntity {
 	public PlayerEntity setCards(Set<PlayerCardEntity> cards) {
 		this.cards = cards;
 		return this;
+	}
+
+	public int getTrophies() {
+		return trophies;
+	}
+
+	public PlayerEntity setTrophies(int trophies) {
+		this.trophies = trophies;
+		return this;
+	}
+
+	public ArenaEntity getArena() {
+		return arena;
+	}
+
+	public PlayerEntity setArena(ArenaEntity arena) {
+		this.arena = arena;
+		return this;
+	}
+
+	public Arena getLogicArena() {
+		return Arena.byDB(arena.getId());
+	}
+
+	public PlayerEntity setLogicArena(Arena arena) {
+		return setArena(new ArenaEntity().setId(arena.getDbId()));
 	}
 }

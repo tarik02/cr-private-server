@@ -38,10 +38,11 @@ public class Player implements MessageHandler, CommandHandler {
 	public void sendOwnHomeData() {
 		OwnHomeData ownHomeData = new OwnHomeData();
 
+		Arena arena = entity.getLogicArena();
 		ownHomeData.homeId = entity.getId();
-		ownHomeData.arena = Arena.by("Arena_T");
-		ownHomeData.lastArena = Arena.by("Arena_T");
-		ownHomeData.trophies = 4000;
+		ownHomeData.arena = arena;
+		ownHomeData.lastArena = arena;
+		ownHomeData.trophies = entity.getTrophies();
 		ownHomeData.username = entity.getName();
 		ownHomeData.gold = entity.getGold();
 		ownHomeData.gems = entity.getGems();
@@ -56,7 +57,7 @@ public class Player implements MessageHandler, CommandHandler {
 			Card card = ownHomeData.cards[i++] = new Card();
 			card.card = cardEntity.getLogicCard();
 			card.level = cardEntity.getLevel();
-			card.count = cardEntity.getLevel();
+			card.count = cardEntity.getCount();
 		}
 
 		session.sendMessage(ownHomeData);
@@ -204,9 +205,10 @@ public class Player implements MessageHandler, CommandHandler {
 		}
 
 		if (responseEntity != null) {
+			Arena arena = responseEntity.getLogicArena();
 			response.homeID = responseEntity.getId();
-			response.arena = 8;
-			response.trophies = 3500;
+			response.arena = arena;
+			response.trophies = responseEntity.getTrophies();
 			response.level = 13;
 			response.username = responseEntity.getName();
 		}

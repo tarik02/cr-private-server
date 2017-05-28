@@ -246,7 +246,7 @@ public class OwnHomeData extends Message {
 
 		stream.putRrsInt32(lastLevel);
 		stream.putByte((byte)36);
-		stream.putByte((byte)arena.getIndex());
+		stream.putByte((byte)lastArena.getArena());
 
 		stream.put(Hex.toByteArray("c5d9c1ba09"));
 
@@ -288,7 +288,7 @@ public class OwnHomeData extends Message {
 
 		stream.putRrsInt32(0); // changes of username. If 1 can't change
 
-		stream.putByte((byte)arena.getIndex());
+		stream.putByte((byte)arena.getArena());
 		stream.putRrsInt32(trophies);
 
 		// unk
