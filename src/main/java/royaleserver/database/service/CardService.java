@@ -31,7 +31,7 @@ public class CardService {
 			entity = new CardEntity();
 			entity.setName(name);
 
-			entityManager.merge(entity);
+			entity = entityManager.merge(entity);
 		}
 
 		return entity;

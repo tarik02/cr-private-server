@@ -31,7 +31,7 @@ public class ArenaService {
 			entity = new ArenaEntity();
 			entity.setName(name);
 
-			entityManager.merge(entity);
+			entity = entityManager.merge(entity);
 		}
 
 		return entity;
