@@ -6,6 +6,7 @@ import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.component.Deck;
 import royaleserver.protocol.messages.component.HomeResources;
+import royaleserver.protocol.messages.component.PlayerClan;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 import royaleserver.utils.SCID;
@@ -44,6 +45,8 @@ public class VisitedHomeData extends Message {
 	public int tournamentCardsWon;
 
 	public HomeResources homeResources;
+
+	public PlayerClan clan;
 
 	public VisitedHomeData() {
 		super(ID);
@@ -86,6 +89,8 @@ public class VisitedHomeData extends Message {
 		tournamentCardsWon = 0;
 
 		homeResources = new HomeResources();
+
+		clan = null;
 	}
 
 	@Override
@@ -219,30 +224,12 @@ public class VisitedHomeData extends Message {
 
 		stream.putBoolean(isMyProfile);
 
-		/*
-		 if (!playerInfo[2].equals("")) {
-		 // ClanData
-		 ClanWorker clanWorker = new ClanWorker(this.player);
-		 String[] clanData = clanWorker.getClanDataU("ClanID", playerInfo[2]);
-
-		 if (clanData != null) {
-		 // hasName|hasClan // 9 - hasClan and username
-		 stream.putRrsInt32(9);
-
-		 // ClanTAG
-		 stream.putRrsLong(Long.parseLong(clanData[0]));
-
-		 // clan info: 1) name 2) badge
-		 stream.putString(clanData[1]);
-		 stream.putRrsInt32(Integer.parseInt(clanData[2]) + 1); // why +1?!
-
-		 // role
-		 stream.putRrsInt32(4);
-		 }
-
-		 } else {*/
-		stream.putRrsInt32(1);
-		//}
+		//if (clan == null) {
+			stream.putRrsInt32(1);
+		/*} else {
+			stream.putRrsInt32(9);
+			clan.encode(stream); // Does not work there
+		}*/
 
 		// # END CLAN INFO # //
 		// Matches played (global/tournament/challenge)?

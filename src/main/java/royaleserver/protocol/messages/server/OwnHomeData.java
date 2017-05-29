@@ -4,6 +4,7 @@ import royaleserver.logic.Arena;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.component.Card;
+import royaleserver.protocol.messages.component.PlayerClan;
 import royaleserver.protocol.messages.component.Deck;
 import royaleserver.protocol.messages.component.HomeChest;
 import royaleserver.utils.DataStream;
@@ -45,6 +46,8 @@ public class OwnHomeData extends Message {
 
 	public Card[] shopCards;
 
+	public PlayerClan clan;
+
 	public OwnHomeData() {
 		super(ID);
 
@@ -59,32 +62,6 @@ public class OwnHomeData extends Message {
 		levelExperience = 0;
 
 		homeChests = new HomeChest[0];
-		/*homeChests = new HomeChest[4];
-
-		homeChests[0] = new HomeChest();
-		homeChests[0].chestID = new SCID(19, 45);
-		homeChests[0].first = true;
-		homeChests[0].slot = 1;
-		homeChests[0].status = HomeChest.STATUS_OPENING;
-		homeChests[0].ticksToOpen = 3 * 60 * 20 - 120;
-		homeChests[0].openTicks = 3 * 60 * 20;
-
-		homeChests[1] = new HomeChest();
-		homeChests[1].chestID = new SCID(19, 45);
-		homeChests[1].slot = 2;
-		homeChests[1].status = HomeChest.STATUS_OPENED;
-
-		homeChests[2] = new HomeChest();
-		homeChests[2].chestID = new SCID(19, 45);
-		homeChests[2].slot = 3;
-		homeChests[2].status = HomeChest.STATUS_OPENED;
-
-		homeChests[3] = new HomeChest();
-		homeChests[3].chestID = new SCID(19, 45);
-		homeChests[3].slot = 4;
-		homeChests[3].status = HomeChest.STATUS_OPENING;
-		homeChests[3].ticksToOpen = 3 * 60 * 20 - 120;
-		homeChests[3].openTicks = 3 * 60 * 20;*/
 
 		cards = new Card[0];
 
@@ -125,6 +102,8 @@ public class OwnHomeData extends Message {
 		shopCards[5] = new Card();
 		shopCards[5].card = royaleserver.logic.Card.by("Log");
 		shopCards[5].boughtTimes = 1;
+
+		clan = null;
 	}
 
 	@Override
@@ -382,28 +361,12 @@ public class OwnHomeData extends Message {
 
 		stream.putRrsInt32(1);
 
-		/*if (!player.data[2].equals("")) {
-		 // ClanData
-		 ClanWorker clanWorker = new ClanWorker(this.player);
-		 String[] clanData = clanWorker.getClanDataU("ClanID", this.player.data[2]);
-
-		 if (clanData != null) {
-		 // hasName|hasClan // 9 - hasClan and username
-		 stream.putRrsInt32(9);
-
-		 // ClanTAG
-		 stream.putRrsLong(Long.parseLong(clanData[0]));
-
-		 // clan info: 1) name 2) badge
-		 stream.putString(clanData[1]);
-		 stream.putRrsInt32(Integer.parseInt(clanData[2]) + 1); // why +1?!
-
-		 // role
-		 stream.putRrsInt32(4);
-		 }
-		 } else {*/
-		stream.putRrsInt32(1);
-		//}
+		if (clan == null) {
+			stream.putRrsInt32(1);
+		} else {
+			stream.putRrsInt32(9);
+			clan.encode(stream);
+		}
 
 		// Games played
 		stream.putRrsInt32(0);

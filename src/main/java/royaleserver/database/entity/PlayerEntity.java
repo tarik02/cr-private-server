@@ -52,6 +52,14 @@ public class PlayerEntity implements Identifiable<Long> {
 	@OneToMany(mappedBy = "player")
 	private Set<HomeChestEntity> homeChests = new HashSet<>();
 
+	@JoinColumn(name = "clan_id")
+	@ManyToOne
+	private ClanEntity clan = null;
+
+	@Column(name = "clan_role")
+	@Enumerated(value = EnumType.ORDINAL)
+	private ClanRole clanRole = null;
+
 
 	public Long getId() {
 		return id;
@@ -139,6 +147,24 @@ public class PlayerEntity implements Identifiable<Long> {
 
 	public PlayerEntity setHomeChests(Set<HomeChestEntity> homeChests) {
 		this.homeChests = homeChests;
+		return this;
+	}
+
+	public ClanEntity getClan() {
+		return clan;
+	}
+
+	public PlayerEntity setClan(ClanEntity clan) {
+		this.clan = clan;
+		return this;
+	}
+
+	public ClanRole getClanRole() {
+		return clanRole;
+	}
+
+	public PlayerEntity setClanRole(ClanRole clanRole) {
+		this.clanRole = clanRole;
 		return this;
 	}
 }

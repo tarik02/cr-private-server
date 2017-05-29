@@ -53,6 +53,7 @@ public class DataManager {
 				new AssetService(entityManager),
 				new CardService(entityManager),
 				new ChestService(entityManager),
+				new ClanService(entityManager),
 				new HomeChestService(entityManager),
 				new PlayerCardService(entityManager),
 				new PlayerService(entityManager)
@@ -77,6 +78,10 @@ public class DataManager {
 
 	public ChestService getChestService() {
 		return services.chestService;
+	}
+
+	public ClanService getClanService() {
+		return services.clanService;
 	}
 
 	public HomeChestService getHomeChestService() {

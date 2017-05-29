@@ -1,9 +1,6 @@
 package royaleserver;
 
-import royaleserver.database.entity.HomeChestEntity;
-import royaleserver.database.entity.HomeChestStatus;
-import royaleserver.database.entity.PlayerCardEntity;
-import royaleserver.database.entity.PlayerEntity;
+import royaleserver.database.entity.*;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
 import royaleserver.protocol.Session;
@@ -12,10 +9,7 @@ import royaleserver.protocol.messages.CommandHandler;
 import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.messages.client.*;
 import royaleserver.protocol.messages.command.*;
-import royaleserver.protocol.messages.component.AllianceHeaderEntry;
-import royaleserver.protocol.messages.component.Card;
-import royaleserver.protocol.messages.component.CommandComponent;
-import royaleserver.protocol.messages.component.HomeChest;
+import royaleserver.protocol.messages.component.*;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.SCID;
 
@@ -39,24 +33,24 @@ public class Player implements MessageHandler, CommandHandler {
 	 * @apiNote For internal usage only
 	 */
 	public void sendOwnHomeData() {
-		OwnHomeData ownHomeData = new OwnHomeData();
+		OwnHomeData response = new OwnHomeData();
 
 		Arena arena = entity.getLogicArena();
-		ownHomeData.homeId = entity.getId();
-		ownHomeData.arena = arena;
-		ownHomeData.lastArena = arena;
-		ownHomeData.trophies = entity.getTrophies();
-		ownHomeData.username = entity.getName();
-		ownHomeData.gold = entity.getGold();
-		ownHomeData.gems = entity.getGems();
-		ownHomeData.levelExperience = 0;
-		ownHomeData.level = 13;
-		ownHomeData.lastLevel = 13;
+		response.homeId = entity.getId();
+		response.arena = arena;
+		response.lastArena = arena;
+		response.trophies = entity.getTrophies();
+		response.username = entity.getName();
+		response.gold = entity.getGold();
+		response.gems = entity.getGems();
+		response.levelExperience = 0;
+		response.level = 13;
+		response.lastLevel = 13;
 
-		ownHomeData.homeChests = new HomeChest[entity.getHomeChests().size()];
+		response.homeChests = new HomeChest[entity.getHomeChests().size()];
 		int i = 0;
 		for (HomeChestEntity homeChestEntity : entity.getHomeChests()) {
-			HomeChest homeChest = ownHomeData.homeChests[i++] = new HomeChest();
+			HomeChest homeChest = response.homeChests[i++] = new HomeChest();
 			homeChest.slot = homeChestEntity.getSlot();
 			homeChest.chest = homeChestEntity.getLogicChest();
 			switch (homeChestEntity.getStatus()) {
@@ -78,16 +72,18 @@ public class Player implements MessageHandler, CommandHandler {
 			}
 		}
 
-		ownHomeData.cards = new Card[entity.getCards().size()];
+		response.cards = new Card[entity.getCards().size()];
 		i = 0;
 		for (PlayerCardEntity cardEntity : entity.getCards()) {
-			Card card = ownHomeData.cards[i++] = new Card();
+			Card card = response.cards[i++] = new Card();
 			card.card = cardEntity.getLogicCard();
 			card.level = cardEntity.getLevel();
 			card.count = cardEntity.getCount();
 		}
 
-		session.sendMessage(ownHomeData);
+		response.clan = PlayerClan.from(entity);
+
+		session.sendMessage(response);
 	}
 
 	/**
@@ -238,6 +234,8 @@ public class Player implements MessageHandler, CommandHandler {
 			response.trophies = responseEntity.getTrophies();
 			response.level = 13;
 			response.username = responseEntity.getName();
+
+			response.clan = PlayerClan.from(responseEntity);
 		}
 
 		session.sendMessage(response);
