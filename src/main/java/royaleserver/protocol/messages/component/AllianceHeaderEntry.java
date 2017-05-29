@@ -1,20 +1,20 @@
 package royaleserver.protocol.messages.component;
 
+import royaleserver.database.entity.ClanEntity;
 import royaleserver.protocol.messages.Component;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.SCID;
 
 public class AllianceHeaderEntry extends Component {
-
 	public static final byte CLAN_OPEN = 1;
 	public static final byte CLAN_INVITE = 2;
 	public static final byte CLAN_CLOSED = 3;
 
-	public long Id;
+	public long id;
 	public String name;
 	public SCID badge;
 	public byte type;
-	public byte numberOfMembers;
+	public int numberOfMembers;
 	public int score;
 	public int requiredScore;
 	public byte unknown_7;
@@ -30,7 +30,7 @@ public class AllianceHeaderEntry extends Component {
 	public byte unknown_17;
 
 	public AllianceHeaderEntry() {
-		Id = 0;
+		id = 0;
 		name = "";
 		badge = new SCID();
 		type = 0;
@@ -54,7 +54,7 @@ public class AllianceHeaderEntry extends Component {
 	public void encode(DataStream stream) {
 		super.encode(stream);
 
-		stream.putBLong(Id);
+		stream.putBLong(id);
 		stream.putString(name);
 		stream.putSCID(badge);
 		stream.putRrsInt32(type);
@@ -81,7 +81,7 @@ public class AllianceHeaderEntry extends Component {
 	public void decode(DataStream stream) {
 		super.decode(stream);
 
-		Id = stream.getBLong();
+		id = stream.getBLong();
 		name = stream.getString();
 		badge = stream.getSCID();
 		type = stream.getByte();
@@ -99,5 +99,41 @@ public class AllianceHeaderEntry extends Component {
 		unknown_15 = stream.getByte();
 		region = stream.getRrsInt32();
 		unknown_17 = stream.getByte();
+	}
+
+	public static AllianceHeaderEntry from(ClanEntity entity) {
+		AllianceHeaderEntry response = new AllianceHeaderEntry();
+		response.id = entity.getId();
+		response.name = entity.getName();
+		response.badge = entity.getBadge();
+
+		switch (entity.getType()) {
+		case OPEN:
+			response.type = CLAN_OPEN;
+			break;
+		case INVITE:
+			response.type = CLAN_INVITE;
+			break;
+		case CLOSED:
+			response.type = CLAN_CLOSED;
+			break;
+		}
+
+		response.numberOfMembers = entity.getMembers().size();
+		response.score = entity.getScore();
+		response.requiredScore = entity.getRequiredTrophies();
+		response.unknown_7 = 0;
+		response.unknown_8 = 0;
+		response.currenRank = 0;
+		response.unknown_10 = 0;
+		response.donations = entity.getDonationsPerWeek();
+		response.unknown_12 = 0;
+		response.unknown_13 = 0;
+		response.unknown_14 = 1;
+		response.unknown_15 = 12;
+		response.region = 57;
+		response.unknown_17 = 6;
+
+		return response;
 	}
 }

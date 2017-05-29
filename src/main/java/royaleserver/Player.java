@@ -1,6 +1,9 @@
 package royaleserver;
 
-import royaleserver.database.entity.*;
+import royaleserver.database.entity.HomeChestEntity;
+import royaleserver.database.entity.HomeChestStatus;
+import royaleserver.database.entity.PlayerCardEntity;
+import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
 import royaleserver.protocol.Session;
@@ -297,7 +300,7 @@ public class Player implements MessageHandler, CommandHandler {
 
 		response.alliances = new AllianceHeaderEntry[1];
 		response.alliances[0] = new AllianceHeaderEntry();
-		response.alliances[0].Id = 1;
+		response.alliances[0].id = 1;
 		response.alliances[0].name = "TestClan";
 		response.alliances[0].badge = new SCID(16, 150);
 		response.alliances[0].type = response.alliances[0].CLAN_OPEN;
@@ -346,7 +349,22 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleSearchAlliances(SearchAlliances message) throws Throwable {
-		return false;
+		/*final ClanService clanService = server.getDataManager().getClanService();
+		final List<ClanEntity> clans = clanService.search(message.searchString, message.minMembers, message.maxMembers, message.minTrophies, message.findOnlyJoinableClans);
+
+		JoinableAllianceList response = new JoinableAllianceList();
+		response.alliances = new AllianceHeaderEntry[clans.size()];
+
+		int i = 0;
+		for (ClanEntity clan : clans) {
+			response.alliances[i] = AllianceHeaderEntry.from(clan);
+
+			++i;
+		}
+
+		session.sendMessage(response);*/
+
+		return true;
 	}
 
 	@Override

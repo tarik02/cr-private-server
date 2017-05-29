@@ -42,7 +42,7 @@ public class ClanEntity {
 	// TODO: Location
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "clan")
-	private Set<PlayerEntity> players = new HashSet<>();
+	private Set<PlayerEntity> members = new HashSet<>();
 
 
 	public long getId() {
@@ -117,12 +117,12 @@ public class ClanEntity {
 		return this;
 	}
 
-	public Set<PlayerEntity> getPlayers() {
-		return players;
+	public Set<PlayerEntity> getMembers() {
+		return members;
 	}
 
-	public ClanEntity setPlayers(Set<PlayerEntity> players) {
-		this.players = players;
+	public ClanEntity setMembers(Set<PlayerEntity> players) {
+		this.members = players;
 		return this;
 	}
 }
