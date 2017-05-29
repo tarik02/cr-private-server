@@ -5,7 +5,6 @@ import royaleserver.logic.Arena;
 import royaleserver.utils.StringUtils;
 
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class PlayerService {
@@ -51,11 +50,6 @@ public class PlayerService {
 		entityManager.getTransaction().begin();
 		entityManager.merge(entity);
 		entityManager.getTransaction().commit();
-	}
-
-	public List<PlayerEntity> getAll(){
-		TypedQuery<PlayerEntity> namedQuery = entityManager.createNamedQuery(".getAll", PlayerEntity.class);
-		return namedQuery.getResultList();
 	}
 
 	public void clear() {

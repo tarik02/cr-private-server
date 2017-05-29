@@ -11,7 +11,6 @@ import java.util.Set;
 @Entity
 @Table(name = "players")
 @NamedQueries({
-		@NamedQuery(name = ".getAll", query = "SELECT c from PlayerEntity c"),
 		@NamedQuery(name = ".clear", query = "DELETE FROM PlayerEntity p")
 })
 public class PlayerEntity implements Identifiable<Long> {
