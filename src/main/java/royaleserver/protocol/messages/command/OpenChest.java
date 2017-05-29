@@ -9,9 +9,11 @@ public class OpenChest extends Command {
 
 	public int tickStart;
 	public int tickEnd;
-	public long accountID;
 
-	public byte unknown_0;
+	public int unknown_0;
+	public int unknown_1;
+
+	public int slot;
 
 	public OpenChest() {
 		super(ID);
@@ -23,8 +25,10 @@ public class OpenChest extends Command {
 		tickStart = stream.getRrsInt32();
 		tickEnd = stream.getRrsInt32();
 
-		accountID = stream.getRrsLong();
-		unknown_0 = stream.getByte();
+		unknown_0 = stream.getRrsInt32();
+		unknown_1 = stream.getRrsInt32();
+
+		slot = stream.getRrsInt32();
 	}
 
 	@Override
