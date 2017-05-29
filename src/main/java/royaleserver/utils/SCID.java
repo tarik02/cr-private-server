@@ -12,6 +12,7 @@ import java.sql.Types;
 
 public final class SCID implements UserType, Serializable {
 	private int high, low;
+	private long value;
 
 	public SCID() {
 		this(0, 0);
@@ -20,6 +21,8 @@ public final class SCID implements UserType, Serializable {
 	public SCID(int high, int low) {
 		this.high = high;
 		this.low = low;
+
+		value = high * 1000000 + low;
 	}
 
 	public SCID(long value) {
@@ -30,20 +33,12 @@ public final class SCID implements UserType, Serializable {
 		return high;
 	}
 
-	public void setHigh(int high) {
-		this.high = high;
-	}
-
 	public int getLow() {
 		return low;
 	}
 
-	public void setLow(int low) {
-		this.low = low;
-	}
-
 	public long getValue() {
-		return high * 1000000 + low;
+		return value;
 	}
 
 	// Java
