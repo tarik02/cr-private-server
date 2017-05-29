@@ -22,7 +22,7 @@ public class Chest implements Cloneable {
 	private boolean inShop, inArenaInfo;
 	private int timeTakenDays, timeTakesHours, timeTakenMinutes, timeTakenSeconds;
 	private int randomSpells, differentSpells;
-	private int rareChance, epicCance, legendaryChance;
+	private int rareChance, epicChance, legendaryChance;
 	private Card[] guaranteedSpells;
 	private int minGoldPerCard, maxGoldPerCard;
 
@@ -80,8 +80,8 @@ public class Chest implements Cloneable {
 		return rareChance;
 	}
 
-	public int getEpicCance() {
-		return epicCance;
+	public int getEpicChance() {
+		return epicChance;
 	}
 
 	public int getLegendaryChance() {
@@ -174,7 +174,7 @@ public class Chest implements Cloneable {
 			chest.randomSpells = csv_chest.getValue(csv_RandomSpells).asInt(chest.randomSpells);
 			chest.differentSpells = csv_chest.getValue(csv_DifferentSpells).asInt(chest.differentSpells);
 			chest.rareChance = csv_chest.getValue(csv_RareChance).asInt(chest.rareChance);
-			chest.epicCance = csv_chest.getValue(csv_EpicChance).asInt(chest.epicCance);
+			chest.epicChance = csv_chest.getValue(csv_EpicChance).asInt(chest.epicChance);
 			chest.legendaryChance = csv_chest.getValue(csv_LegendaryChance).asInt(chest.legendaryChance);
 
 			String[] guaranteedSpells = csv_chest.getValue(csv_GuaranteedSpells).asStringArray();
