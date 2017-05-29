@@ -1,8 +1,5 @@
 package royaleserver.crypto;
 
-import com.caligochat.nacl.Box;
-import com.caligochat.nacl.Curve25519;
-import com.caligochat.nacl.Salsa;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.MessageHeader;
 
@@ -18,9 +15,7 @@ public class ClientCrypto extends Crypto {
 	public ClientCrypto(byte[] serverKey) {
 		super();
 
-		Box.KeyPair pair = Box.generate();
-		privateKey = pair.privKey;
-		clientKey = pair.pubKey;
+		TweetNaCl.crypto_sign_keypair(privateKey, clientKey, false);
 		this.serverKey = serverKey;
 
 		sharedKey = Curve25519.scalarMult(privateKey, serverKey);
