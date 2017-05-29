@@ -1,6 +1,5 @@
 package royaleserver.crypto;
 
-import com.caligochat.nacl.*;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.MessageHeader;
 import royaleserver.utils.Hex;

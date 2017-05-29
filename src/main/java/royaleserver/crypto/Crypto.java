@@ -1,7 +1,5 @@
 package royaleserver.crypto;
 
-import com.caligochat.nacl.NaclException;
-import com.caligochat.nacl.SecretBox;
 import royaleserver.protocol.MessageHeader;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
@@ -15,9 +13,9 @@ public abstract class Crypto {
 
 	private static Logger logger = LogManager.getLogger(Crypto.class);
 
-	protected byte[] privateKey;
+	protected byte[] privateKey = new byte[TweetNaCl.SIGN_PUBLIC_KEY_BYTES];
 	protected byte[] serverKey;
-	protected byte[] clientKey;
+	protected byte[] clientKey = new byte[TweetNaCl.SIGN_SECRET_KEY_BYTES];
 	protected byte[] sharedKey;
 	protected Nonce decryptNonce = new Nonce();
 	protected Nonce encryptNonce = new Nonce();
@@ -53,7 +51,7 @@ public abstract class Crypto {
 			nonce = encryptNonce;
 		}
 
-		return SecretBox.seal(message, nonce.getBytes(), sharedKey);
+		return TweetNaCl.secretbox(message, nonce.getBytes(), sharedKey);
 	}
 
 	public byte[] decrypt(byte[] message) {
@@ -66,13 +64,7 @@ public abstract class Crypto {
 			nonce = decryptNonce;
 		}
 
-		try {
-			return SecretBox.open(message, nonce.getBytes(), sharedKey);
-		} catch (NaclException e) {
-			e.printStackTrace();
-		}
-
-		return null;
+		return TweetNaCl.secretbox_open(message, nonce.getBytes(), sharedKey);
 	}
 
 	public abstract void decryptPacket(MessageHeader message);
