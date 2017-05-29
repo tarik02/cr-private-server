@@ -21,6 +21,7 @@
 /server.log
 /workdir/server.log
 /target
+/out
 
 /config.json
 /clashroyale.db
