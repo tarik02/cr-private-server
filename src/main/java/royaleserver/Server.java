@@ -103,6 +103,8 @@ public class Server {
 		networkThread = new NetworkThread();
 		networkThread.start();
 
+		System.gc();
+
 		logger.info("Server started!");
 
 		while (running) {
