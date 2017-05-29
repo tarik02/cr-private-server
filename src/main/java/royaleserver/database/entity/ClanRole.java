@@ -1,8 +1,8 @@
 package royaleserver.database.entity;
 
 public enum ClanRole {
-	Member,
-	Elder,
-	CoLeader,
-	Leader
+	MEMBER,
+	ELDER,
+	CO_LEADER,
+	LEADER
 }

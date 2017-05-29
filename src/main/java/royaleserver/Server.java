@@ -98,13 +98,13 @@ public class Server {
 		Card.init(this);
 		GameMode.init(this);
 		Chest.init(this);
+		ClanBadge.init(this);
 
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();
 		networkThread.start();
 
 		System.gc();
-
 		logger.info("Server started!");
 
 		while (running) {

@@ -16,6 +16,13 @@ public class ClanService {
 		this.entityManager = entityManager;
 	}
 
+	public ClanEntity add(ClanEntity entity){
+		entityManager.getTransaction().begin();
+		ClanEntity fromDB = entityManager.merge(entity);
+		entityManager.getTransaction().commit();
+		return fromDB;
+	}
+
 	public ClanEntity searchById(long id) {
 		return (ClanEntity)entityManager.createNamedQuery("Clan.searchById").setParameter("id", id).getSingleResult();
 	}

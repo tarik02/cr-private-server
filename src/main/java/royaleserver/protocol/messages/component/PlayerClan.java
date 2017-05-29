@@ -37,19 +37,19 @@ public class PlayerClan extends Component {
 			PlayerClan clan = new PlayerClan();
 			clan.id = entity.getId();
 			clan.name = entity.getName();
-			clan.badge = entity.getBadge();
+			clan.badge = entity.getLogicBadge().getScid();
 
 			switch (role) {
-			case Member:
+			case MEMBER:
 				clan.role = ROLE_MEMBER;
 				break;
-			case Elder:
+			case ELDER:
 				clan.role = ROLE_ELDER;
 				break;
-			case CoLeader:
+			case CO_LEADER:
 				clan.role = ROLE_COLEADER;
 				break;
-			case Leader:
+			case LEADER:
 				clan.role = ROLE_LEADER;
 				break;
 			}

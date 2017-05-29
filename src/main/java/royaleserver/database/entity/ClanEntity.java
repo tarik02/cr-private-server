@@ -1,6 +1,6 @@
 package royaleserver.database.entity;
 
-import royaleserver.utils.SCID;
+import royaleserver.logic.ClanBadge;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -23,8 +23,9 @@ public class ClanEntity {
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String description = "";
 
-	@Column(nullable = false)
-	private SCID badge = new SCID(16, 6); // Default will be this
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "badge_id")
+	private ClanBadgeEntity badge;
 
 	@Column(nullable = false)
 	private int score = 0;
@@ -72,11 +73,11 @@ public class ClanEntity {
 		return this;
 	}
 
-	public SCID getBadge() {
+	public ClanBadgeEntity getBadge() {
 		return badge;
 	}
 
-	public ClanEntity setBadge(SCID badge) {
+	public ClanEntity setBadge(ClanBadgeEntity badge) {
 		this.badge = badge;
 		return this;
 	}
@@ -124,5 +125,14 @@ public class ClanEntity {
 	public ClanEntity setMembers(Set<PlayerEntity> players) {
 		this.members = players;
 		return this;
+	}
+
+
+	public ClanBadge getLogicBadge() {
+		return ClanBadge.byDB(badge.getId());
+	}
+
+	public ClanEntity setLogicBadge(ClanBadge badge) {
+		return setBadge(new ClanBadgeEntity().setId(badge.getDbId()));
 	}
 }

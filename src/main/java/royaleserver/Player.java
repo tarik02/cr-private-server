@@ -1,11 +1,10 @@
 package royaleserver;
 
-import royaleserver.database.entity.HomeChestEntity;
-import royaleserver.database.entity.HomeChestStatus;
-import royaleserver.database.entity.PlayerCardEntity;
-import royaleserver.database.entity.PlayerEntity;
+import royaleserver.database.entity.*;
+import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
+import royaleserver.logic.ClanBadge;
 import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.CommandHandler;
@@ -14,9 +13,15 @@ import royaleserver.protocol.messages.client.*;
 import royaleserver.protocol.messages.command.*;
 import royaleserver.protocol.messages.component.*;
 import royaleserver.protocol.messages.server.*;
+import royaleserver.utils.LogManager;
+import royaleserver.utils.Logger;
 import royaleserver.utils.SCID;
 
+import java.util.List;
+
 public class Player implements MessageHandler, CommandHandler {
+	private static final Logger logger = LogManager.getLogger(Player.class);
+
 	protected Server server;
 	protected Session session;
 
@@ -349,7 +354,7 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleSearchAlliances(SearchAlliances message) throws Throwable {
-		/*final ClanService clanService = server.getDataManager().getClanService();
+		final ClanService clanService = server.getDataManager().getClanService();
 		final List<ClanEntity> clans = clanService.search(message.searchString, message.minMembers, message.maxMembers, message.minTrophies, message.findOnlyJoinableClans);
 
 		JoinableAllianceList response = new JoinableAllianceList();
@@ -362,7 +367,7 @@ public class Player implements MessageHandler, CommandHandler {
 			++i;
 		}
 
-		session.sendMessage(response);*/
+		session.sendMessage(response); // TODO: Change response message
 
 		return true;
 	}
@@ -398,6 +403,36 @@ public class Player implements MessageHandler, CommandHandler {
 	@Override
 	public boolean handleAskForBattleReplayStream(AskForBattleReplayStream message) throws Throwable {
 		return false;
+	}
+
+	@Override
+	public boolean handleCreateAlliance(CreateAlliance message) throws Throwable {
+		ClanBadge badge = ClanBadge.by(message.badge);
+		if (badge == null) {
+			logger.warn("Player " + entity.getName() + "#" + entity.getId() + " tried to create clan with unknown badge.");
+			return true;
+		}
+
+		// TODO: Check and set location and type
+
+		if (entity.getClan() == null && entity.getGold() >= 1000) {
+			entity.setGold(entity.getGold() - 1000);
+
+			ClanService clanService = server.getDataManager().getClanService();
+			ClanEntity clan = new ClanEntity();
+			clan.setName(message.name);
+			clan.setDescription(message.description);
+			clan.setLogicBadge(badge);
+			//clan.setType();
+			clan.setRequiredTrophies(message.minTrophies);
+			//clan.setLocaltion();
+			clan = clanService.add(clan);
+
+			entity.setClan(clan);
+			entity.setClanRole(ClanRole.LEADER);
+		}
+
+		return true;
 	}
 
 	@Override

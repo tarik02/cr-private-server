@@ -53,6 +53,7 @@ public class DataManager {
 				new AssetService(entityManager),
 				new CardService(entityManager),
 				new ChestService(entityManager),
+				new ClanBadgeService(entityManager),
 				new ClanService(entityManager),
 				new HomeChestService(entityManager),
 				new PlayerCardService(entityManager),
@@ -78,6 +79,10 @@ public class DataManager {
 
 	public ChestService getChestService() {
 		return services.chestService;
+	}
+
+	public ClanBadgeService getClanBadgeService() {
+		return services.clanBadgeService;
 	}
 
 	public ClanService getClanService() {

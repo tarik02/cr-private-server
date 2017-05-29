@@ -105,7 +105,7 @@ public class AllianceHeaderEntry extends Component {
 		AllianceHeaderEntry response = new AllianceHeaderEntry();
 		response.id = entity.getId();
 		response.name = entity.getName();
-		response.badge = entity.getBadge();
+		response.badge = entity.getLogicBadge().getScid();
 
 		switch (entity.getType()) {
 		case OPEN:

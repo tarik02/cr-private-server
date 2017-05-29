@@ -29,4 +29,5 @@ public interface MessageHandler {
 	boolean handleStartMission(StartMission message) throws Throwable;
 	boolean handleGoHome(GoHome message) throws Throwable;
 	boolean handleChangeAvatarName(ChangeAvatarName message) throws Throwable;
+	boolean handleCreateAlliance(CreateAlliance message) throws Throwable;
 }
