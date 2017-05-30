@@ -5,16 +5,20 @@ import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
 import royaleserver.database.service.ArenaService;
+import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Arena {
+	public static final int SCID_HIGH = 0; // TODO: Get it
+
 	private long dbId;
 
 	private int index;
-
+	private SCID scid;
 	private String name;
+
 	private int arena;
 	private String chestArena;
 	private boolean isInUse;
@@ -34,6 +38,10 @@ public class Arena {
 
 	public int getIndex() {
 		return index;
+	}
+
+	public SCID getScid() {
+		return scid;
 	}
 
 	public String getName() {
@@ -125,7 +133,8 @@ public class Arena {
 		for (Row csv_arena : csv_arenas.getRows()) {
 			Arena arena = new Arena();
 
-			arena.index = i++;
+			arena.index = i;
+			arena.scid = new SCID(SCID_HIGH, i);
 			arena.name = csv_arena.getValue(csv_Name).asString();
 			arena.arena = csv_arena.getValue(csv_Arena).asInt();
 			arena.chestArena = csv_arena.getValue(csv_ChestArena).asString();
@@ -144,6 +153,7 @@ public class Arena {
 			arena.dbId = arenaService.resolve(arena.name).getId();
 
 			values.add(arena);
+			++i;
 		}
 		arenaService.endResolve();
 

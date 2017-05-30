@@ -99,6 +99,7 @@ public class Server {
 		GameMode.init(this);
 		Chest.init(this);
 		ClanBadge.init(this);
+		ClanRole.init(this);
 
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();

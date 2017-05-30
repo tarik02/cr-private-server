@@ -1,8 +1,8 @@
 package royaleserver.protocol.messages.component;
 
+import royaleserver.database.entity.PlayerEntity;
 import royaleserver.protocol.messages.Component;
 import royaleserver.utils.DataStream;
-
 import royaleserver.utils.SCID;
 
 public class AllianceMemberEntry extends Component {
@@ -92,5 +92,21 @@ public class AllianceMemberEntry extends Component {
 		unknown_15 = stream.getByte();
 		unknown_16 = stream.getByte();
 		homeID = stream.getBLong();
+	}
+
+	public static AllianceMemberEntry from(PlayerEntity entity) {
+		AllianceMemberEntry allianceMemberEntry = new AllianceMemberEntry();
+		allianceMemberEntry.avatarId = entity.getId();
+		allianceMemberEntry.name = entity.getName();
+		allianceMemberEntry.arena = entity.getLogicArena().getScid();
+		allianceMemberEntry.role = (byte)entity.getLogicClanRole().getIndex();
+		allianceMemberEntry.expLevel = 13; // TODO:
+		allianceMemberEntry.score = 10; // ?
+		allianceMemberEntry.donations = 1000; // TODO:
+		allianceMemberEntry.currenRank = 0; // ?
+		allianceMemberEntry.previousRank = 0; // ?
+		allianceMemberEntry.clanChestCrowns = 0;
+		allianceMemberEntry.homeID = entity.getId();
+		return allianceMemberEntry;
 	}
 }

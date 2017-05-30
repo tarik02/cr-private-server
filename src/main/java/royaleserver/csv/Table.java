@@ -4,6 +4,7 @@ import royaleserver.utils.CSVConverter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Table {
 	private Column[] cachedColumns;
@@ -90,7 +91,8 @@ public class Table {
 	}
 
 	protected void parse(String csv) {
-		String[] rows = csv.split(System.getProperty("line.separator"));
+		csv = Pattern.compile("\r?\n").matcher(csv).replaceAll("\n");
+		String[] rows = csv.split("\n");
 		columns = rows[0].split(",", -1);
 		for (int i = 0; i < columns.length; ++i) {
 			columns[i] = removeQuotes(columns[i]);

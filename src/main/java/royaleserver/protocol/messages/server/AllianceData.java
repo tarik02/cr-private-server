@@ -1,11 +1,12 @@
 package royaleserver.protocol.messages.server;
 
+import royaleserver.database.entity.ClanEntity;
+import royaleserver.database.entity.PlayerEntity;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
-import royaleserver.utils.DataStream;
-
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
 import royaleserver.protocol.messages.component.AllianceMemberEntry;
+import royaleserver.utils.DataStream;
 
 public class AllianceData extends Message {
 	public static final short ID = Info.ALLIANCE_DATA;
@@ -81,5 +82,19 @@ public class AllianceData extends Message {
 		unknown_9 = stream.getRrsInt32();
 		unknown_10 = stream.getByte();
 		unknown_11 = stream.getByte();
+	}
+
+	public static AllianceData from(ClanEntity entity) {
+		AllianceData allianceData = new AllianceData();
+		allianceData.header = AllianceHeaderEntry.from(entity);
+		allianceData.description = entity.getDescription();
+		allianceData.members = new AllianceMemberEntry[entity.getMembers().size()];
+
+		int i = 0;
+		for (PlayerEntity member : entity.getMembers()) {
+			allianceData.members[i++] = AllianceMemberEntry.from(member);
+		}
+
+		return allianceData;
 	}
 }

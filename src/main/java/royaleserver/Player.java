@@ -5,6 +5,7 @@ import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
 import royaleserver.logic.ClanBadge;
+import royaleserver.logic.ClanRole;
 import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.CommandHandler;
@@ -268,7 +269,15 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleAskForAllianceData(AskForAllianceData message) throws Throwable {
-		return false;
+		ClanService clanService = server.getDataManager().getClanService();
+		ClanEntity clan = clanService.searchById(message.allianceId);
+
+		if (clan != null) {
+			AllianceData allianceData = AllianceData.from(clan);
+			session.sendMessage(allianceData);
+		}
+
+		return true;
 	}
 
 	@Override
@@ -440,7 +449,7 @@ public class Player implements MessageHandler, CommandHandler {
 			clan = clanService.add(clan);
 
 			entity.setClan(clan);
-			entity.setClanRole(ClanRole.LEADER);
+			entity.setLogicClanRole(ClanRole.by("Leader"));
 		}
 
 		return true;

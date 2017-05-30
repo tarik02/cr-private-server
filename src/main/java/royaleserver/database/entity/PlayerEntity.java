@@ -3,6 +3,7 @@ package royaleserver.database.entity;
 import org.hibernate.annotations.GenericGenerator;
 import royaleserver.database.util.Identifiable;
 import royaleserver.logic.Arena;
+import royaleserver.logic.ClanRole;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -56,9 +57,9 @@ public class PlayerEntity implements Identifiable<Long> {
 	@ManyToOne
 	private ClanEntity clan = null;
 
-	@Column(name = "clan_role")
-	@Enumerated(value = EnumType.ORDINAL)
-	private ClanRole clanRole = null;
+	@JoinColumn(name = "clan_role_id")
+	@ManyToOne
+	private ClanRoleEntity clanRole = null;
 
 
 	public Long getId() {
@@ -159,12 +160,20 @@ public class PlayerEntity implements Identifiable<Long> {
 		return this;
 	}
 
-	public ClanRole getClanRole() {
+	public ClanRoleEntity getClanRole() {
 		return clanRole;
 	}
 
-	public PlayerEntity setClanRole(ClanRole clanRole) {
+	public PlayerEntity setClanRole(ClanRoleEntity clanRole) {
 		this.clanRole = clanRole;
 		return this;
+	}
+
+	public ClanRole getLogicClanRole() {
+		return ClanRole.byDB(clanRole.getId());
+	}
+
+	public PlayerEntity setLogicClanRole(ClanRole role) {
+		return setClanRole(new ClanRoleEntity().setId(role.getDbId()));
 	}
 }
