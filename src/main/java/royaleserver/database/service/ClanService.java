@@ -8,6 +8,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Set;
 
 public class ClanService {
 	private final EntityManager entityManager;
@@ -21,6 +22,12 @@ public class ClanService {
 		ClanEntity fromDB = entityManager.merge(entity);
 		entityManager.getTransaction().commit();
 		return fromDB;
+	}
+
+	public void update(ClanEntity entity){
+		entityManager.getTransaction().begin();
+		entityManager.merge(entity);
+		entityManager.getTransaction().commit();
 	}
 
 	public ClanEntity searchById(long id) {
