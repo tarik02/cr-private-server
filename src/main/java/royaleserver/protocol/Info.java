@@ -55,7 +55,7 @@ public class Info {
 	public static final short KICK_ALLIANCE_MEMBER = 14307;
 	public static final short LEAVE_ALLIANCE = 14308;
 	public static final short DONATE_ALLIANCE_UNIT = 14310;
-	public static final short CHAT_TO_ALLIANCE_STREAM = 14315;
+	public static final short CLAN_CHAT_MESSAGE = 14315;
 	public static final short CHANGE_ALLIANCE_SETTINGS = 14316;
 	public static final short REQUEST_JOIN_ALLIANCE = 14317;
 	public static final short SELECT_SPELLS_FROM_CO_OPEN = 14318;

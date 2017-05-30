@@ -10,9 +10,6 @@ import royaleserver.protocol.messages.component.GameDeck;
 import royaleserver.protocol.messages.component.HomeResources;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
-import royaleserver.utils.SCID;
-
-import java.util.zip.Deflater;
 
 public class SectorState extends Message {
 	public static final short ID = Info.SECTOR_STATE;
@@ -102,7 +99,6 @@ public class SectorState extends Message {
 		stream.putByte((byte)1);
 
 		if (isTrainer == 1) {
-			System.out.println("Trainer");
 			// trainer ids = null = -64 (varint) = 127 (byte)
 			stream.putRrsInt32(-64);
 			stream.putRrsInt32(-64);

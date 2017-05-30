@@ -1,6 +1,5 @@
 package royaleserver;
 
-import org.hibernate.mapping.Join;
 import royaleserver.database.entity.*;
 import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerService;
@@ -17,7 +16,6 @@ import royaleserver.protocol.messages.component.*;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
-import royaleserver.utils.SCID;
 
 import java.util.List;
 
@@ -296,15 +294,6 @@ public class Player implements MessageHandler, CommandHandler {
 	}
 
 	@Override
-	public boolean handleSetNickname(SetNickname command) throws Throwable {
-		if (checkNickname(command.nickname)) {
-			entity.setName(command.nickname);
-		}
-
-		return true;
-	}
-
-	@Override
 	public boolean handleChangeAvatarName(ChangeAvatarName message) throws Throwable {
 		SetNickname command = new SetNickname();
 
@@ -323,8 +312,8 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleAskForJoinableAlliancesList(AskForJoinableAlliancesList message) throws Throwable {
-		ClanService clanService = server.getDataManager().getClanService();
-		List<ClanEntity> clans = clanService.getAll();
+		final ClanService clanService = server.getDataManager().getClanService();
+		final List<ClanEntity> clans = clanService.search(null, 0, 0, 0, true);
 
 		JoinableAllianceList response = new JoinableAllianceList();
 		response.alliances = new AllianceHeaderEntry[clans.size()];
@@ -354,10 +343,10 @@ public class Player implements MessageHandler, CommandHandler {
 		ClanService clanService = server.getDataManager().getClanService();
 		ClanEntity clan = clanService.searchById(message.allianceId);
 
-		if (entity.getClan() == null && entity.getTrophies() >= clan.getRequiredTrophies()) {
-
+		if (clan != null && entity.getClan() == null && entity.getTrophies() >= clan.getRequiredTrophies()) {
 			entity.setClan(clan);
-			entity.setLogicClanRole(ClanRole.by("Leader"));
+			entity.setLogicClanRole(ClanRole.by("Member"));
+			save();
 
 			// Send some information about clan
 			JoinClan command = JoinClan.from(clan);
@@ -381,7 +370,7 @@ public class Player implements MessageHandler, CommandHandler {
 		ClanService clanService = server.getDataManager().getClanService();
 		ClanEntity clan = entity.getClan();
 
-		if(clan != null) {
+		if (clan != null) {
 			LeaveClanOK command = LeaveClanOK.from(clan);
 
 			CancelChallengeDone response = new CancelChallengeDone();
@@ -390,6 +379,8 @@ public class Player implements MessageHandler, CommandHandler {
 			response_1.command.command = command;
 
 			entity.setClan(null);
+			entity.setClanRole(null);
+			save();
 
 			session.sendMessage(response);
 			session.sendMessage(response_1);
@@ -481,6 +472,7 @@ public class Player implements MessageHandler, CommandHandler {
 
 			entity.setClan(clan);
 			entity.setLogicClanRole(ClanRole.by("Leader"));
+			save();
 
 			// Send some information about clan
 			JoinClan command = JoinClan.from(clan);
@@ -497,27 +489,6 @@ public class Player implements MessageHandler, CommandHandler {
 		}
 
 		return true;
-	}
-
-	@Override
-	public boolean handleStartFight(StartFight command) throws Throwable {
-		SectorState response = new SectorState();
-
-		response.homeID = entity.getId();
-		response.isTrainer = 0;
-		response.username = "Tester";
-		response.wins = 100;
-		response.looses = 100;
-		response.arena = Arena.by("Arena_T");
-		response.trophies = 3500;
-		response.gold = 10000;
-		response.gems = 10000;
-		response.levelExperience = 0;
-		response.level = 13;
-
-		session.sendMessage(response);
-
-		return false;
 	}
 
 	@Override
@@ -563,5 +534,40 @@ public class Player implements MessageHandler, CommandHandler {
 		session.sendMessage(response);
 
 		return true;
+	}
+
+	@Override
+	public boolean handleSetNickname(SetNickname command) throws Throwable {
+		if (checkNickname(command.nickname)) {
+			entity.setName(command.nickname);
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean handleStartFight(StartFight command) throws Throwable {
+		SectorState response = new SectorState();
+
+		response.homeID = entity.getId();
+		response.isTrainer = 0;
+		response.username = "Tester";
+		response.wins = 100;
+		response.looses = 100;
+		response.arena = Arena.by("Arena_T");
+		response.trophies = 3500;
+		response.gold = 10000;
+		response.gems = 10000;
+		response.levelExperience = 0;
+		response.level = 13;
+
+		session.sendMessage(response);
+
+		return false;
+	}
+
+	@Override
+	public boolean handleClanChatMessage(ClanChatMessage message) throws Throwable {
+		return false;
 	}
 }

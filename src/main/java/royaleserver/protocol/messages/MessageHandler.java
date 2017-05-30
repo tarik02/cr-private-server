@@ -30,4 +30,5 @@ public interface MessageHandler {
 	boolean handleGoHome(GoHome message) throws Throwable;
 	boolean handleChangeAvatarName(ChangeAvatarName message) throws Throwable;
 	boolean handleCreateAlliance(CreateAlliance message) throws Throwable;
+	boolean handleClanChatMessage(ClanChatMessage message) throws Throwable;
 }

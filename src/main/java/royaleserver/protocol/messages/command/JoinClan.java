@@ -2,7 +2,6 @@ package royaleserver.protocol.messages.command;
 
 import royaleserver.database.entity.ClanEntity;
 import royaleserver.protocol.messages.Command;
-import royaleserver.protocol.messages.CommandHandler;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.SCID;
 
@@ -40,7 +39,7 @@ public class JoinClan extends Command {
 		JoinClan joinClan = new JoinClan();
 		joinClan.allianceId = entity.getId();
 		joinClan.name = entity.getName();
-		joinClan.badge = new SCID(entity.getBadge().getId());
+		joinClan.badge = entity.getLogicBadge().getScid();
 		joinClan.unknown_0 = 0;
 		joinClan.accepted = 1;
 

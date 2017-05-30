@@ -49,7 +49,6 @@ public class AllianceData extends Message {
 		stream.putString(description);
 		stream.putRrsInt32(members.length);
 		for (int i = 0; i < members.length; ++i) {
-			System.out.println(i);
 			members[i].encode(stream);
 		}
 		stream.putByte(unknown_3);
