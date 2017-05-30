@@ -1,6 +1,15 @@
 package royaleserver;
 
 import com.google.gson.Gson;
+import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.*;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
+import org.jboss.netty.handler.codec.replay.VoidEnum;
+import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import royaleserver.assets.AssetManager;
 import royaleserver.assets.FolderAssetManager;
 import royaleserver.config.Config;
@@ -21,11 +30,15 @@ import royaleserver.protocol.messages.server.LoginOk;
 import royaleserver.protocol.messages.server.ServerHello;
 import royaleserver.utils.*;
 
-import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
 	private static Logger logger;
@@ -35,14 +48,19 @@ public class Server {
 	protected boolean running = false;
 	protected long tickCounter = 0;
 
-	protected ServerSocket serverSocket = null;
 	protected AssetManager assetManager = null;
 	protected DataManager dataManager = null;
-	protected NetworkThread networkThread = null;
 
 	protected String resourceFingerprint = "";
 
 	protected Config config;
+
+	protected Set<Player> players = new LinkedHashSet<>();
+
+	private OrderedMemoryAwareThreadPoolExecutor bossExec;
+	private OrderedMemoryAwareThreadPoolExecutor ioExec;
+	private ServerBootstrap networkServer;
+	private Channel channel;
 
 	public Server() throws ServerException {
 		this(null);
@@ -100,11 +118,50 @@ public class Server {
 		Chest.init(this);
 
 		logger.info("Starting the network thread...");
-		networkThread = new NetworkThread();
-		networkThread.start();
+
+		int workingThreadsCount = 4;
+		bossExec = new OrderedMemoryAwareThreadPoolExecutor(1, 400000000, 2000000000, 60, TimeUnit.SECONDS);
+		ioExec = new OrderedMemoryAwareThreadPoolExecutor(workingThreadsCount, 400000000, 2000000000, 60, TimeUnit.SECONDS);
+		networkServer = new ServerBootstrap(new NioServerSocketChannelFactory(bossExec, ioExec, workingThreadsCount));
+		networkServer.setOption("backlog", 500);
+		networkServer.setOption("connectTimeoutMillis", 10000);
+		networkServer.setPipelineFactory(new ServerPipelineFactory());
+		channel = networkServer.bind(new InetSocketAddress(9339));
 
 		logger.info("Server started!");
 
+		loop();
+	}
+
+	public void stop() {
+		if (!running) {
+			return;
+		}
+		running = false;
+
+		logger.info("Stopping the server...");
+		try {
+			channel.unbind().await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		logger.info("Disconnecting the clients...");
+		for (Player player : players) {
+			player.close("server stopped", true);
+		}
+
+		logger.info("Closing server...");
+		try {
+			channel.close().await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		logger.info("Server stopped!");
+	}
+
+	private void loop() {
 		while (running) {
 			final long startTime = System.currentTimeMillis();
 			tick();
@@ -120,37 +177,6 @@ public class Server {
 				}
 			}
 		}
-	}
-
-	public void stop() {
-		if (!running) {
-			return;
-		}
-		running = false;
-
-		logger.info("Stopping the server...");
-		logger.info("Disconnecting the clients...");
-		// TODO: Disconnect clients
-
-		try {
-			logger.info("Closing the server socket...");
-			serverSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			logger.info("Joining the network thread...");
-			networkThread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		serverSocket = null;
-		networkThread = null;
-		dataManager = null;
-
-		logger.info("Server stopped!");
 	}
 
 	protected void tick() {
@@ -169,73 +195,99 @@ public class Server {
 		return resourceFingerprint;
 	}
 
-	private class NetworkThread extends Thread {
-		public void run() {
-			try {
-				serverSocket = new ServerSocket(9339);
-
-				while (running) {
-					Socket clientSocket = serverSocket.accept();
-					(new ClientThread(clientSocket)).start();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	/**
+	 * @apiNote Internal usage only
+	 * @param player
+	 */
+	public void addPlayer(Player player) {
+		players.add(player);
 	}
 
-	private class ClientThread extends Thread implements Session {
-		private Socket socket;
-		private DataInputStream reader;
-		private DataOutputStream writer;
+	/**
+	 * @apiNote Internal usage only
+	 * @param player
+	 */
+	public void removePlayer(Player player) {
+		players.remove(player);
+	}
 
-		private ClientCrypto clientCrypto;
-		private ServerCrypto serverCrypto;
+	private static final byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");
+	private static final byte[] sessionKey = Hex.toByteArray("74794DE40D62A03AC6F6E86A9815C6262AA12BEDD518F883");
 
-		private Player player;
-
-		public ClientThread(Socket socket) {
-			this.socket = socket;
-		}
-
-		public void run() {
-			byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");
-			byte[] sessionKey = Hex.toByteArray("74794DE40D62A03AC6F6E86A9815C6262AA12BEDD518F883");
-			clientCrypto = new ClientCrypto(serverKey);
-			serverCrypto = new ServerCrypto();
+	private class ServerPipelineFactory implements ChannelPipelineFactory {
+		@Override
+		public ChannelPipeline getPipeline() throws Exception {
+			ClientCrypto clientCrypto = new ClientCrypto(serverKey);
+			ServerCrypto serverCrypto = new ServerCrypto();
 
 			clientCrypto.setServer(serverCrypto);
 			serverCrypto.setClient(clientCrypto);
 
-loop:
-			try {
-				reader = new DataInputStream(socket.getInputStream());
-				writer = new DataOutputStream(socket.getOutputStream());
+			PacketFrameDecoder decoder = new PacketFrameDecoder(serverCrypto);
+			PacketFrameEncoder encoder = new PacketFrameEncoder(serverCrypto);
+			return Channels.pipeline(decoder, encoder, new PlayerHandler(Server.this));
+		}
+	}
 
-				Message message = readMessage();
-				if (message.id != Info.CLIENT_HELLO) {
-					logger.warn("Excepted ClientHello, received %s. Disconnecting...", message.getClass().getSimpleName());
-					break loop;
-				}
+	private static class PlayerHandler extends SimpleChannelUpstreamHandler implements Session {
+		private enum Status {
+			HELLO,
+			LOGIN,
+			CONNECTED,
+			DISCONNECTING
+		}
 
-				{
+		private final Server server;
+		private Player player;
+
+		private Channel channel;
+		private ChannelFuture lastWrite = null;
+		private Status status;
+
+		public PlayerHandler(Server server) {
+			this.server = server;
+			status = Status.HELLO;
+		}
+
+		@Override
+		public void channelConnected(ChannelHandlerContext context, ChannelStateEvent e) throws Exception {
+			channel = context.getChannel();
+		}
+
+		@Override
+		public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+			player.close("", false);
+		}
+
+		@Override
+		public void messageReceived(ChannelHandlerContext context, MessageEvent e) {
+			if (e.getChannel().isOpen()) {
+				Message message = (Message)e.getMessage();
+				logger.debug("> %s", message.getClass().getSimpleName());
+
+				switch (status) {
+				case HELLO:
+					if (message.id != Info.CLIENT_HELLO) {
+						logger.warn("Excepted ClientHello, received %s. Disconnecting...", message.getClass().getSimpleName());
+						close();
+						return;
+					}
+
 					ClientHello clientHello = (ClientHello)message;
-					message = null;
-				}
 
-				{
 					ServerHello serverHello = new ServerHello();
 					serverHello.sessionKey = sessionKey;
-					writeMessage(serverHello);
-				}
+					sendMessage(serverHello);
 
-				message = readMessage();
-				if (message.id != Info.LOGIN) {
-					logger.warn("Excepted Login, received %s. Disconnecting...", message.getClass().getSimpleName());
-					break loop;
-				}
+					status = Status.LOGIN;
+					break;
+				case LOGIN:
+					if (message.id != Info.LOGIN) {
+						logger.warn("Excepted Login, received %s. Disconnecting...", message.getClass().getSimpleName());
+						close();
+						return;
+					}
 
-				{
 					Login login = (Login)message;
 					/*if (login.resourceSha.equals("863227dfdea3a47d55da528a39c6123d17c961be")) {
 						LoginFailed loginFailed = new LoginFailed();
@@ -251,9 +303,8 @@ loop:
 						writeMessage(loginFailed);
 						break loop;
 					}*/
-					message = null;
 
-					PlayerService playerService = dataManager.getPlayerService();
+					PlayerService playerService = server.getDataManager().getPlayerService();
 					PlayerEntity playerEntity = login.accountId == 0 ? null : playerService.get(login.accountId);
 					if (playerEntity == null) { // TODO: DO SOMETHING TO CHECK THIS PASS TOKEN
 						if (login.accountId == 0) {
@@ -286,145 +337,151 @@ loop:
 					loginOk.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com"; // TODO: Make it from config
 					loginOk.eventAssetsURL = "https://event-assets.clashroyale.com"; // TODO: Make it from config
 					loginOk.unknown_23 = 1;
-					writeMessage(loginOk);
+					sendMessage(loginOk);
 
-					player = new Player(playerEntity, Server.this, this);
+					player = new Player(playerEntity, server, this);
 					player.sendOwnHomeData();
-				}
 
-				logger.info("Player connected.");
-
-				while (true) {
-					message = readMessage();
-					if (message != null) {
-						try {
-							if (!message.handle(player)) {
-								logger.warn("Failed to handle message %s:\n%s", message.getClass().getSimpleName(), Dumper.dump(message));
-							}
-						} catch (Throwable e) {
-							logger.error("Failed to handle message %s:\n%s. Error throwed:", e, message.getClass().getSimpleName(), Dumper.dump(message));
+					status = Status.CONNECTED;
+					break;
+				case CONNECTED:
+					try {
+						if (!message.handle(player)) {
+							logger.warn("Failed to handle message %s:\n%s", message.getClass().getSimpleName(), Dumper.dump(message));
 						}
+					} catch (Throwable e2) {
+						logger.error("Failed to handle message %s:\n%s. Error throwed:", e2, message.getClass().getSimpleName(), Dumper.dump(message));
 					}
+					break;
+				case DISCONNECTING:
 
-					message = null;
+					break;
 				}
-			} catch (EOFException ignored) {
-			} catch (Exception e) {
-				logger.error("Error while looping client.", e);
 			}
-
-			try {
-				socket.close();
-			} catch (IOException e) {
-				logger.error("Failed to close the socket.", e);
-			}
-
-			if (player != null) {
-				player.close("", false);
-			}
-
-			socket = null;
-			reader = null;
-
-			clientCrypto = null;
-			serverCrypto = null;
-
-			player = null;
 		}
 
-		public Message readMessage() throws IOException {
-			byte[] payload = new byte[2];
-			reader.readFully(payload);
-			short id = ByteBuffer
-				.allocate(2)
-				.put(payload)
-				.order(ByteOrder.BIG_ENDIAN).getShort(0);
-
-			payload = new byte[3];
-			reader.readFully(payload);
-			reader.readShort(); // Version, always 5
-
-			int length = ByteBuffer
-				.allocate(4)
-				.put((byte)0)
-				.put(payload)
-				.order(ByteOrder.BIG_ENDIAN).getInt(0);
-			payload = new byte[length];
-			reader.readFully(payload);
-
-			MessageHeader header = new MessageHeader(id, payload);
-			serverCrypto.decryptPacket(header);
-
-			Message message = MessageFactory.create(header.id);
-
-			if (message == null) {
-				if (header.decrypted == null) {
-					logger.error("Failed to decrypt packet %d, encrypted payload:\n%s", header.id, Hex.dump(header.payload));
-				} else {
-					String name = null;
-					if (Info.messagesMap.containsKey(header.id)) {
-						name = Info.messagesMap.get(header.id);
-					}
-
-					if (name == null) {
-						logger.warn("Received unknown packet %d:\n%s", header.id, Hex.dump(header.decrypted));
-						/*if (header.id == 10099) {
-							player.disconnect("DEBUGGING"); // Sometimes I receive this packet
-						}*/
-					} else {
-						logger.warn("Received undefined packet %s:\n%s", name, Hex.dump(header.decrypted));
-					}
-				}
-			} else if (header.decrypted == null) {
-				logger.error("Failed to decrypt packet %s, encrypted payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.payload));
-			} else {
-				logger.debug("> %s", message.getClass().getSimpleName());
-
-				try {
-					message.decode(new DataStream(header.decrypted));
-				} catch (Exception e) {
-					logger.error("Failed to decode packet %s, payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.decrypted));
-				}
-
-				return message;
-			}
-
-			return null;
+		@Override
+		public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+			logger.error("Exception from downstream", e.getCause());
+			ctx.getChannel().close();
 		}
 
-		public void writeMessage(Message message) throws IOException {
+		@Override
+		public void sendMessage(Message message) {
 			logger.debug("< %s", message.getClass().getSimpleName());
+			lastWrite = channel.write(message);
+		}
+
+		@Override
+		public void close() {
+			status = Status.DISCONNECTING;
+
+			if (lastWrite != null) {
+				lastWrite.addListener(ChannelFutureListener.CLOSE);
+			} else {
+				channel.close();
+			}
+		}
+	}
+
+	private static class PacketFrameEncoder extends OneToOneEncoder {
+		private final ServerCrypto crypto;
+
+		public PacketFrameEncoder(ServerCrypto crypto) {
+			this.crypto = crypto;
+		}
+
+		@Override
+		protected Object encode(ChannelHandlerContext channelHandlerContext, Channel channel, Object object) throws Exception {
+			Message message = (Message)object;
 
 			DataStream stream = new DataStream();
 			message.encode(stream);
 			MessageHeader header = new MessageHeader();
 			header.id = message.id;
 			header.decrypted = stream.getBuffer();
-			serverCrypto.encryptPacket(header);
+			crypto.encryptPacket(header);
 
-			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort(message.id).array());
-			writer.write(ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(header.payload.length).array(), 1, 3);
-			writer.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort((short)5).array());
-			writer.write(header.payload);
+			stream.reset(true);
+
+			stream.put(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort(message.id).array());
+			stream.put(ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(header.payload.length).array(), 1, 3);
+			stream.put(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort((short)5).array());
+			stream.put(header.payload);
+
+			return ChannelBuffers.wrappedBuffer(stream.getBuffer());
+		}
+	}
+
+	private static class PacketFrameDecoder extends ReplayingDecoder<VoidEnum> {
+		private final ServerCrypto crypto;
+
+		public PacketFrameDecoder(ServerCrypto crypto) {
+			this.crypto = crypto;
 		}
 
-
 		@Override
-		public void sendMessage(Message message) {
-			try {
-				writeMessage(message);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+			ctx.sendUpstream(e);
 		}
-
 		@Override
-		public void close() {
-			try {
-				socket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+		public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+			ctx.sendUpstream(e);
+		}
+		@Override
+		protected Object decode(ChannelHandlerContext channelHandlerContext, Channel arg1, ChannelBuffer buffer, VoidEnum ignored) throws Exception {
+			byte[] payload = new byte[2];
+			buffer.readBytes(payload);
+			short id = ByteBuffer
+					.allocate(2)
+					.put(payload)
+					.order(ByteOrder.BIG_ENDIAN).getShort(0);
+
+			payload = new byte[3];
+			buffer.readBytes(payload);
+			buffer.readShort(); // Version, always 5
+
+			int length = ByteBuffer
+					.allocate(4)
+					.put((byte)0)
+					.put(payload)
+					.order(ByteOrder.BIG_ENDIAN).getInt(0);
+			payload = new byte[length];
+			buffer.readBytes(payload);
+
+			MessageHeader header = new MessageHeader(id, payload);
+			crypto.decryptPacket(header);
+
+			Message message = MessageFactory.create(header.id);
+
+			if (header.decrypted == null) {
+				logger.error("Failed to decrypt packet %d, encrypted payload:\n%s", header.id, Hex.dump(header.payload));
+				return null;
 			}
+
+			if (message == null) {
+				String name = null;
+				if (Info.messagesMap.containsKey(header.id)) {
+					name = Info.messagesMap.get(header.id);
+				}
+
+				if (name == null) {
+					logger.warn("Received unknown packet %d:\n%s", header.id, Hex.dump(header.decrypted));
+				} else {
+					logger.warn("Received undefined packet %s:\n%s", name, Hex.dump(header.decrypted));
+				}
+
+				return null;
+			}
+
+			try {
+				message.decode(new DataStream(header.decrypted));
+			} catch (Exception e) {
+				logger.error("Failed to decode packet %s, payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.decrypted));
+				return null;
+			}
+
+			return message;
 		}
 	}
 

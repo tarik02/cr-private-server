@@ -33,6 +33,7 @@ public class Player implements MessageHandler, CommandHandler {
 		this.session = session;
 
 		this.closed = false;
+		server.addPlayer(this);
 	}
 
 	/**
@@ -132,6 +133,8 @@ public class Player implements MessageHandler, CommandHandler {
 		}
 		closed = true;
 
+		server.removePlayer(this);
+
 		PlayerService playerService = server.getDataManager().getPlayerService();
 		playerService.update(entity);
 		entity = null;
@@ -152,8 +155,8 @@ public class Player implements MessageHandler, CommandHandler {
 			loginFailed.unknown_7 = (byte)0;
 			loginFailed.unknown_8 = "";
 			session.sendMessage(loginFailed);
-			session.close();
 		}
+		session.close();
 
 		return true;
 	}
