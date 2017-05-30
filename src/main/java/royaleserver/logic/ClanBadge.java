@@ -45,11 +45,11 @@ public class ClanBadge {
 
 		clanBadgeService.beginResolve();
 		int i = 0;
-		for (Row csv_chest : csv_badges.getRows()) {
+		for (Row csv_badge : csv_badges.getRows()) {
 			ClanBadge badge = new ClanBadge();
 
 			badge.scid = new SCID(SCID_HIGH, i++);
-			badge.name = csv_chest.getValue(csv_Name).asString();
+			badge.name = csv_badge.getValue(csv_Name).asString();
 			badge.dbId = clanBadgeService.resolve(badge.name).getId();
 
 			values.add(badge);
