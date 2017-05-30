@@ -3,6 +3,7 @@ package royaleserver.protocol.messages.server;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
 import royaleserver.utils.DataStream;
+import royaleserver.utils.Hex;
 
 public class CancelChallengeDone extends Message {
 	public static final short ID = Info.CANCEL_CHALLENGE_DONE;
@@ -14,6 +15,7 @@ public class CancelChallengeDone extends Message {
 	@Override
 	public void encode(DataStream stream) {
 		super.encode(stream);
+		stream.put(Hex.toByteArray("00"));
 	}
 
 	@Override

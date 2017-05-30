@@ -47,8 +47,9 @@ public class AllianceData extends Message {
 
 		header.encode(stream);
 		stream.putString(description);
-		members = new AllianceMemberEntry[stream.getRrsInt32()];
+		stream.putRrsInt32(members.length);
 		for (int i = 0; i < members.length; ++i) {
+			System.out.println(i);
 			members[i].encode(stream);
 		}
 		stream.putByte(unknown_3);
@@ -62,28 +63,6 @@ public class AllianceData extends Message {
 		stream.putByte(unknown_11);
 	}
 
-	@Override
-	public void decode(DataStream stream) {
-		super.decode(stream);
-
-		header.decode(stream);
-		description = stream.getString();
-		stream.putRrsInt32(members.length);
-		for (int i = 0; i < members.length; ++i) {
-			members[i] = new AllianceMemberEntry();
-			members[i].decode(stream);
-		}
-		unknown_3 = stream.getByte();
-		unknown_4 = stream.getByte();
-		unknown_5 = stream.getRrsInt32();
-		unknown_6 = stream.getRrsInt32();
-		unknown_7 = stream.getBInt();
-		unknown_8 = stream.getBInt();
-		unknown_9 = stream.getRrsInt32();
-		unknown_10 = stream.getByte();
-		unknown_11 = stream.getByte();
-	}
-
 	public static AllianceData from(ClanEntity entity) {
 		AllianceData allianceData = new AllianceData();
 		allianceData.header = AllianceHeaderEntry.from(entity);
@@ -94,6 +73,16 @@ public class AllianceData extends Message {
 		for (PlayerEntity member : entity.getMembers()) {
 			allianceData.members[i++] = AllianceMemberEntry.from(member);
 		}
+
+		allianceData.unknown_3 = 1; // 1
+		allianceData.unknown_4 = 0;
+		allianceData.unknown_5 = 234815; // 234815
+		allianceData.unknown_6 = 0;
+		allianceData.unknown_7 = 1494573487; // timestamp last request?
+		allianceData.unknown_8 = 1494832687; // timestamp ?
+		allianceData.unknown_9 = 4179457; // 4179457
+		allianceData.unknown_10 = 0;
+		allianceData.unknown_11 = 1;
 
 		return allianceData;
 	}

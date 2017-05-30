@@ -1,5 +1,6 @@
 package royaleserver;
 
+import org.hibernate.mapping.Join;
 import royaleserver.database.entity.*;
 import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerService;
@@ -114,6 +115,7 @@ public class Player implements MessageHandler, CommandHandler {
 
 	/**
 	 * Disconnect player showing the reason.
+	 *
 	 * @param reason message
 	 */
 	public void disconnect(String reason) {
@@ -321,30 +323,20 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleAskForJoinableAlliancesList(AskForJoinableAlliancesList message) throws Throwable {
+		ClanService clanService = server.getDataManager().getClanService();
+		List<ClanEntity> clans = clanService.getAll();
+
 		JoinableAllianceList response = new JoinableAllianceList();
+		response.alliances = new AllianceHeaderEntry[clans.size()];
 
-		response.alliances = new AllianceHeaderEntry[1];
-		response.alliances[0] = new AllianceHeaderEntry();
-		response.alliances[0].id = 1;
-		response.alliances[0].name = "TestClan";
-		response.alliances[0].badge = new SCID(16, 150);
-		response.alliances[0].type = response.alliances[0].CLAN_OPEN;
-		response.alliances[0].numberOfMembers = 1;
-		response.alliances[0].score = 10000;
-		response.alliances[0].requiredScore = 2000;
-		response.alliances[0].unknown_7 = 0;
-		response.alliances[0].unknown_8 = 0;
-		response.alliances[0].currenRank = 0;
-		response.alliances[0].unknown_10 = 0;
-		response.alliances[0].donations = 0;
-		response.alliances[0].unknown_12 = 0;
-		response.alliances[0].unknown_13 = 0;
-		response.alliances[0].unknown_14 = 1;
-		response.alliances[0].unknown_15 = 12;
-		response.alliances[0].region = 57;
-		response.alliances[0].unknown_17 = 6;
+		int i = 0;
+		for (ClanEntity clan : clans) {
+			response.alliances[i] = AllianceHeaderEntry.from(clan);
 
-		session.sendMessage(response);
+			++i;
+		}
+
+		session.sendMessage(response); // TODO: Change response message
 
 		return true;
 	}
@@ -359,12 +351,51 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleJoinAlliance(JoinAlliance message) throws Throwable {
-		return false;
+		ClanService clanService = server.getDataManager().getClanService();
+		ClanEntity clan = clanService.searchById(message.allianceId);
+
+		if (entity.getClan() == null && entity.getTrophies() >= clan.getRequiredTrophies()) {
+
+			entity.setClan(clan);
+			entity.setLogicClanRole(ClanRole.by("Leader"));
+
+			// Send some information about clan
+			JoinClan command = JoinClan.from(clan);
+
+			AvailableServerCommand response = new AvailableServerCommand();
+			response.command.command = command;
+
+			AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
+			response_1.membersOnline = 1;
+			response_1.unknown_1 = 0;
+
+			session.sendMessage(response);
+			session.sendMessage(response_1);
+		}
+
+		return true;
 	}
 
 	@Override
 	public boolean handleLeaveAlliance(LeaveAlliance message) throws Throwable {
-		return false;
+		ClanService clanService = server.getDataManager().getClanService();
+		ClanEntity clan = entity.getClan();
+
+		if(clan != null) {
+			LeaveClanOK command = LeaveClanOK.from(clan);
+
+			CancelChallengeDone response = new CancelChallengeDone();
+
+			AvailableServerCommand response_1 = new AvailableServerCommand();
+			response_1.command.command = command;
+
+			entity.setClan(null);
+
+			session.sendMessage(response);
+			session.sendMessage(response_1);
+		}
+
+		return true;
 	}
 
 	@Override
@@ -450,6 +481,19 @@ public class Player implements MessageHandler, CommandHandler {
 
 			entity.setClan(clan);
 			entity.setLogicClanRole(ClanRole.by("Leader"));
+
+			// Send some information about clan
+			JoinClan command = JoinClan.from(clan);
+
+			AvailableServerCommand response = new AvailableServerCommand();
+			response.command.command = command;
+
+			AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
+			response_1.membersOnline = 1;
+			response_1.unknown_1 = 0;
+
+			session.sendMessage(response);
+			session.sendMessage(response_1);
 		}
 
 		return true;

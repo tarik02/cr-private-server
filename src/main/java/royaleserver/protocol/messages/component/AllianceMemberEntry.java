@@ -97,15 +97,22 @@ public class AllianceMemberEntry extends Component {
 	public static AllianceMemberEntry from(PlayerEntity entity) {
 		AllianceMemberEntry allianceMemberEntry = new AllianceMemberEntry();
 		allianceMemberEntry.avatarId = entity.getId();
+		allianceMemberEntry.facebookId = "0";
 		allianceMemberEntry.name = entity.getName();
 		allianceMemberEntry.arena = entity.getLogicArena().getScid();
-		allianceMemberEntry.role = (byte)entity.getLogicClanRole().getIndex();
-		allianceMemberEntry.expLevel = 13; // TODO:
-		allianceMemberEntry.score = 10; // ?
-		allianceMemberEntry.donations = 1000; // TODO:
-		allianceMemberEntry.currenRank = 0; // ?
-		allianceMemberEntry.previousRank = 0; // ?
+		allianceMemberEntry.role = 4;
+		allianceMemberEntry.expLevel = 7; // TODO:
+		allianceMemberEntry.score = 2000; // ? - trophies
+		allianceMemberEntry.donations = 0; // TODO:
+		allianceMemberEntry.unknown_8 = 0;
+		allianceMemberEntry.currenRank = 4; // ?
+		allianceMemberEntry.previousRank = 4; // ?
 		allianceMemberEntry.clanChestCrowns = 0;
+		allianceMemberEntry.unknown_12 = 0;
+		allianceMemberEntry.unknown_13 = -64;
+		allianceMemberEntry.unknown_14 = -64;
+		allianceMemberEntry.unknown_15 = 0;
+		allianceMemberEntry.unknown_16 = 4;
 		allianceMemberEntry.homeID = entity.getId();
 		return allianceMemberEntry;
 	}

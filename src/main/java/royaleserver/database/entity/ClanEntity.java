@@ -8,8 +8,10 @@ import java.util.Set;
 
 @Entity
 @Table(name = "clans")
-@NamedQueries({
-		@NamedQuery(name = "Clan.searchById", query = "SELECT clan FROM ClanEntity clan WHERE clan.id = :id"),
+
+@NamedQueries(value = {
+		@NamedQuery(name = "Clan.searchById", query = "SELECT clan from ClanEntity clan WHERE clan.id = :id"),
+		@NamedQuery(name = "Clan.getAll", query = "SELECT clan FROM ClanEntity clan WHERE clan.type = 1"),
 		@NamedQuery(name = "Clan.searchByName", query = "SELECT clan FROM ClanEntity clan WHERE LOWER(clan.name) LIKE LOWER(:name)")
 })
 public class ClanEntity {

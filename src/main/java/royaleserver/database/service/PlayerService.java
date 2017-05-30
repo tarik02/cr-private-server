@@ -18,6 +18,8 @@ public class PlayerService {
 		PlayerEntity playerEntity = new PlayerEntity();
 		playerEntity.setPassToken(StringUtils.randomString(32, 64));
 		playerEntity.setLogicArena(Arena.by("Arena1"));
+		playerEntity.setGems(10000);
+		playerEntity.setGold(10000);
 		return add(playerEntity);
 	}
 

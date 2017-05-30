@@ -57,48 +57,21 @@ public class AllianceHeaderEntry extends Component {
 		stream.putBLong(id);
 		stream.putString(name);
 		stream.putSCID(badge);
-		stream.putRrsInt32(type);
-		stream.putRrsInt32(numberOfMembers);
+		stream.putByte(type);
+		stream.putByte((byte)numberOfMembers);
 		stream.putRrsInt32(score);
 		stream.putRrsInt32(requiredScore);
-		stream.putRrsInt32(unknown_7);
-		stream.putRrsInt32(unknown_8);
+		stream.putByte(unknown_7);
+		stream.putByte(unknown_8);
 		stream.putRrsInt32(currenRank);
 		stream.putRrsInt32(unknown_10);
 		stream.putRrsInt32(donations);
 		stream.putRrsInt32(unknown_12);
-		stream.putRrsInt32(unknown_13);
-		stream.putRrsInt32(unknown_14);
-		stream.putRrsInt32(unknown_15);
+		stream.putByte(unknown_13);
+		stream.putByte(unknown_14);
+		stream.putByte(unknown_15);
 		stream.putRrsInt32(region);
-		stream.putRrsInt32(unknown_17);
-
-		// next clan
-		stream.putByte((byte) 0);
-	}
-
-	@Override
-	public void decode(DataStream stream) {
-		super.decode(stream);
-
-		id = stream.getBLong();
-		name = stream.getString();
-		badge = stream.getSCID();
-		type = stream.getByte();
-		numberOfMembers = stream.getByte();
-		score = stream.getRrsInt32();
-		requiredScore = stream.getRrsInt32();
-		unknown_7 = stream.getByte();
-		unknown_8 = stream.getByte();
-		currenRank = stream.getRrsInt32();
-		unknown_10 = stream.getRrsInt32();
-		donations = stream.getRrsInt32();
-		unknown_12 = stream.getRrsInt32();
-		unknown_13 = stream.getByte();
-		unknown_14 = stream.getByte();
-		unknown_15 = stream.getByte();
-		region = stream.getRrsInt32();
-		unknown_17 = stream.getByte();
+		stream.putByte(unknown_17);
 	}
 
 	public static AllianceHeaderEntry from(ClanEntity entity) {
@@ -107,7 +80,7 @@ public class AllianceHeaderEntry extends Component {
 		response.name = entity.getName();
 		response.badge = entity.getLogicBadge().getScid();
 
-		switch (entity.getType()) {
+		/*switch (entity.getType()) {
 		case OPEN:
 			response.type = CLAN_OPEN;
 			break;
@@ -117,7 +90,9 @@ public class AllianceHeaderEntry extends Component {
 		case CLOSED:
 			response.type = CLAN_CLOSED;
 			break;
-		}
+		}*/
+
+		response.type = 1;
 
 		response.numberOfMembers = entity.getMembers().size();
 		response.score = entity.getScore();
@@ -125,14 +100,14 @@ public class AllianceHeaderEntry extends Component {
 		response.unknown_7 = 0;
 		response.unknown_8 = 0;
 		response.currenRank = 0;
-		response.unknown_10 = 0;
+		response.unknown_10 = 50; // 50
 		response.donations = entity.getDonationsPerWeek();
 		response.unknown_12 = 0;
-		response.unknown_13 = 0;
-		response.unknown_14 = 1;
-		response.unknown_15 = 12;
-		response.region = 57;
-		response.unknown_17 = 6;
+		response.unknown_13 = 1;
+		response.unknown_14 = 12;
+		response.unknown_15 = 57;
+		response.region = 6;
+		response.unknown_17 = 0;
 
 		return response;
 	}

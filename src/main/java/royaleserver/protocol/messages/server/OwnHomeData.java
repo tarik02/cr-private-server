@@ -223,7 +223,7 @@ public class OwnHomeData extends Message {
 		}
 
 		// Not decoded yet
-		stream.put(Hex.toByteArray("000098ef1a9ca41d91e6f1900b00007f0000000000000000001dbeae2ba1400900a8802884d4d20195baf2900ba8ee8701a0a0d201b59ff7900b00a8850a80c33da5faf0900b030000000000000002"));
+		stream.put(Hex.toByteArray("0000809423809423849fe6920b00007f0113070102007f0000000000000000000000000000a8ced101b0f6d201a6fbee920ba8ced101b0f6d201a6fbee920b0000007f0d0000000000000002"));
 
 		stream.putRrsInt32(lastLevel);
 		stream.putByte((byte)36);
@@ -361,7 +361,10 @@ public class OwnHomeData extends Message {
 
 		stream.putRrsInt32(1);
 
-		if (clan == null) {
+		if(username == null) {
+			stream.putRrsInt32(0);
+		}
+		else if (clan == null) {
 			stream.putRrsInt32(1);
 		} else {
 			stream.putRrsInt32(9);
@@ -386,12 +389,7 @@ public class OwnHomeData extends Message {
 		// WinStreak
 		stream.putByte((byte)127); // 127 = -64 (varint) = null
 
-		// Tutorial Step (06 = setName , 08 = lastDone)
-		//if (username == null) { // Temponary solution
-		//	stream.putRrsInt32(6);
-		//} else {
-			stream.putRrsInt32(8);
-		//}
+		stream.putRrsInt32(8);
 
 		// Tournament?
 		stream.putRrsInt32(0);

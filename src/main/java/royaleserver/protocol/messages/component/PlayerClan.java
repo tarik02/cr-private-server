@@ -19,7 +19,7 @@ public class PlayerClan extends Component {
 
 		stream.putRrsLong(id);
 		stream.putString(name);
-		stream.putRrsInt32((int)(badge.getValue() + 1));
+		stream.putRrsInt32(badge.getLow() + 1);
 		stream.putRrsInt32(role);
 	}
 

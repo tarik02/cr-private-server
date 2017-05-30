@@ -23,6 +23,10 @@ public class ClanService {
 		return fromDB;
 	}
 
+	public List<ClanEntity> getAll() {
+		return entityManager.createNamedQuery("Clan.getAll", ClanEntity.class).getResultList();
+	}
+
 	public ClanEntity searchById(long id) {
 		return (ClanEntity)entityManager.createNamedQuery("Clan.searchById").setParameter("id", id).getSingleResult();
 	}

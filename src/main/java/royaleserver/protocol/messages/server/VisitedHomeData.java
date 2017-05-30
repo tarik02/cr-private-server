@@ -120,7 +120,7 @@ public class VisitedHomeData extends Message {
 		}
 
 		stream.putRrsInt32(0); // name changes count
-		stream.putByte((byte)arena.getIndex());
+		stream.putByte((byte)(arena.getIndex() + 1)); // why +1? :c
 
 		stream.putRrsInt32(trophies);
 		stream.putRrsInt32(657); // unk_6
@@ -224,12 +224,12 @@ public class VisitedHomeData extends Message {
 
 		stream.putBoolean(isMyProfile);
 
-		//if (clan == null) {
+		if (clan == null) {
 			stream.putRrsInt32(1);
-		/*} else {
+		} else {
 			stream.putRrsInt32(9);
 			clan.encode(stream); // Does not work there
-		}*/
+		}
 
 		// # END CLAN INFO # //
 		// Matches played (global/tournament/challenge)?
