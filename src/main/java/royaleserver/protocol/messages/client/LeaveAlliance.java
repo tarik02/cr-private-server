@@ -1,10 +1,9 @@
 package royaleserver.protocol.messages.client;
 
-import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.utils.DataStream;
-import royaleserver.utils.Hex;
 
 public class LeaveAlliance extends Message {
 	public static final short ID = Info.LEAVE_ALLIANCE;
@@ -22,8 +21,6 @@ public class LeaveAlliance extends Message {
 	@Override
 	public void decode(DataStream stream) {
 		super.decode(stream);
-
-		System.out.println("Buffer: " + Hex.toHexString(stream.get(1000)));
 	}
 
 	public boolean handle(MessageHandler handler) throws Throwable {
