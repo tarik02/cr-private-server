@@ -152,8 +152,8 @@ public class Player implements MessageHandler, CommandHandler {
 			loginFailed.unknown_7 = (byte)0;
 			loginFailed.unknown_8 = "";
 			session.sendMessage(loginFailed);
-			session.close();
 		}
+		session.close();
 
 		return true;
 	}
