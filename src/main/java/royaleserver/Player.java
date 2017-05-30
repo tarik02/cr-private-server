@@ -103,6 +103,18 @@ public class Player implements MessageHandler, CommandHandler {
 		return nickname.length() > 0 && nickname.length() < 16;
 	}
 
+	/**
+	 * Saves player entity to database.
+	 */
+	public void save() {
+		PlayerService playerService = server.getDataManager().getPlayerService();
+		playerService.update(entity);
+	}
+
+	/**
+	 * Disconnect player showing the reason.
+	 * @param reason message
+	 */
 	public void disconnect(String reason) {
 		close(reason, true);
 	}
@@ -136,8 +148,7 @@ public class Player implements MessageHandler, CommandHandler {
 		}
 		closed = true;
 
-		PlayerService playerService = server.getDataManager().getPlayerService();
-		playerService.update(entity);
+		save();
 		entity = null;
 
 		if (reason == null) {
