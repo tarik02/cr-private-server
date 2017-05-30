@@ -33,6 +33,7 @@ public class Player implements MessageHandler, CommandHandler {
 		this.session = session;
 
 		this.closed = false;
+		server.addPlayer(this);
 	}
 
 	/**
@@ -131,6 +132,8 @@ public class Player implements MessageHandler, CommandHandler {
 			return false;
 		}
 		closed = true;
+
+		server.removePlayer(this);
 
 		PlayerService playerService = server.getDataManager().getPlayerService();
 		playerService.update(entity);

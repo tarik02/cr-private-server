@@ -1,5 +1,6 @@
 package royaleserver;
 
+import com.google.gson.Gson;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -9,8 +10,6 @@ import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import org.jboss.netty.handler.codec.replay.VoidEnum;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
-
-import com.google.gson.Gson;
 import royaleserver.assets.AssetManager;
 import royaleserver.assets.FolderAssetManager;
 import royaleserver.config.Config;
@@ -31,13 +30,14 @@ import royaleserver.protocol.messages.server.LoginOk;
 import royaleserver.protocol.messages.server.ServerHello;
 import royaleserver.utils.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.concurrent.ExecutorService;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class Server {
@@ -48,13 +48,19 @@ public class Server {
 	protected boolean running = false;
 	protected long tickCounter = 0;
 
-	protected ServerSocket serverSocket = null;
 	protected AssetManager assetManager = null;
 	protected DataManager dataManager = null;
 
 	protected String resourceFingerprint = "";
 
 	protected Config config;
+
+	protected Set<Player> players = new LinkedHashSet<>();
+
+	private OrderedMemoryAwareThreadPoolExecutor bossExec;
+	private OrderedMemoryAwareThreadPoolExecutor ioExec;
+	private ServerBootstrap networkServer;
+	private Channel channel;
 
 	public Server() throws ServerException {
 		this(null);
@@ -114,13 +120,13 @@ public class Server {
 		logger.info("Starting the network thread...");
 
 		int workingThreadsCount = 4;
-		ExecutorService bossExec = new OrderedMemoryAwareThreadPoolExecutor(1, 400000000, 2000000000, 60, TimeUnit.SECONDS);
-		ExecutorService ioExec = new OrderedMemoryAwareThreadPoolExecutor(workingThreadsCount, 400000000, 2000000000, 60, TimeUnit.SECONDS);
-		ServerBootstrap networkServer = new ServerBootstrap(new NioServerSocketChannelFactory(bossExec, ioExec, workingThreadsCount));
+		bossExec = new OrderedMemoryAwareThreadPoolExecutor(1, 400000000, 2000000000, 60, TimeUnit.SECONDS);
+		ioExec = new OrderedMemoryAwareThreadPoolExecutor(workingThreadsCount, 400000000, 2000000000, 60, TimeUnit.SECONDS);
+		networkServer = new ServerBootstrap(new NioServerSocketChannelFactory(bossExec, ioExec, workingThreadsCount));
 		networkServer.setOption("backlog", 500);
 		networkServer.setOption("connectTimeoutMillis", 10000);
 		networkServer.setPipelineFactory(new ServerPipelineFactory());
-		Channel channel = networkServer.bind(new InetSocketAddress(9339));
+		channel = networkServer.bind(new InetSocketAddress(9339));
 
 		logger.info("Server started!");
 
@@ -134,25 +140,23 @@ public class Server {
 		running = false;
 
 		logger.info("Stopping the server...");
-		logger.info("Disconnecting the clients...");
-		// TODO: Disconnect clients
-
 		try {
-			logger.info("Closing the server socket...");
-			serverSocket.close();
-		} catch (IOException e) {
+			channel.unbind().await();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
-		/*try {
-			logger.info("Joining the network thread...");
-			networkThread.join();
+		logger.info("Disconnecting the clients...");
+		for (Player player : players) {
+			player.close("server stopped", true);
+		}
+
+		logger.info("Closing server...");
+		try {
+			channel.close().await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}*/
-
-		serverSocket = null;
-		dataManager = null;
+		}
 
 		logger.info("Server stopped!");
 	}
@@ -191,6 +195,21 @@ public class Server {
 		return resourceFingerprint;
 	}
 
+	/**
+	 * @apiNote Internal usage only
+	 * @param player
+	 */
+	public void addPlayer(Player player) {
+		players.add(player);
+	}
+
+	/**
+	 * @apiNote Internal usage only
+	 * @param player
+	 */
+	public void removePlayer(Player player) {
+		players.remove(player);
+	}
 
 	private static final byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");
 	private static final byte[] sessionKey = Hex.toByteArray("74794DE40D62A03AC6F6E86A9815C6262AA12BEDD518F883");
