@@ -4,6 +4,7 @@ import org.hibernate.annotations.GenericGenerator;
 import royaleserver.database.util.Identifiable;
 import royaleserver.logic.Arena;
 import royaleserver.logic.ClanRole;
+import royaleserver.logic.ExpLevel;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -48,6 +49,18 @@ public class PlayerEntity implements Identifiable<Long> {
 	@JoinColumn(name = "arena_id")
 	@ManyToOne(optional = false)
 	private ArenaEntity arena;
+
+
+	@JoinColumn(name = "last_exp_level_id")
+	@ManyToOne(optional = false)
+	private ExpLevelEntity lastExpLevel;
+	
+	@JoinColumn(name = "exp_level_id")
+	@ManyToOne(optional = false)
+	private ExpLevelEntity expLevel;
+
+	@Column(name = "exp_level_experience", nullable = false)
+	private int expLevelExperience = 0;
 
 	@Column(nullable = false)
 	@OneToMany(mappedBy = "player")
@@ -140,6 +153,49 @@ public class PlayerEntity implements Identifiable<Long> {
 
 	public PlayerEntity setLogicArena(Arena arena) {
 		return setArena(new ArenaEntity().setId(arena.getDbId()));
+	}
+
+	public ExpLevelEntity getLastExpLevel() {
+		return lastExpLevel;
+	}
+
+	public PlayerEntity setLastExpLevel(ExpLevelEntity lastExpLevel) {
+		this.lastExpLevel = lastExpLevel;
+		return this;
+	}
+
+	public ExpLevel getLogicLastExpLevel() {
+		return ExpLevel.byDB(lastExpLevel.getId());
+	}
+
+	public PlayerEntity setLogicLastExpLevel(ExpLevel level) {
+		return setLastExpLevel(new ExpLevelEntity().setId(level.getDbId()));
+	}
+	
+	public ExpLevelEntity getExpLevel() {
+		return expLevel;
+	}
+
+	public PlayerEntity setExpLevel(ExpLevelEntity expLevel) {
+		this.expLevel = expLevel;
+		return this;
+	}
+	
+	public ExpLevel getLogicExpLevel() {
+		return ExpLevel.byDB(expLevel.getId());
+	}
+
+	public PlayerEntity setLogicExpLevel(ExpLevel level) {
+		return setExpLevel(new ExpLevelEntity().setId(level.getDbId()));
+	}
+
+	public int getExpLevelExperience() {
+		return expLevelExperience;
+	}
+
+	public PlayerEntity setExpLevelExperience(int expLevelExperience) {
+		this.expLevelExperience = expLevelExperience;
+		return this;
 	}
 
 	public Set<HomeChestEntity> getHomeChests() {

@@ -6,6 +6,7 @@ import royaleserver.database.service.PlayerService;
 import royaleserver.logic.Arena;
 import royaleserver.logic.ClanBadge;
 import royaleserver.logic.ClanRole;
+import royaleserver.logic.ExpLevel;
 import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.CommandHandler;
@@ -51,9 +52,14 @@ public class Player implements MessageHandler, CommandHandler {
 		response.username = entity.getName();
 		response.gold = entity.getGold();
 		response.gems = entity.getGems();
-		response.levelExperience = 0;
-		response.level = 13;
-		response.lastLevel = 13;
+		response.levelExperience = entity.getExpLevelExperience();
+
+		ExpLevel expLevel = entity.getLogicExpLevel(), lastExpLevel = entity.getLogicLastExpLevel();
+		response.level = expLevel.getIndex();
+		response.lastLevel = lastExpLevel.getIndex();
+		if (expLevel != lastExpLevel) {
+			entity.setLogicLastExpLevel(expLevel);
+		}
 
 		response.homeChests = new HomeChest[entity.getHomeChests().size()];
 		int i = 0;
@@ -92,6 +98,39 @@ public class Player implements MessageHandler, CommandHandler {
 		response.clan = PlayerClan.from(entity);
 
 		session.sendMessage(response);
+	}
+
+	// API
+
+	/**
+	 * Adds experience and increases level if needed
+	 * @param count of experience to add
+	 */
+	public void addExperience(int count) {
+		int newExp = entity.getExpLevelExperience() + count;
+		ExpLevel level = entity.getLogicExpLevel();
+
+		if (newExp >= level.getExpToNextLevel()) {
+			ExpLevel nextLevel;
+
+			do {
+				nextLevel = ExpLevel.by(level.getName() + 1);
+				newExp -= level.getExpToNextLevel();
+
+				if (nextLevel == null) {
+					entity.setLogicExpLevel(level);
+					entity.setExpLevelExperience(level.getExpToNextLevel());
+					return;
+				}
+
+				level = nextLevel;
+			} while (newExp >= level.getExpToNextLevel());
+
+			entity.setExpLevelExperience(newExp);
+			entity.setLogicExpLevel(nextLevel);
+		} else {
+			entity.setExpLevelExperience(newExp);
+		}
 	}
 
 	/**
@@ -252,7 +291,7 @@ public class Player implements MessageHandler, CommandHandler {
 			response.homeID = responseEntity.getId();
 			response.arena = arena;
 			response.trophies = responseEntity.getTrophies();
-			response.level = 13;
+			response.level = responseEntity.getLogicExpLevel().getIndex();
 			response.username = responseEntity.getName();
 
 			response.clan = PlayerClan.from(responseEntity);
@@ -562,6 +601,7 @@ public class Player implements MessageHandler, CommandHandler {
 		response.level = 13;
 
 		session.sendMessage(response);
+		addExperience(1000);
 
 		return false;
 	}

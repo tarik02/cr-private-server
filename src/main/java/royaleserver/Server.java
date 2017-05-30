@@ -100,6 +100,7 @@ public class Server {
 		Chest.init(this);
 		ClanBadge.init(this);
 		ClanRole.init(this);
+		ExpLevel.init(this);
 
 		logger.info("Starting the network thread...");
 		networkThread = new NetworkThread();

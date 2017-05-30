@@ -13,11 +13,12 @@ public final class DataServices {
 	public final ClanBadgeService clanBadgeService;
 	public final ClanRoleService clanRoleService;
 	public final ClanService clanService;
+	public final ExpLevelService expLevelService;
 	public final HomeChestService homeChestService;
 	public final PlayerCardService playerCardService;
 	public final PlayerService playerService;
 
-	public DataServices(ArenaService arenaService, AssetService assetService, CardService cardService, ChestService chestService, ClanBadgeService clanBadgeService, ClanRoleService clanRoleService, ClanService clanService, HomeChestService homeChestService, PlayerCardService playerCardService, PlayerService playerService) {
+	public DataServices(ArenaService arenaService, AssetService assetService, CardService cardService, ChestService chestService, ClanBadgeService clanBadgeService, ClanRoleService clanRoleService, ClanService clanService, ExpLevelService expLevelService, HomeChestService homeChestService, PlayerCardService playerCardService, PlayerService playerService) {
 		this.arenaService = arenaService;
 		this.assetService = assetService;
 		this.cardService = cardService;
@@ -25,6 +26,7 @@ public final class DataServices {
 		this.clanBadgeService = clanBadgeService;
 		this.clanRoleService = clanRoleService;
 		this.clanService = clanService;
+		this.expLevelService = expLevelService;
 		this.homeChestService = homeChestService;
 		this.playerCardService = playerCardService;
 		this.playerService = playerService;

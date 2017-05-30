@@ -2,10 +2,10 @@ package royaleserver.database.service;
 
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.logic.Arena;
+import royaleserver.logic.ExpLevel;
 import royaleserver.utils.StringUtils;
 
 import javax.persistence.EntityManager;
-import java.util.List;
 
 public class PlayerService {
 	private final EntityManager entityManager;
@@ -15,19 +15,20 @@ public class PlayerService {
 	}
 
 	public PlayerEntity create() {
-		PlayerEntity playerEntity = new PlayerEntity();
-		playerEntity.setPassToken(StringUtils.randomString(32, 64));
-		playerEntity.setLogicArena(Arena.by("Arena1"));
-		playerEntity.setGems(10000);
-		playerEntity.setGold(10000);
-		return add(playerEntity);
+		return create(null, null);
 	}
 
-	public PlayerEntity create(long id, String passToken) {
+	public PlayerEntity create(Long id, String passToken) {
 		PlayerEntity playerEntity = new PlayerEntity();
-		playerEntity.setId(id);
-		playerEntity.setPassToken(passToken);
+		if (id != null) {
+			playerEntity.setId(id);
+		}
+		playerEntity.setPassToken(passToken == null ? StringUtils.randomString(32, 64) : passToken);
 		playerEntity.setLogicArena(Arena.by("Arena1"));
+		playerEntity.setLogicLastExpLevel(ExpLevel.by(1));
+		playerEntity.setLogicExpLevel(ExpLevel.by(1));
+		playerEntity.setGems(10000);
+		playerEntity.setGold(10000);
 		return add(playerEntity);
 	}
 
