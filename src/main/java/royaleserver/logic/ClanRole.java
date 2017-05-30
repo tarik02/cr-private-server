@@ -17,6 +17,8 @@ public class ClanRole {
 	private int level;
 	private boolean canInvite, canSendMail, canChangeClanSettings, canAcceptJoinRequest, canKick, canBePromotedToLeader, canPromoteToOwnLevel;
 
+	private ClanRole() {}
+
 	public long getDbId() {
 		return dbId;
 	}

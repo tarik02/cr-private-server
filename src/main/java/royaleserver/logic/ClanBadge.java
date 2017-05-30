@@ -17,6 +17,8 @@ public class ClanBadge {
 	private SCID scid;
 	private String name;
 
+	private ClanBadge() {}
+
 	public long getDbId() {
 		return dbId;
 	}
