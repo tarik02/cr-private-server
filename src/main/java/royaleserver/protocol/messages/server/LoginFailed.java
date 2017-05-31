@@ -7,6 +7,9 @@ import royaleserver.utils.DataStream;
 public class LoginFailed extends Message {
 	public static final short ID = Info.LOGIN_FAILED;
 
+	public static int ERROR_CODE_RESET_ACCOUNT = 1;
+	public static int ERROR_CODE_NEW_ASSETS = 7;
+
 	public int errorCode;
 	public String resourceFingerprintData;
 	public String redirectDomain;
