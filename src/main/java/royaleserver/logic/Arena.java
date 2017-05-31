@@ -24,6 +24,7 @@ public class Arena {
 	private boolean isInUse;
 	private int trophyLimit, demoteTrophyLimit;
 	private Integer seasonTrophyRequest;
+	private int chestRewardMultiplier, chestShopPriceMultiplier;
 	private int requestSize;
 	private int maxDonationCountCommon, maxDonationCountRare, maxDonationCountEpic;
 	private int dailyDonationCapacityLimit;
@@ -72,6 +73,14 @@ public class Arena {
 		return seasonTrophyRequest;
 	}
 
+	public int getChestRewardMultiplier() {
+		return chestRewardMultiplier;
+	}
+
+	public int getChestShopPriceMultiplier() {
+		return chestShopPriceMultiplier;
+	}
+
 	public int getRequestSize() {
 		return requestSize;
 	}
@@ -118,6 +127,8 @@ public class Arena {
 		Column csv_TrophyLimit = csv_arenas.getColumn("TrophyLimit");
 		Column csv_DemoteTrophyLimit = csv_arenas.getColumn("DemoteTrophyLimit");
 		Column csv_SeasonTrophyReset = csv_arenas.getColumn("SeasonTrophyReset");
+		Column csv_ChestRewardMultiplier = csv_arenas.getColumn("ChestRewardMultiplier");
+		Column csv_ChestShopPriceMultiplier = csv_arenas.getColumn("ChestShopPriceMultiplier");
 		Column csv_RequestSize = csv_arenas.getColumn("RequestSize");
 		Column csv_MaxDonationCountCommon = csv_arenas.getColumn("MaxDonationCountCommon");
 		Column csv_MaxDonationCountRare = csv_arenas.getColumn("MaxDonationCountRare");
@@ -142,6 +153,8 @@ public class Arena {
 			arena.trophyLimit = csv_arena.getValue(csv_TrophyLimit).asInt();
 			arena.demoteTrophyLimit = csv_arena.getValue(csv_DemoteTrophyLimit).asInt();
 			arena.seasonTrophyRequest = csv_arena.getValue(csv_SeasonTrophyReset).asIntNullable();
+			arena.chestRewardMultiplier = csv_arena.getValue(csv_ChestRewardMultiplier).asInt();
+			arena.chestShopPriceMultiplier = csv_arena.getValue(csv_ChestShopPriceMultiplier).asInt();
 			arena.requestSize = csv_arena.getValue(csv_RequestSize).asInt();
 			arena.maxDonationCountCommon = csv_arena.getValue(csv_MaxDonationCountCommon).asInt();
 			arena.maxDonationCountRare = csv_arena.getValue(csv_MaxDonationCountRare).asInt();

@@ -7,8 +7,10 @@ import royaleserver.utils.StringUtils;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Random;
 
 public class PlayerService {
+	private final Random random = new Random(System.currentTimeMillis());
 	private final EntityManager entityManager;
 
 	public PlayerService(EntityManager entityManager) {
@@ -16,23 +18,20 @@ public class PlayerService {
 	}
 
 	public PlayerEntity create() {
-		return create(null, null);
-	}
-
-	public PlayerEntity create(Long id, String passToken) {
 		PlayerEntity playerEntity = new PlayerEntity();
-		if (id != null) {
-			playerEntity.setId(id);
-		}
 		playerEntity.setRegisteredDate(new Date());
 		playerEntity.setLastOnlineStatusUpdate(new Date());
-		playerEntity.setPassToken(passToken == null ? StringUtils.randomString(32, 64) : passToken);
+		playerEntity.setPassToken(StringUtils.randomString(32, 64));
 		playerEntity.setTrophies(3800);
 		playerEntity.setLogicArena(Arena.by("Arena_T"));
 		playerEntity.setLogicLastExpLevel(ExpLevel.by(13));
 		playerEntity.setLogicExpLevel(ExpLevel.by(13));
 		playerEntity.setGold(10000);
 		playerEntity.setGems(100000);
+		playerEntity.setRandomSeed(random.nextLong());
+		playerEntity.setRareChance(random.nextFloat());
+		playerEntity.setEpicChance(random.nextFloat());
+		playerEntity.setLegendaryChance(random.nextFloat());
 		return add(playerEntity);
 	}
 

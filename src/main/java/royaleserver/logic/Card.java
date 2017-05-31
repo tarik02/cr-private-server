@@ -10,6 +10,7 @@ import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Card {
 	public static final int TYPE_CHARACTER = 26;
@@ -134,5 +135,16 @@ public class Card {
 		}
 
 		return null;
+	}
+
+	public static List<Card> select(Rarity rarity, Arena arena, Random random) {
+		List<Card> candidates = new ArrayList<>();
+		for (Card card : cards) {
+			if (!card.notInUse && card.getUnlockArena().getArena() <= arena.getArena() && card.getRarity() == rarity) {
+				candidates.add(card);
+			}
+		}
+
+		return candidates;
 	}
 }

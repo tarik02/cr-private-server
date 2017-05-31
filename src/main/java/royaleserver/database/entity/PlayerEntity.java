@@ -86,6 +86,12 @@ public class PlayerEntity implements Identifiable<Long> {
 	@ManyToOne
 	private ClanRoleEntity clanRole = null;
 
+	private long randomSeed;
+
+	private float rareChance = 0;
+	private float epicChance = 0;
+	private float legendaryChance = 0;
+
 
 	public Long getId() {
 		return id;
@@ -270,5 +276,41 @@ public class PlayerEntity implements Identifiable<Long> {
 
 	public PlayerEntity setLogicClanRole(ClanRole role) {
 		return setClanRole(new ClanRoleEntity().setId(role.getDbId()));
+	}
+
+	public float getRareChance() {
+		return rareChance;
+	}
+
+	public long getRandomSeed() {
+		return randomSeed;
+	}
+
+	public PlayerEntity setRandomSeed(long randomSeed) {
+		this.randomSeed = randomSeed;
+		return this;
+	}
+
+	public PlayerEntity setRareChance(float rareChance) {
+		this.rareChance = rareChance;
+		return this;
+	}
+
+	public float getEpicChance() {
+		return epicChance;
+	}
+
+	public PlayerEntity setEpicChance(float epicChance) {
+		this.epicChance = epicChance;
+		return this;
+	}
+
+	public float getLegendaryChance() {
+		return legendaryChance;
+	}
+
+	public PlayerEntity setLegendaryChance(float legendaryChance) {
+		this.legendaryChance = legendaryChance;
+		return this;
 	}
 }

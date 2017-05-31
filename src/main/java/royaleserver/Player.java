@@ -3,10 +3,7 @@ package royaleserver;
 import royaleserver.database.entity.*;
 import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerService;
-import royaleserver.logic.Arena;
-import royaleserver.logic.ClanBadge;
-import royaleserver.logic.ClanRole;
-import royaleserver.logic.ExpLevel;
+import royaleserver.logic.*;
 import royaleserver.protocol.Session;
 import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.CommandHandler;
@@ -14,11 +11,15 @@ import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.messages.client.*;
 import royaleserver.protocol.messages.command.*;
 import royaleserver.protocol.messages.component.*;
+import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class Player implements MessageHandler, CommandHandler {
 	private static final Logger logger = LogManager.getLogger(Player.class);
@@ -29,6 +30,7 @@ public class Player implements MessageHandler, CommandHandler {
 	protected boolean closed;
 
 	protected PlayerEntity entity;
+	protected Random random;
 
 	public Player(PlayerEntity entity, Server server, Session session) {
 		this.entity = entity;
@@ -37,6 +39,8 @@ public class Player implements MessageHandler, CommandHandler {
 
 		this.closed = false;
 		server.addPlayer(this);
+
+		random = new Random(entity.getRandomSeed());
 	}
 
 	/**
@@ -134,6 +138,115 @@ public class Player implements MessageHandler, CommandHandler {
 		}
 	}
 
+	protected void openChest(Chest chest) {
+		Rarity common = Rarity.by("Common");
+		Rarity rare = Rarity.by("Rare");
+		Rarity epic = Rarity.by("Epic");
+		Rarity legendary = Rarity.by("Legendary");
+
+		Map<royaleserver.logic.Card, Integer> cards = new HashMap<>();
+
+		float rewardMultiplier = chest.getArena().getChestRewardMultiplier() / 100;
+		int spellsCount = (int)(chest.getRandomSpells() * rewardMultiplier);
+		int differentSpells = (int)(chest.getDifferentSpells() * rewardMultiplier);
+
+		float minimumRareCount = entity.getRareChance() + spellsCount / chest.getRareChance();
+		float minimumEpicCount = entity.getEpicChance() + spellsCount / chest.getEpicChance();
+		float minimumLegendaryCount = entity.getLegendaryChance() + spellsCount / chest.getLegendaryChance();
+
+		float rareAdder = random.nextFloat() / 2;
+		float epicAdder = random.nextFloat() / 2;
+		float legendaryAdder = random.nextFloat() / 2;
+
+		if (minimumLegendaryCount + legendaryAdder > 1) {
+			List<royaleserver.logic.Card> candidates = royaleserver.logic.Card.select(legendary, entity.getLogicArena(), random);
+
+			while (minimumLegendaryCount + legendaryAdder > 1) {
+				int count = generateCardOfRarity(minimumLegendaryCount, legendaryAdder, cards, candidates);
+
+				--differentSpells;
+				spellsCount -= count;
+				minimumLegendaryCount -= count;
+			}
+		}
+
+		if (minimumEpicCount + epicAdder > 1) {
+			List<royaleserver.logic.Card> candidates = royaleserver.logic.Card.select(epic, entity.getLogicArena(), random);
+
+			while (minimumEpicCount + epicAdder > 1) {
+				int count = generateCardOfRarity(minimumEpicCount, epicAdder, cards, candidates);
+
+				--differentSpells;
+				spellsCount -= count;
+				minimumEpicCount -= count;
+			}
+		}
+
+		if (minimumRareCount + rareAdder > 1) {
+			List<royaleserver.logic.Card> candidates = royaleserver.logic.Card.select(rare, entity.getLogicArena(), random);
+
+			while (minimumRareCount + rareAdder > 1) {
+				int count = generateCardOfRarity(minimumRareCount, rareAdder, cards, candidates);
+
+				--differentSpells;
+				spellsCount -= count;
+				minimumRareCount -= count;
+			}
+		}
+
+		List<royaleserver.logic.Card> candidates = royaleserver.logic.Card.select(common, entity.getLogicArena(), random);
+		while (spellsCount > 0 && differentSpells > 0) {
+			int count = generateCardOfRarity(spellsCount / differentSpells, 0, cards, candidates);
+
+			--differentSpells;
+			spellsCount -= count;
+		}
+
+		entity.setRareChance(minimumRareCount);
+		entity.setEpicChance(minimumEpicCount);
+		entity.setLegendaryChance(minimumLegendaryCount);
+
+		int realSpellsCount = (int)(chest.getRandomSpells() * rewardMultiplier) - spellsCount;
+		int minGold = chest.getMinGoldPerCard() * realSpellsCount;
+		int maxGold = chest.getMaxGoldPerCard() * realSpellsCount;
+
+		OpenChestOK command = new OpenChestOK();
+		command.gold = minGold + random.nextInt(maxGold - minGold);
+		command.gems = 0;
+		command.chestItems = new ChestItem[cards.size()];
+
+		// TODO: Order
+		int i = 0;
+		for (Map.Entry<royaleserver.logic.Card, Integer> card : cards.entrySet()) {
+			ChestItem chestItem = new ChestItem();
+			chestItem.card = card.getKey().getIndex();
+			chestItem.quantity = card.getValue();
+
+			command.chestItems[i++] = chestItem;
+		}
+
+		AvailableServerCommand response = new AvailableServerCommand();
+		response.command.command = command;
+		session.sendMessage(response);
+	}
+
+	protected int generateCardOfRarity(float minimumCount, float adder, Map<royaleserver.logic.Card, Integer> cards, List<royaleserver.logic.Card> candidates) {
+		int count = (int)Math.floor(random.nextFloat() * (minimumCount + adder));
+
+		royaleserver.logic.Card card;
+
+		if (candidates.size() > 0) {
+			int i = random.nextInt(candidates.size());
+			card = candidates.remove(i);
+			candidates.remove(card);
+			cards.put(card, count);
+		} else {
+			// TODO: Add to existing
+		}
+
+		return count;
+	}
+
 	/**
 	 * @param nickname to check
 	 * @return true if nickname is allowed to use
@@ -148,6 +261,7 @@ public class Player implements MessageHandler, CommandHandler {
 	 */
 	public void save() {
 		PlayerService playerService = server.getDataManager().getPlayerService();
+		entity.setRandomSeed(random.nextLong());
 		playerService.update(entity);
 	}
 
@@ -578,9 +692,21 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleOpenChestCommand(OpenChest command) throws Throwable {
-		AvailableServerCommand response = new AvailableServerCommand();
-		response.command.command = new OpenChestOK();
-		session.sendMessage(response);
+		int slot = command.slot;
+		System.out.println(slot);
+		for (HomeChestEntity homeChest : entity.getHomeChests()) {
+			if (homeChest.getSlot() == slot) {
+				if (homeChest.getStatus() == HomeChestStatus.OPENED ||
+						(homeChest.getStatus() == HomeChestStatus.OPENING &&
+								homeChest.getOpenEnd().getTime() < System.currentTimeMillis())) {
+					//server.getDataManager().getHomeChestService().delete(homeChest);
+
+					openChest(homeChest.getLogicChest());
+				}
+
+				break;
+			}
+		}
 
 		return true;
 	}

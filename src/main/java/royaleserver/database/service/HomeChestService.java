@@ -16,4 +16,10 @@ public class HomeChestService {
 		entityManager.merge(entity);
 		entityManager.getTransaction().commit();
 	}
+
+	public void delete(HomeChestEntity entity){
+		entityManager.getTransaction().begin();
+		entityManager.remove(entity);
+		entityManager.getTransaction().commit();
+	}
 }
