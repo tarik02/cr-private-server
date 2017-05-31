@@ -620,4 +620,9 @@ public class Player implements MessageHandler, CommandHandler {
 	public boolean handleClanChatMessage(ClanChatMessage message) throws Throwable {
 		return false;
 	}
+
+	@Override
+	public boolean handleChangeDeckCardCommand(ChangeDeckCard command) throws Throwable {
+		return false;
+	}
 }
