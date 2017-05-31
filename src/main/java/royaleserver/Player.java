@@ -19,7 +19,6 @@ import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
 import java.util.List;
-import java.util.Set;
 
 public class Player implements MessageHandler, CommandHandler {
 	private static final Logger logger = LogManager.getLogger(Player.class);
@@ -149,11 +148,6 @@ public class Player implements MessageHandler, CommandHandler {
 	public void save() {
 		PlayerService playerService = server.getDataManager().getPlayerService();
 		playerService.update(entity);
-	}
-
-	public void saveClan(ClanEntity clanEntity) {
-		ClanService clanService = server.getDataManager().getClanService();
-		clanService.update(clanEntity);
 	}
 
 	/**
@@ -389,17 +383,9 @@ public class Player implements MessageHandler, CommandHandler {
 		ClanEntity clan = clanService.searchById(message.allianceId);
 
 		if (clan != null && entity.getClan() == null && entity.getTrophies() >= clan.getRequiredTrophies()) {
-
-			// temporary solution
-			Set<PlayerEntity> playerEntities = clan.getMembers();
-			playerEntities.add(entity);
-			clan.setMembers(playerEntities);
-
 			entity.setClan(clan);
 			entity.setLogicClanRole(ClanRole.by("Member"));
-
 			save();
-			saveClan(clan);
 
 			// Send some information about clan
 			JoinClan command = JoinClan.from(clan);
@@ -424,7 +410,6 @@ public class Player implements MessageHandler, CommandHandler {
 		ClanEntity clan = entity.getClan();
 
 		if (clan != null) {
-
 			LeaveClanOK command = LeaveClanOK.from(clan);
 
 			CancelChallengeDone response = new CancelChallengeDone();
@@ -432,16 +417,9 @@ public class Player implements MessageHandler, CommandHandler {
 			AvailableServerCommand response_1 = new AvailableServerCommand();
 			response_1.command.command = command;
 
-			// temporary solution
-			Set<PlayerEntity> playerEntities = clan.getMembers();
-			playerEntities.remove(entity);
-			clan.setMembers(playerEntities);
-
 			entity.setClan(null);
 			entity.setClanRole(null);
-
 			save();
-			saveClan(clan);
 
 			session.sendMessage(response);
 			session.sendMessage(response_1);
@@ -531,14 +509,9 @@ public class Player implements MessageHandler, CommandHandler {
 			//clan.setLocaltion();
 			clan = clanService.add(clan);
 
-			Set<PlayerEntity> playerEntities = clan.getMembers();
-			playerEntities.add(entity);
-			clan.setMembers(playerEntities);
-
 			entity.setClan(clan);
 			entity.setLogicClanRole(ClanRole.by("Leader"));
 			save();
-			saveClan(clan);
 
 			// Send some information about clan
 			JoinClan command = JoinClan.from(clan);
