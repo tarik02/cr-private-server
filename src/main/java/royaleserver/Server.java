@@ -43,6 +43,8 @@ import java.util.concurrent.TimeUnit;
 public class Server {
 	private static Logger logger;
 
+	public static final int TICKS_PER_SECOND = 20;
+
 	protected File workingDirectory;
 
 	protected boolean running = false;
@@ -55,7 +57,7 @@ public class Server {
 
 	protected Config config;
 
-	protected Set<Player> players = new LinkedHashSet<>();
+	protected final Set<Player> players = new LinkedHashSet<>();
 
 	private OrderedMemoryAwareThreadPoolExecutor bossExec;
 	private OrderedMemoryAwareThreadPoolExecutor ioExec;
@@ -166,6 +168,8 @@ public class Server {
 	}
 
 	private void loop() {
+		final int TICK_TIME = 1000 / TICKS_PER_SECOND;
+
 		while (running) {
 			final long startTime = System.currentTimeMillis();
 			tick();
@@ -173,9 +177,9 @@ public class Server {
 			final long endTime = System.currentTimeMillis();
 			final long diff = endTime - startTime;
 
-			if (diff < 50) {
+			if (diff < TICK_TIME) {
 				try {
-					Thread.sleep(50 - diff);
+					Thread.sleep(TICK_TIME - diff);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -184,7 +188,13 @@ public class Server {
 	}
 
 	protected void tick() {
-
+		if (tickCounter % 2.5 * 60 * 20 == 0) { // Every 2.5 minutes
+			synchronized (players) {
+				for (Player player : players) {
+					player.updateOnline();
+				}
+			}
+		}
 	}
 
 	public AssetManager getAssetManager() {
@@ -204,7 +214,9 @@ public class Server {
 	 * @param player
 	 */
 	public void addPlayer(Player player) {
-		players.add(player);
+		synchronized (players) {
+			players.add(player);
+		}
 	}
 
 	/**
@@ -212,7 +224,9 @@ public class Server {
 	 * @param player
 	 */
 	public void removePlayer(Player player) {
-		players.remove(player);
+		synchronized (players) {
+			players.remove(player);
+		}
 	}
 
 	private static final byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");

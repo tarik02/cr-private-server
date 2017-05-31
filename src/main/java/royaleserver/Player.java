@@ -151,6 +151,11 @@ public class Player implements MessageHandler, CommandHandler {
 		playerService.update(entity);
 	}
 
+	public void updateOnline() {
+		entity.setOnline(true);
+		save();
+	}
+
 	/**
 	 * Disconnect player showing the reason.
 	 *
@@ -190,6 +195,7 @@ public class Player implements MessageHandler, CommandHandler {
 		closed = true;
 
 		server.removePlayer(this);
+		entity.setOnline(false);
 		save();
 		entity = null;
 

@@ -6,6 +6,7 @@ import royaleserver.logic.ExpLevel;
 import royaleserver.utils.StringUtils;
 
 import javax.persistence.EntityManager;
+import java.util.Date;
 
 public class PlayerService {
 	private final EntityManager entityManager;
@@ -23,6 +24,7 @@ public class PlayerService {
 		if (id != null) {
 			playerEntity.setId(id);
 		}
+		playerEntity.setRegisteredDate(new Date());
 		playerEntity.setPassToken(passToken == null ? StringUtils.randomString(32, 64) : passToken);
 		playerEntity.setTrophies(3800);
 		playerEntity.setLogicArena(Arena.by("Arena_T"));

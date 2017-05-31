@@ -7,6 +7,7 @@ import royaleserver.logic.ClanRole;
 import royaleserver.logic.ExpLevel;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +30,17 @@ public class PlayerEntity implements Identifiable<Long> {
 
 	@Column(length = 32, unique = true, nullable = true)
 	private String name;
+
+	@Temporal(value = TemporalType.TIMESTAMP)
+	@Column(nullable = false)
+	private Date registeredDate;
+
+	@Temporal(value = TemporalType.TIMESTAMP)
+	@Column(nullable = false)
+	private Date lastOnlineStatusUpdate;
+
+	@Column(nullable = false)
+	private boolean online = false;
 
 	@Column(nullable = false)
 	private int gold;
@@ -91,6 +103,33 @@ public class PlayerEntity implements Identifiable<Long> {
 	public PlayerEntity setName(String name) {
 		this.name = name;
 		return this;
+	}
+
+	public Date getRegisteredDate() {
+		return registeredDate;
+	}
+
+	public PlayerEntity setRegisteredDate(Date registeredDate) {
+		this.registeredDate = registeredDate;
+		return this;
+	}
+
+	public Date getLastOnlineStatusUpdate() {
+		return lastOnlineStatusUpdate;
+	}
+
+	public PlayerEntity setLastOnlineStatusUpdate(Date lastOnlineStatusUpdate) {
+		this.lastOnlineStatusUpdate = lastOnlineStatusUpdate;
+		return this;
+	}
+
+	public boolean isOnline() {
+		return online && getLastOnlineStatusUpdate().after(new Date(System.currentTimeMillis() - 5 * 60 * 1000));
+	}
+
+	public PlayerEntity setOnline(boolean online) {
+		this.online = online;
+		return setLastOnlineStatusUpdate(new Date());
 	}
 
 	public int getGold() {
