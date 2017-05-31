@@ -25,6 +25,7 @@ public class PlayerService {
 			playerEntity.setId(id);
 		}
 		playerEntity.setRegisteredDate(new Date());
+		playerEntity.setLastOnlineStatusUpdate(new Date());
 		playerEntity.setPassToken(passToken == null ? StringUtils.randomString(32, 64) : passToken);
 		playerEntity.setTrophies(3800);
 		playerEntity.setLogicArena(Arena.by("Arena_T"));
