@@ -26,6 +26,7 @@ import royaleserver.protocol.messages.Message;
 import royaleserver.protocol.messages.MessageFactory;
 import royaleserver.protocol.messages.client.ClientHello;
 import royaleserver.protocol.messages.client.Login;
+import royaleserver.protocol.messages.server.LoginFailed;
 import royaleserver.protocol.messages.server.LoginOk;
 import royaleserver.protocol.messages.server.ServerHello;
 import royaleserver.utils.*;
@@ -256,7 +257,9 @@ public class Server {
 
 		@Override
 		public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-			player.close("", false);
+			if (player != null) {
+				player.close("", false);
+			}
 		}
 
 		@Override
@@ -305,12 +308,26 @@ public class Server {
 					}*/
 
 					PlayerService playerService = server.getDataManager().getPlayerService();
-					PlayerEntity playerEntity = login.accountId == 0 ? null : playerService.get(login.accountId);
-					if (playerEntity == null) { // TODO: DO SOMETHING TO CHECK THIS PASS TOKEN
-						if (login.accountId == 0) {
-							playerEntity = playerService.create();
-						} else {
-							playerEntity = playerService.create(login.accountId, login.passToken);
+					PlayerEntity playerEntity;
+
+					if (login.accountId == 0 && login.passToken.isEmpty()) {
+						playerEntity = playerService.create();
+					} else {
+						playerEntity = playerService.get(login.accountId);
+
+						if (playerEntity == null || !login.passToken.equals(playerEntity.getPassToken())) {
+							LoginFailed loginFailed = new LoginFailed();
+							loginFailed.errorCode = LoginFailed.ERROR_CODE_RESET_ACCOUNT;
+							loginFailed.resourceFingerprintData = "";
+							loginFailed.redirectDomain = "";
+							loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
+							loginFailed.updateURL = "https://play.google.com/store/apps/details?id=com.supercell.clashroyale";
+							loginFailed.reason = "";
+							loginFailed.secondsUntilMaintenanceEnd = -64;
+							loginFailed.unknown_7 = (byte)0;
+							loginFailed.unknown_8 = "";
+							sendMessage(loginFailed);
+							return;
 						}
 					}
 
