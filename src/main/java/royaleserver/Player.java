@@ -387,9 +387,9 @@ public class Player implements MessageHandler, CommandHandler {
 		if (clan != null && entity.getClan() == null && entity.getTrophies() >= clan.getRequiredTrophies()) {
 			entity.setClan(clan);
 			entity.setLogicClanRole(ClanRole.by("Member"));
+			clan.getMembers().add(entity);
 			save();
 
-			// Send some information about clan
 			JoinClan command = JoinClan.from(clan);
 
 			AvailableServerCommand response = new AvailableServerCommand();
@@ -419,6 +419,7 @@ public class Player implements MessageHandler, CommandHandler {
 			AvailableServerCommand response_1 = new AvailableServerCommand();
 			response_1.command.command = command;
 
+			clan.getMembers().remove(entity);
 			entity.setClan(null);
 			entity.setClanRole(null);
 			save();
@@ -513,6 +514,7 @@ public class Player implements MessageHandler, CommandHandler {
 
 			entity.setClan(clan);
 			entity.setLogicClanRole(ClanRole.by("Leader"));
+			clan.getMembers().add(entity);
 			save();
 
 			// Send some information about clan

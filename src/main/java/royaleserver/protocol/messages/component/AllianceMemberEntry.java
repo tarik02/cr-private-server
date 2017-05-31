@@ -100,9 +100,9 @@ public class AllianceMemberEntry extends Component {
 		allianceMemberEntry.facebookId = "0";
 		allianceMemberEntry.name = entity.getName();
 		allianceMemberEntry.arena = entity.getLogicArena().getScid();
-		allianceMemberEntry.role = 4;
-		allianceMemberEntry.expLevel = 7; // TODO:
-		allianceMemberEntry.score = 2000; // ? - trophies
+		allianceMemberEntry.role = (byte)entity.getLogicClanRole().getIndex();
+		allianceMemberEntry.expLevel = entity.getLogicExpLevel().getIndex();
+		allianceMemberEntry.score = entity.getTrophies();
 		allianceMemberEntry.donations = 0; // TODO:
 		allianceMemberEntry.unknown_8 = 0;
 		allianceMemberEntry.currenRank = 4; // ?

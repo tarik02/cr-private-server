@@ -24,11 +24,12 @@ public class PlayerService {
 			playerEntity.setId(id);
 		}
 		playerEntity.setPassToken(passToken == null ? StringUtils.randomString(32, 64) : passToken);
-		playerEntity.setLogicArena(Arena.by("Arena1"));
-		playerEntity.setLogicLastExpLevel(ExpLevel.by(1));
-		playerEntity.setLogicExpLevel(ExpLevel.by(1));
-		playerEntity.setGems(10000);
+		playerEntity.setTrophies(3800);
+		playerEntity.setLogicArena(Arena.by("Arena_T"));
+		playerEntity.setLogicLastExpLevel(ExpLevel.by(13));
+		playerEntity.setLogicExpLevel(ExpLevel.by(13));
 		playerEntity.setGold(10000);
+		playerEntity.setGems(100000);
 		return add(playerEntity);
 	}
 
