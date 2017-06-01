@@ -102,11 +102,13 @@ public class Server {
 		}
 	}
 
-	public int getOnlinePlayersByClan(long clan_id) {
+	public int getOnlinePlayersByClan(ClanEntity clanEntity) {
 		int count = 0;
 
 		for (Player player : players) {
-			if (player.entity.getClan() != null && player.entity.getClan().getId() == clan_id) {
+			PlayerEntity playerEntity = player.entity;
+
+			if (playerEntity.getClan() != null && playerEntity.getClan() == clanEntity) {
 				count++;
 			}
 		}
@@ -265,6 +267,7 @@ public class Server {
 		private Channel channel;
 		private ChannelFuture lastWrite = null;
 		private Status status;
+
 		public PlayerHandler(Server server) {
 			this.server = server;
 			status = Status.HELLO;
