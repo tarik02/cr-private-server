@@ -16,6 +16,7 @@ import royaleserver.config.Config;
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
 import royaleserver.database.DataManager;
+import royaleserver.database.entity.ClanEntity;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.*;
@@ -42,24 +43,18 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class Server {
-	private static Logger logger;
-
 	public static final int TICKS_PER_SECOND = 20;
-
+	private static final byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");
+	private static final byte[] sessionKey = Hex.toByteArray("74794DE40D62A03AC6F6E86A9815C6262AA12BEDD518F883");
+	private static Logger logger;
+	protected final Set<Player> players = new LinkedHashSet<>();
 	protected File workingDirectory;
-
 	protected boolean running = false;
 	protected long tickCounter = 0;
-
 	protected AssetManager assetManager = null;
 	protected DataManager dataManager = null;
-
 	protected String resourceFingerprint = "";
-
 	protected Config config;
-
-	protected final Set<Player> players = new LinkedHashSet<>();
-
 	private OrderedMemoryAwareThreadPoolExecutor bossExec;
 	private OrderedMemoryAwareThreadPoolExecutor ioExec;
 	private ServerBootstrap networkServer;
@@ -83,6 +78,40 @@ public class Server {
 		logger = LogManager.getLogger(Server.class);
 
 		start();
+	}
+
+	// Отправка всем игрокам в клане, за исключением одного
+	public void sendAllInClanOthers(PlayerEntity entity, ClanEntity clanEntity, Message message) {
+		for (Player player : players) {
+			PlayerEntity playerEntity = player.entity;
+
+			if (entity != playerEntity && playerEntity.getClan() != null && playerEntity.getClan() == clanEntity) {
+				player.session.sendMessage(message);
+			}
+		}
+	}
+
+	// Отправка всем игрокам в клане.
+	public void sendAllInClan(ClanEntity clanEntity, Message message) {
+		for (Player player : players) {
+			PlayerEntity playerEntity = player.entity;
+
+			if (playerEntity.getClan() != null && playerEntity.getClan() == clanEntity) {
+				player.session.sendMessage(message);
+			}
+		}
+	}
+
+	public int getOnlinePlayersByClan(long clan_id) {
+		int count = 0;
+
+		for (Player player : players) {
+			if (player.entity.getClan() != null && player.entity.getClan().getId() == clan_id) {
+				count++;
+			}
+		}
+
+		return count;
 	}
 
 	public void start() throws ServerException {
@@ -211,8 +240,8 @@ public class Server {
 	}
 
 	/**
-	 * @apiNote Internal usage only
 	 * @param player
+	 * @apiNote Internal usage only
 	 */
 	public void addPlayer(Player player) {
 		synchronized (players) {
@@ -221,8 +250,8 @@ public class Server {
 	}
 
 	/**
-	 * @apiNote Internal usage only
 	 * @param player
+	 * @apiNote Internal usage only
 	 */
 	public void removePlayer(Player player) {
 		synchronized (players) {
@@ -230,39 +259,12 @@ public class Server {
 		}
 	}
 
-	private static final byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");
-	private static final byte[] sessionKey = Hex.toByteArray("74794DE40D62A03AC6F6E86A9815C6262AA12BEDD518F883");
-
-	private class ServerPipelineFactory implements ChannelPipelineFactory {
-		@Override
-		public ChannelPipeline getPipeline() throws Exception {
-			ClientCrypto clientCrypto = new ClientCrypto(serverKey);
-			ServerCrypto serverCrypto = new ServerCrypto();
-
-			clientCrypto.setServer(serverCrypto);
-			serverCrypto.setClient(clientCrypto);
-
-			PacketFrameDecoder decoder = new PacketFrameDecoder(serverCrypto);
-			PacketFrameEncoder encoder = new PacketFrameEncoder(serverCrypto);
-			return Channels.pipeline(decoder, encoder, new PlayerHandler(Server.this));
-		}
-	}
-
 	private static class PlayerHandler extends SimpleChannelUpstreamHandler implements Session {
-		private enum Status {
-			HELLO,
-			LOGIN,
-			CONNECTED,
-			DISCONNECTING
-		}
-
 		private final Server server;
 		private Player player;
-
 		private Channel channel;
 		private ChannelFuture lastWrite = null;
 		private Status status;
-
 		public PlayerHandler(Server server) {
 			this.server = server;
 			status = Status.HELLO;
@@ -417,6 +419,13 @@ public class Server {
 				channel.close();
 			}
 		}
+
+		private enum Status {
+			HELLO,
+			LOGIN,
+			CONNECTED,
+			DISCONNECTING
+		}
 	}
 
 	private static class PacketFrameEncoder extends OneToOneEncoder {
@@ -459,10 +468,12 @@ public class Server {
 		public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 			ctx.sendUpstream(e);
 		}
+
 		@Override
 		public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 			ctx.sendUpstream(e);
 		}
+
 		@Override
 		protected Object decode(ChannelHandlerContext channelHandlerContext, Channel arg1, ChannelBuffer buffer, VoidEnum ignored) throws Exception {
 			byte[] payload = new byte[2];
@@ -523,6 +534,21 @@ public class Server {
 	public static class ServerException extends Exception {
 		public ServerException(String message) {
 			super(message);
+		}
+	}
+
+	private class ServerPipelineFactory implements ChannelPipelineFactory {
+		@Override
+		public ChannelPipeline getPipeline() throws Exception {
+			ClientCrypto clientCrypto = new ClientCrypto(serverKey);
+			ServerCrypto serverCrypto = new ServerCrypto();
+
+			clientCrypto.setServer(serverCrypto);
+			serverCrypto.setClient(clientCrypto);
+
+			PacketFrameDecoder decoder = new PacketFrameDecoder(serverCrypto);
+			PacketFrameEncoder encoder = new PacketFrameEncoder(serverCrypto);
+			return Channels.pipeline(decoder, encoder, new PlayerHandler(Server.this));
 		}
 	}
 }

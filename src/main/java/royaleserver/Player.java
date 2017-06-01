@@ -10,6 +10,7 @@ import royaleserver.protocol.messages.CommandHandler;
 import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.messages.client.*;
 import royaleserver.protocol.messages.command.*;
+import royaleserver.protocol.messages.command.stream.AllianceEventStreamEntry;
 import royaleserver.protocol.messages.component.*;
 import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.server.*;
@@ -435,6 +436,12 @@ public class Player implements MessageHandler, CommandHandler {
 
 		if (clan != null) {
 			AllianceData allianceData = AllianceData.from(clan);
+
+			AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
+			response_1.membersOnline = (byte)server.getOnlinePlayersByClan(message.allianceId);
+			response_1.unknown_1 = 0;
+
+			server.sendAllInClan(clan, response_1);
 			session.sendMessage(allianceData);
 		}
 
@@ -515,12 +522,44 @@ public class Player implements MessageHandler, CommandHandler {
 			AvailableServerCommand response = new AvailableServerCommand();
 			response.command.command = command;
 
-			AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
-			response_1.membersOnline = 1;
-			response_1.unknown_1 = 0;
+			// Отправляем оповещение всем игрокам клана о том, что вошел новый игрок.
+			AllianceMember allianceMember = new AllianceMember();
+			allianceMember.member = AllianceMemberEntry.from(entity);
+
+			// Обновляем статус онлайна
+			AllianceOnlineStatusUpdated allianceOnlineStatusUpdated = new AllianceOnlineStatusUpdated();
+			allianceOnlineStatusUpdated.membersOnline = 1;
+			allianceOnlineStatusUpdated.unknown_1 = 0;
+
+			// Отправляем пакет (надпись 'В клан вошел новый игрок') всем игрокам в клане
+			// После AllianceStreamEntry происходит автоматический запрос AllianceData (AskForAllianceData)
+
+			// Команда
+			AllianceEventStreamEntry allianceEventStreamEntry = new AllianceEventStreamEntry();
+			allianceEventStreamEntry.type = 3;
+			allianceEventStreamEntry.initiatorId = entity.getId();
+			allianceEventStreamEntry.initiatorName = entity.getName();
+
+			// Сам AllianceStreamEntry
+			AllianceStreamEntry allianceStreamEntry = new AllianceStreamEntry();
+
+			allianceStreamEntry.entry.entryId = clan.getId();
+			allianceStreamEntry.entry.senderAvatarId = entity.getId();
+			allianceStreamEntry.entry.senderAvatarId2 = entity.getId();
+
+			allianceStreamEntry.entry.senderName = entity.getName();
+			allianceStreamEntry.entry.senderLevel = entity.getExpLevelExperience();
+			allianceStreamEntry.entry.senderRole = 1;
+			allianceStreamEntry.entry.ageSeconds = 0;
+			allianceStreamEntry.entry.isRemoved = 0;
+
+			allianceStreamEntry.entry.command = allianceEventStreamEntry;
+
+			server.sendAllInClanOthers(entity, clan, allianceMember);
+			server.sendAllInClan(clan, allianceStreamEntry);
+			server.sendAllInClan(clan, allianceOnlineStatusUpdated);
 
 			session.sendMessage(response);
-			session.sendMessage(response_1);
 		}
 
 		return true;
@@ -643,12 +682,7 @@ public class Player implements MessageHandler, CommandHandler {
 			AvailableServerCommand response = new AvailableServerCommand();
 			response.command.command = command;
 
-			AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
-			response_1.membersOnline = 1;
-			response_1.unknown_1 = 0;
-
 			session.sendMessage(response);
-			session.sendMessage(response_1);
 		}
 
 		return true;

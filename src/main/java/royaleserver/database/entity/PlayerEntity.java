@@ -28,7 +28,7 @@ public class PlayerEntity implements Identifiable<Long> {
 	)
 	private Long id;
 
-	@Column(length = 32, unique = true, nullable = true)
+	@Column(length = 32, nullable = true)
 	private String name;
 
 	@Temporal(value = TemporalType.TIMESTAMP)
@@ -282,17 +282,17 @@ public class PlayerEntity implements Identifiable<Long> {
 		return rareChance;
 	}
 
+	public PlayerEntity setRareChance(float rareChance) {
+		this.rareChance = rareChance;
+		return this;
+	}
+
 	public long getRandomSeed() {
 		return randomSeed;
 	}
 
 	public PlayerEntity setRandomSeed(long randomSeed) {
 		this.randomSeed = randomSeed;
-		return this;
-	}
-
-	public PlayerEntity setRareChance(float rareChance) {
-		this.rareChance = rareChance;
 		return this;
 	}
 
