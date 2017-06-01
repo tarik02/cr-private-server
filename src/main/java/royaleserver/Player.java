@@ -15,11 +15,9 @@ import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.server.*;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
+import royaleserver.utils.Pair;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Player implements MessageHandler, CommandHandler {
 	private static final Logger logger = LogManager.getLogger(Player.class);
@@ -144,69 +142,39 @@ public class Player implements MessageHandler, CommandHandler {
 		Rarity epic = Rarity.by("Epic");
 		Rarity legendary = Rarity.by("Legendary");
 
-		Map<royaleserver.logic.Card, Integer> cards = new HashMap<>();
+		Set<Pair<royaleserver.logic.Card, Integer>> cards = new TreeSet<>(
+				Comparator.comparingInt(a -> a.first().getRarity().getSortCapacity() * a.second()));
 
 		float rewardMultiplier = chest.getArena().getChestRewardMultiplier() / 100;
-		int spellsCount = (int)(chest.getRandomSpells() * rewardMultiplier);
-		int differentSpells = (int)(chest.getDifferentSpells() * rewardMultiplier);
+		int minimumSpellsCount = (int)(chest.getRandomSpells() * rewardMultiplier);
+		int minimumDifferentSpells = (int)(chest.getDifferentSpells() * rewardMultiplier);
 
-		float minimumRareCount = entity.getRareChance() + spellsCount / chest.getRareChance();
-		float minimumEpicCount = entity.getEpicChance() + spellsCount / chest.getEpicChance();
-		float minimumLegendaryCount = entity.getLegendaryChance() + spellsCount / chest.getLegendaryChance();
+		int minimumRare = minimumSpellsCount / chest.getRareChance();
+		int minimumEpic = minimumSpellsCount / chest.getEpicChance();
+		int minimumLegendary = minimumSpellsCount / chest.getLegendaryChance();
 
-		float rareAdder = random.nextFloat() / 2;
-		float epicAdder = random.nextFloat() / 2;
-		float legendaryAdder = random.nextFloat() / 2;
+		float rareCount = minimumRare + entity.getRareChance();
+		float epicCount = minimumEpic + entity.getEpicChance();
+		float legendaryCount = minimumLegendary + entity.getLegendaryChance();
+		float commonCount = minimumSpellsCount - minimumRare - minimumEpic - minimumLegendary;
 
-		if (minimumLegendaryCount + legendaryAdder > 1) {
-			List<royaleserver.logic.Card> candidates = royaleserver.logic.Card.select(legendary, entity.getLogicArena(), random);
+		int differentCommon = countDifferent(commonCount, minimumSpellsCount, minimumDifferentSpells);
+		int differentRare = countDifferent(rareCount, minimumSpellsCount, minimumDifferentSpells);
+		int differentEpic = countDifferent(epicCount, minimumSpellsCount, minimumDifferentSpells);
+		int differentLegendary = countDifferent(legendaryCount, minimumSpellsCount, minimumDifferentSpells);
 
-			while (minimumLegendaryCount + legendaryAdder > 1) {
-				int count = generateCardOfRarity(minimumLegendaryCount, legendaryAdder, cards, candidates);
+		int realSpellsCount = (int)(commonCount + rareCount + epicCount + legendaryCount);
 
-				--differentSpells;
-				spellsCount -= count;
-				minimumLegendaryCount -= count;
-			}
-		}
+		Map<Rarity, List<royaleserver.logic.Card>> candidates = royaleserver.logic.Card.select(entity.getLogicArena());
+		commonCount -= generateCards(cards, candidates.get(common), differentCommon, (int)commonCount);
+		rareCount -= generateCards(cards, candidates.get(rare), differentRare, (int)rareCount);
+		epicCount -= generateCards(cards, candidates.get(epic), differentEpic, (int)epicCount);
+		legendaryCount -= generateCards(cards, candidates.get(legendary), differentLegendary, (int)legendaryCount);
 
-		if (minimumEpicCount + epicAdder > 1) {
-			List<royaleserver.logic.Card> candidates = royaleserver.logic.Card.select(epic, entity.getLogicArena(), random);
+		entity.setRareChance(rareCount);
+		entity.setEpicChance(epicCount);
+		entity.setLegendaryChance(legendaryCount);
 
-			while (minimumEpicCount + epicAdder > 1) {
-				int count = generateCardOfRarity(minimumEpicCount, epicAdder, cards, candidates);
-
-				--differentSpells;
-				spellsCount -= count;
-				minimumEpicCount -= count;
-			}
-		}
-
-		if (minimumRareCount + rareAdder > 1) {
-			List<royaleserver.logic.Card> candidates = royaleserver.logic.Card.select(rare, entity.getLogicArena(), random);
-
-			while (minimumRareCount + rareAdder > 1) {
-				int count = generateCardOfRarity(minimumRareCount, rareAdder, cards, candidates);
-
-				--differentSpells;
-				spellsCount -= count;
-				minimumRareCount -= count;
-			}
-		}
-
-		List<royaleserver.logic.Card> candidates = royaleserver.logic.Card.select(common, entity.getLogicArena(), random);
-		while (spellsCount > 0 && differentSpells > 0) {
-			int count = generateCardOfRarity(spellsCount / differentSpells, 0, cards, candidates);
-
-			--differentSpells;
-			spellsCount -= count;
-		}
-
-		entity.setRareChance(minimumRareCount);
-		entity.setEpicChance(minimumEpicCount);
-		entity.setLegendaryChance(minimumLegendaryCount);
-
-		int realSpellsCount = (int)(chest.getRandomSpells() * rewardMultiplier) - spellsCount;
 		int minGold = chest.getMinGoldPerCard() * realSpellsCount;
 		int maxGold = chest.getMaxGoldPerCard() * realSpellsCount;
 
@@ -217,10 +185,10 @@ public class Player implements MessageHandler, CommandHandler {
 
 		// TODO: Order
 		int i = 0;
-		for (Map.Entry<royaleserver.logic.Card, Integer> card : cards.entrySet()) {
+		for (Pair<royaleserver.logic.Card, Integer> card : cards) {
 			ChestItem chestItem = new ChestItem();
-			chestItem.card = card.getKey().getIndex();
-			chestItem.quantity = card.getValue();
+			chestItem.card = card.first().getIndex();
+			chestItem.quantity = card.second();
 
 			command.chestItems[i++] = chestItem;
 		}
@@ -230,21 +198,43 @@ public class Player implements MessageHandler, CommandHandler {
 		session.sendMessage(response);
 	}
 
-	protected int generateCardOfRarity(float minimumCount, float adder, Map<royaleserver.logic.Card, Integer> cards, List<royaleserver.logic.Card> candidates) {
-		int count = (int)Math.floor(random.nextFloat() * (minimumCount + adder));
-
-		royaleserver.logic.Card card;
-
-		if (candidates.size() > 0) {
-			int i = random.nextInt(candidates.size());
-			card = candidates.remove(i);
-			candidates.remove(card);
-			cards.put(card, count);
+	private int generateCards(Set<Pair<royaleserver.logic.Card, Integer>> cards, List<royaleserver.logic.Card> candidates,
+	                          int different, int count) {
+		int first;
+		if (different == 1) {
+			first = count;
 		} else {
-			// TODO: Add to existing
+			first = (int)(count / different * (0.1f + random.nextFloat()));
+		}
+
+		int current = first;
+		int sum = 0;
+
+		while (sum < count && different != 1 && sum + current <= count) {
+			sum += current;
+
+			addCard(cards, candidates, current);
+
+			current *= 1f + random.nextFloat();
+			--different;
+		}
+
+		if (sum < count) {
+			addCard(cards, candidates, count - sum);
 		}
 
 		return count;
+	}
+
+	private void addCard(Set<Pair<royaleserver.logic.Card, Integer>> cards, List<royaleserver.logic.Card> candidates, int count) {
+		if (candidates.size() != 0) {
+			int index = random.nextInt(candidates.size());
+			cards.add(new Pair<>(candidates.remove(index), count));
+		}
+	}
+
+	protected int countDifferent(float rarityCount, int count, int different) {
+		return (int)Math.ceil(rarityCount / ((float)count) * different);
 	}
 
 	/**

@@ -8,9 +8,7 @@ import royaleserver.csv.Table;
 import royaleserver.database.service.CardService;
 import royaleserver.utils.SCID;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Card {
 	public static final int TYPE_CHARACTER = 26;
@@ -137,11 +135,15 @@ public class Card {
 		return null;
 	}
 
-	public static List<Card> select(Rarity rarity, Arena arena, Random random) {
-		List<Card> candidates = new ArrayList<>();
+	public static Map<Rarity, List<Card>> select(Arena arena) {
+		Map<Rarity, List<Card>> candidates = new HashMap<>();
+		for (Rarity rarity : Rarity.all()) {
+			candidates.put(rarity, new ArrayList<>());
+		}
+
 		for (Card card : cards) {
-			if (!card.notInUse && card.getUnlockArena().getArena() <= arena.getArena() && card.getRarity() == rarity) {
-				candidates.add(card);
+			if (!card.notInUse && card.getUnlockArena().getArena() <= arena.getArena()) {
+				candidates.get(card.getRarity()).add(card);
 			}
 		}
 
