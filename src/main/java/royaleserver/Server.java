@@ -114,8 +114,10 @@ public class Server {
 		dataManager = new DataManager(config.database);
 
 		logger.info("Loading data...");
-		Rarity.init(this);
+		//Rarity.init(this);
 		Arena.init(this);
+
+		if (true) return;
 		Card.init(this);
 		GameMode.init(this);
 		Chest.init(this);

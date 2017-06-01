@@ -1,5 +1,7 @@
 package royaleserver.database;
 
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import royaleserver.Server;
 import royaleserver.config.Database;
 import royaleserver.database.service.*;
@@ -11,7 +13,8 @@ import java.util.Map;
 import java.util.Properties;
 
 public class DataManager {
-	private final EntityManager entityManager;
+	//private final EntityManager entityManager;
+	private final SessionFactory sessionFactory;
 	private final DataServices services;
 
 	public DataManager(Database config) throws Server.ServerException {
@@ -26,13 +29,13 @@ public class DataManager {
 		p.put("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "WARNING");
 		System.setProperties(p);
 
-		Map<String, String> properties = new HashMap<>();
+		Properties properties = new Properties();
 
 		switch (config.provider) {
 		case "mysql":
-			properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect");
-			properties.put("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
-			properties.put("hibernate.connection.url", (new StringBuilder())
+			properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect");
+			properties.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+			properties.setProperty("hibernate.connection.url", (new StringBuilder())
 					.append("jdbc:mysql://")
 					.append(config.mysql.host)
 					.append(":")
@@ -40,26 +43,31 @@ public class DataManager {
 					.append("/")
 					.append(config.mysql.database)
 					.toString());
-			properties.put("hibernate.connection.username", config.mysql.user);
-			properties.put("hibernate.connection.password", config.mysql.password);
+			properties.setProperty("hibernate.connection.username", config.mysql.user);
+			properties.setProperty("hibernate.connection.password", config.mysql.password);
 			break;
 		default:
 			throw new Server.ServerException("Invalid data provider " + config.provider);
 		}
 
-		entityManager = Persistence.createEntityManagerFactory("royaleserver", properties).createEntityManager();
+		sessionFactory = new Configuration()
+				.configure()
+				.addProperties(properties)
+				.buildSessionFactory();
+
 		services = new DataServices(
-				new ArenaService(entityManager),
-				new AssetService(entityManager),
-				new CardService(entityManager),
-				new ChestService(entityManager),
-				new ClanBadgeService(entityManager),
-				new ClanRoleService(entityManager),
-				new ClanService(entityManager),
-				new ExpLevelService(entityManager),
-				new HomeChestService(entityManager),
-				new PlayerCardService(entityManager),
-				new PlayerService(entityManager)
+				new ArenaService(sessionFactory),
+				/*new AssetService(sessionFactory),
+				new CardService(sessionFactory),
+				new ChestService(sessionFactory),
+				new ClanBadgeService(sessionFactory),
+				new ClanRoleService(sessionFactory),
+				new ClanService(sessionFactory),
+				new ExpLevelService(sessionFactory),
+				new HomeChestService(sessionFactory),
+				new PlayerCardService(sessionFactory),
+				new PlayerService(sessionFactory)*/
+				null,null,null,null,null,null,null,null,null,null
 		);
 	}
 

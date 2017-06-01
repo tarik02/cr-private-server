@@ -4,7 +4,9 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "arenas")
-@NamedQuery(name = "ArenaEntity.getByName", query = "SELECT c FROM ArenaEntity c WHERE c.name = :name")
+@NamedQueries({
+		@NamedQuery(name = "ArenaEntity.all", query = "SELECT arenaEntity FROM ArenaEntity arenaEntity"),
+})
 public class ArenaEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

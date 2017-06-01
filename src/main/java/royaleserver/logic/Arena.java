@@ -1,14 +1,17 @@
 package royaleserver.logic;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Maps;
 import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.entity.ArenaEntity;
 import royaleserver.database.service.ArenaService;
 import royaleserver.utils.SCID;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Arena {
 	public static final int SCID_HIGH = 0; // TODO: Get it
@@ -139,7 +142,9 @@ public class Arena {
 		Column csv_ReleaseDate = csv_arenas.getColumn("ReleaseDate");
 		Column csv_SeasonRewardChest = csv_arenas.getColumn("SeasonRewardChest");
 
-		arenaService.beginResolve();
+		final Map<String, ArenaEntity> entities = Maps.uniqueIndex(arenaService.all(), ArenaEntity::getName);
+		final HashMap<String, Long> entitiesToAdd = new HashMap<>();
+
 		int i = 0;
 		for (Row csv_arena : csv_arenas.getRows()) {
 			Arena arena = new Arena();
@@ -163,12 +168,23 @@ public class Arena {
 			arena.battleRewardGold = csv_arena.getValue(csv_BattleRewardGold).asInt();
 			arena.releaseDate = csv_arena.getValue(csv_ReleaseDate).asString(true);
 
-			arena.dbId = arenaService.resolve(arena.name).getId();
+			ArenaEntity entity = entities.getOrDefault(arena.name, null);
+			if (entity == null) {
+				entitiesToAdd.put(arena.name, 0);
+			} else {
+				arena.dbId = entity.getId();
+			}
 
 			values.add(arena);
 			++i;
 		}
-		arenaService.endResolve();
+
+		if (entitiesToAdd.size() > 0) {
+			arenaService.store(entitiesToAdd);
+			for (Map.Entry<String, Long> entry : entitiesToAdd.entrySet()) {
+				by(entry.getKey()).dbId = entry.getValue();
+			}
+		}
 
 		initialized = true;
 	}
