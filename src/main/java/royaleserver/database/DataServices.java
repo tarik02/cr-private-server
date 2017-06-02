@@ -1,5 +1,6 @@
 package royaleserver.database;
 
+import org.hibernate.SessionFactory;
 import royaleserver.database.service.*;
 
 /**
@@ -18,17 +19,17 @@ public final class DataServices {
 	public final PlayerCardService playerCardService;
 	public final PlayerService playerService;
 
-	public DataServices(ArenaService arenaService, AssetService assetService, CardService cardService, ChestService chestService, ClanBadgeService clanBadgeService, ClanRoleService clanRoleService, ClanService clanService, ExpLevelService expLevelService, HomeChestService homeChestService, PlayerCardService playerCardService, PlayerService playerService) {
-		this.arenaService = arenaService;
-		this.assetService = assetService;
-		this.cardService = cardService;
-		this.chestService = chestService;
-		this.clanBadgeService = clanBadgeService;
-		this.clanRoleService = clanRoleService;
-		this.clanService = clanService;
-		this.expLevelService = expLevelService;
-		this.homeChestService = homeChestService;
-		this.playerCardService = playerCardService;
-		this.playerService = playerService;
+	public DataServices(SessionFactory sessionFactory) {
+		this.arenaService = new ArenaService(sessionFactory);
+		this.assetService = new AssetService(sessionFactory);
+		this.cardService = new CardService(sessionFactory);
+		this.chestService = new ChestService(sessionFactory);
+		this.clanBadgeService = new ClanBadgeService(sessionFactory);
+		this.clanRoleService = new ClanRoleService(sessionFactory);
+		this.clanService = new ClanService(sessionFactory);
+		this.expLevelService = new ExpLevelService(sessionFactory);
+		this.homeChestService = new HomeChestService(sessionFactory);
+		this.playerCardService = new PlayerCardService(sessionFactory);
+		this.playerService = new PlayerService(sessionFactory);
 	}
 }

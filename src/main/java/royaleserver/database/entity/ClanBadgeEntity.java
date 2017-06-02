@@ -1,34 +1,16 @@
 package royaleserver.database.entity;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "clan_badges")
-@NamedQuery(name = "ClanBadgeEntity.getByName", query = "SELECT c FROM ClanBadgeEntity c WHERE c.name = :name")
-public class ClanBadgeEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+@NamedQuery(name = "ClanBadgeEntity.all", query = "SELECT clanBadgeEntity FROM ClanBadgeEntity clanBadgeEntity")
+public class ClanBadgeEntity extends LogicEntity<ClanBadgeEntity> {
+	public ClanBadgeEntity() {}
 
-	@Column(nullable = false, unique = true)
-	private String name;
-
-
-	public long getId() {
-		return id;
-	}
-
-	public ClanBadgeEntity setId(long id) {
-		this.id = id;
-		return this;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public ClanBadgeEntity setName(String name) {
-		this.name = name;
-		return this;
+	public ClanBadgeEntity(String name) {
+		super(name);
 	}
 }

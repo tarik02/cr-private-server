@@ -4,20 +4,15 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
-import royaleserver.database.service.ChestService;
 import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Chest implements Cloneable {
+public final class Chest extends DBLogic implements Cloneable {
 	public static final int SCID_HIGH = 19;
 
-	private long dbId;
-
 	private SCID scid;
-
-	private String name;
 	private Arena arena;
 	private boolean inShop, inArenaInfo;
 	private int timeTakenDays, timeTakesHours, timeTakenMinutes, timeTakenSeconds;
@@ -28,16 +23,8 @@ public class Chest implements Cloneable {
 
 	private Chest() {}
 
-	public long getDbId() {
-		return dbId;
-	}
-
 	public SCID getScid() {
 		return scid;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public Arena getArena() {
@@ -117,8 +104,6 @@ public class Chest implements Cloneable {
 			return;
 		}
 
-		ChestService chestService = server.getDataManager().getChestService();
-
 		Table csv_chests = server.getAssetManager().open("csv_logic/treasure_chests.csv").csv();
 		Column csv_Name = csv_chests.getColumn("Name");
 		Column csv_BaseChest = csv_chests.getColumn("BaseChest");
@@ -138,7 +123,6 @@ public class Chest implements Cloneable {
 		Column csv_MinGoldPerCard = csv_chests.getColumn("MinGoldPerCard");
 		Column csv_MaxGoldPerCard = csv_chests.getColumn("MaxGoldPerCard");
 
-		chestService.beginResolve();
 		int i = 0;
 		for (Row csv_chest : csv_chests.getRows()) {
 			Chest chest;
@@ -186,11 +170,10 @@ public class Chest implements Cloneable {
 			chest.minGoldPerCard = csv_chest.getValue(csv_MinGoldPerCard).asInt(chest.minGoldPerCard);
 			chest.maxGoldPerCard = csv_chest.getValue(csv_MaxGoldPerCard).asInt(chest.maxGoldPerCard);
 
-			chest.dbId = chestService.resolve(chest.name).getId();
-
 			values.add(chest);
 		}
-		chestService.endResolve();
+
+		init(values, server.getDataManager().getChestService());
 
 		initialized = true;
 	}

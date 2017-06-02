@@ -2,9 +2,7 @@ package royaleserver.protocol.messages.command;
 
 import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.CommandHandler;
-import royaleserver.protocol.messages.component.ChestItem;
 import royaleserver.utils.DataStream;
-import royaleserver.utils.Hex;
 
 public class StartFight extends Command {
 

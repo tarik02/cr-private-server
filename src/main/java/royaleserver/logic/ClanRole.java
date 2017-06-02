@@ -4,16 +4,12 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
-import royaleserver.database.service.ClanRoleService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClanRole {
-	private long dbId;
+public final class ClanRole extends DBLogic {
 	private int index;
-	private String name;
-
 	private int level;
 	private boolean canInvite, canSendMail, canChangeClanSettings, canAcceptJoinRequest, canKick, canBePromotedToLeader, canPromoteToOwnLevel;
 
@@ -71,8 +67,6 @@ public class ClanRole {
 			return;
 		}
 
-		ClanRoleService clanRoleService = server.getDataManager().getClanRoleService();
-
 		Table csv_roles = server.getAssetManager().open("csv_logic/alliance_roles.csv").csv();
 		Column csv_Name = csv_roles.getColumn("Name");
 		Column csv_Level = csv_roles.getColumn("Level");
@@ -84,7 +78,6 @@ public class ClanRole {
 		Column csv_CanBePromotedToLeader = csv_roles.getColumn("CanBePromotedToLeader");
 		Column csv_CanPromoteToOwnLevel = csv_roles.getColumn("CanPromoteToOwnLevel");
 
-		clanRoleService.beginResolve();
 		int i = 0;
 		for (Row csv_role : csv_roles.getRows()) {
 			ClanRole role = new ClanRole();
@@ -100,11 +93,10 @@ public class ClanRole {
 			role.canBePromotedToLeader = csv_role.getValue(csv_CanBePromotedToLeader).asBoolean();
 			role.canPromoteToOwnLevel = csv_role.getValue(csv_CanPromoteToOwnLevel).asBoolean();
 
-			role.dbId = clanRoleService.resolve(role.name).getId();
-
 			values.add(role);
 		}
-		clanRoleService.endResolve();
+
+		init(values, server.getDataManager().getClanRoleService());
 
 		initialized = true;
 	}

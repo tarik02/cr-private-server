@@ -62,7 +62,6 @@ public class Server {
 
 	private OrderedMemoryAwareThreadPoolExecutor bossExec;
 	private OrderedMemoryAwareThreadPoolExecutor ioExec;
-	private ServerBootstrap networkServer;
 	private Channel channel;
 
 	public Server() throws ServerException {
@@ -128,7 +127,7 @@ public class Server {
 		int workingThreadsCount = 4;
 		bossExec = new OrderedMemoryAwareThreadPoolExecutor(1, 400000000, 2000000000, 60, TimeUnit.SECONDS);
 		ioExec = new OrderedMemoryAwareThreadPoolExecutor(workingThreadsCount, 400000000, 2000000000, 60, TimeUnit.SECONDS);
-		networkServer = new ServerBootstrap(new NioServerSocketChannelFactory(bossExec, ioExec, workingThreadsCount));
+		ServerBootstrap networkServer = new ServerBootstrap(new NioServerSocketChannelFactory(bossExec, ioExec, workingThreadsCount));
 		networkServer.setOption("backlog", 500);
 		networkServer.setOption("connectTimeoutMillis", 10000);
 		networkServer.setPipelineFactory(new ServerPipelineFactory());
@@ -147,10 +146,12 @@ public class Server {
 		running = false;
 
 		logger.info("Stopping the server...");
-		try {
-			channel.unbind().await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		if (channel != null) {
+			try {
+				channel.unbind().await();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
 		logger.info("Disconnecting the clients...");
@@ -159,11 +160,18 @@ public class Server {
 		}
 
 		logger.info("Closing server...");
-		try {
-			channel.close().await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		if (channel != null) {
+			try {
+				channel.close().await();
+				bossExec.shutdown();
+				ioExec.shutdown();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+
+		logger.info("Stopping data manager...");
+		dataManager.stop();
 
 		logger.info("Server stopped!");
 	}
@@ -189,7 +197,7 @@ public class Server {
 	}
 
 	protected void tick() {
-		if (tickCounter % 2.5 * 60 * 20 == 0) { // Every 2.5 minutes
+		if (tickCounter % (2.5 * 60 * 20) == 0) { // Every 2.5 minutes
 			synchronized (players) {
 				for (Player player : players) {
 					player.updateOnline();
@@ -284,6 +292,11 @@ public class Server {
 		public void messageReceived(ChannelHandlerContext context, MessageEvent e) {
 			if (e.getChannel().isOpen()) {
 				Message message = (Message)e.getMessage();
+				if (message == null) {
+					context.getChannel().close();
+					return;
+				}
+
 				logger.debug("> %s", message.getClass().getSimpleName());
 
 				switch (status) {
@@ -485,7 +498,12 @@ public class Server {
 			buffer.readBytes(payload);
 
 			MessageHeader header = new MessageHeader(id, payload);
-			crypto.decryptPacket(header);
+
+			try {
+				crypto.decryptPacket(header);
+			} catch (RuntimeException e) {
+				return null;
+			}
 
 			Message message = MessageFactory.create(header.id);
 
