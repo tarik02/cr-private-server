@@ -183,10 +183,9 @@ public class Player implements MessageHandler, CommandHandler {
 
 		OpenChestOK command = new OpenChestOK();
 		command.gold = minGold + random.nextInt(maxGold - minGold);
-		command.gems = 0;
+		command.gems = 0; // TODO:
 		command.chestItems = new ChestItem[cards.size()];
 
-		// TODO: Order
 		int i = 0;
 		for (Pair<royaleserver.logic.Card, Integer> card : cards) {
 			ChestItem chestItem = new ChestItem();
