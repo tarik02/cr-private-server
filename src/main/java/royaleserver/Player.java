@@ -689,7 +689,7 @@ public class Player implements MessageHandler, CommandHandler {
 				if (homeChest.getStatus() == HomeChestStatus.OPENED ||
 						(homeChest.getStatus() == HomeChestStatus.OPENING &&
 								homeChest.getOpenEnd().getTime() < System.currentTimeMillis())) {
-					//server.getDataManager().getHomeChestService().delete(homeChest);
+					server.getDataManager().getHomeChestService().delete(homeChest);
 
 					openChest(homeChest.getLogicChest());
 				}
