@@ -2,14 +2,13 @@ package royaleserver.database;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.reflections.Reflections;
 import royaleserver.Server;
 import royaleserver.config.Database;
 import royaleserver.database.service.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import java.util.HashMap;
-import java.util.Map;
+import javax.persistence.Entity;
+import java.lang.reflect.Modifier;
 import java.util.Properties;
 
 public class DataManager {
@@ -50,25 +49,23 @@ public class DataManager {
 			throw new Server.ServerException("Invalid data provider " + config.provider);
 		}
 
-		sessionFactory = new Configuration()
+		Configuration configuration = new Configuration()
 				.configure()
-				.addProperties(properties)
-				.buildSessionFactory();
+				.addProperties(properties);
 
-		services = new DataServices(
-				new ArenaService(sessionFactory),
-				/*new AssetService(sessionFactory),
-				new CardService(sessionFactory),
-				new ChestService(sessionFactory),
-				new ClanBadgeService(sessionFactory),
-				new ClanRoleService(sessionFactory),
-				new ClanService(sessionFactory),
-				new ExpLevelService(sessionFactory),
-				new HomeChestService(sessionFactory),
-				new PlayerCardService(sessionFactory),
-				new PlayerService(sessionFactory)*/
-				null,null,null,null,null,null,null,null,null,null
-		);
+		configuration.addPackage("royaleserver.database.entity");
+		for (Class<?> clazz : (new Reflections("royaleserver.database.entity")).getTypesAnnotatedWith(Entity.class)) {
+			if (!Modifier.isAbstract(clazz.getModifiers())) {
+				configuration.addAnnotatedClass(clazz);
+			}
+		}
+
+		sessionFactory = configuration.buildSessionFactory();
+		services = new DataServices(sessionFactory);
+	}
+
+	public void stop() {
+		sessionFactory.close();
 	}
 
 	public DataServices getServices() {

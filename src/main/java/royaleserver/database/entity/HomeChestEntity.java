@@ -108,10 +108,7 @@ public class HomeChestEntity implements java.io.Serializable {
 
 		HomeChestEntity that = (HomeChestEntity)o;
 
-		if (slot != that.slot) {
-			return false;
-		}
-		return player.equals(that.player);
+		return slot == that.slot && player.equals(that.player);
 	}
 
 	@Override

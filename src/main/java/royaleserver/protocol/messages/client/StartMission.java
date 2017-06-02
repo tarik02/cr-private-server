@@ -1,12 +1,9 @@
 package royaleserver.protocol.messages.client;
 
-import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
 import royaleserver.protocol.messages.Message;
+import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.utils.DataStream;
-
-import royaleserver.utils.Hex;
-import royaleserver.utils.SCID;
 
 public class StartMission extends Message {
 

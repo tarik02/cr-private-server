@@ -106,6 +106,13 @@ public final class MainLogger extends Logger {
 			} catch (InterruptedException ignored) {}
 
 			thread = null;
+			for (OutputStream handler : handlers) {
+				try {
+					handler.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -115,6 +122,10 @@ public final class MainLogger extends Logger {
 			String line;
 
 			while (running) {
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException ignored) {}
+
 				while ((line = logQueue.poll()) != null) {
 					for (OutputStream handler : handlers) {
 						try {
@@ -122,12 +133,6 @@ public final class MainLogger extends Logger {
 						} catch (IOException ignored) {}
 					}
 				}
-
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException ignored) {}
-
-				line = null;
 			}
 		}
 	}

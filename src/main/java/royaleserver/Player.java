@@ -119,7 +119,7 @@ public class Player implements MessageHandler, CommandHandler {
 			ExpLevel nextLevel;
 
 			do {
-				nextLevel = ExpLevel.by(level.getName() + 1);
+				nextLevel = ExpLevel.by(level.getNumericName() + 1);
 				newExp -= level.getExpToNextLevel();
 
 				if (nextLevel == null) {

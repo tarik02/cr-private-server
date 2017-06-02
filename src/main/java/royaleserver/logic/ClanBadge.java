@@ -4,31 +4,20 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
-import royaleserver.database.service.ClanBadgeService;
 import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClanBadge {
+public final class ClanBadge extends DBLogic {
 	public static final int SCID_HIGH = 16;
 
-	private long dbId;
 	private SCID scid;
-	private String name;
 
 	private ClanBadge() {}
 
-	public long getDbId() {
-		return dbId;
-	}
-
 	public SCID getScid() {
 		return scid;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 
@@ -40,23 +29,20 @@ public class ClanBadge {
 			return;
 		}
 
-		ClanBadgeService clanBadgeService = server.getDataManager().getClanBadgeService();
-
 		Table csv_badges = server.getAssetManager().open("csv_logic/alliance_badges.csv").csv();
 		Column csv_Name = csv_badges.getColumn("Name");
 
-		clanBadgeService.beginResolve();
 		int i = 0;
 		for (Row csv_badge : csv_badges.getRows()) {
 			ClanBadge badge = new ClanBadge();
 
 			badge.scid = new SCID(SCID_HIGH, i++);
 			badge.name = csv_badge.getValue(csv_Name).asString();
-			badge.dbId = clanBadgeService.resolve(badge.name).getId();
 
 			values.add(badge);
 		}
-		clanBadgeService.endResolve();
+
+		init(values, server.getDataManager().getClanBadgeService());
 
 		initialized = true;
 	}

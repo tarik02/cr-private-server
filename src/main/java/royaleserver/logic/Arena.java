@@ -1,27 +1,19 @@
 package royaleserver.logic;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Maps;
 import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
-import royaleserver.database.entity.ArenaEntity;
-import royaleserver.database.service.ArenaService;
 import royaleserver.utils.SCID;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Arena {
+public final class Arena extends DBLogic {
 	public static final int SCID_HIGH = 0; // TODO: Get it
-
-	private long dbId;
 
 	private int index;
 	private SCID scid;
-	private String name;
-
 	private int arena;
 	private String chestArena;
 	private boolean isInUse;
@@ -36,20 +28,12 @@ public class Arena {
 
 	private Arena() {}
 
-	public long getDbId() {
-		return dbId;
-	}
-
 	public int getIndex() {
 		return index;
 	}
 
 	public SCID getScid() {
 		return scid;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public int getArena() {
@@ -120,8 +104,6 @@ public class Arena {
 			return;
 		}
 
-		ArenaService arenaService = server.getDataManager().getArenaService();
-
 		Table csv_arenas = server.getAssetManager().open("csv_logic/arenas.csv").csv();
 		Column csv_Name = csv_arenas.getColumn("Name");
 		Column csv_Arena = csv_arenas.getColumn("Arena");
@@ -141,9 +123,6 @@ public class Arena {
 		Column csv_BattleRewardGold = csv_arenas.getColumn("BattleRewardGold");
 		Column csv_ReleaseDate = csv_arenas.getColumn("ReleaseDate");
 		Column csv_SeasonRewardChest = csv_arenas.getColumn("SeasonRewardChest");
-
-		final Map<String, ArenaEntity> entities = Maps.uniqueIndex(arenaService.all(), ArenaEntity::getName);
-		final HashMap<String, Long> entitiesToAdd = new HashMap<>();
 
 		int i = 0;
 		for (Row csv_arena : csv_arenas.getRows()) {
@@ -168,30 +147,18 @@ public class Arena {
 			arena.battleRewardGold = csv_arena.getValue(csv_BattleRewardGold).asInt();
 			arena.releaseDate = csv_arena.getValue(csv_ReleaseDate).asString(true);
 
-			ArenaEntity entity = entities.getOrDefault(arena.name, null);
-			if (entity == null) {
-				entitiesToAdd.put(arena.name, 0);
-			} else {
-				arena.dbId = entity.getId();
-			}
-
 			values.add(arena);
 			++i;
 		}
 
-		if (entitiesToAdd.size() > 0) {
-			arenaService.store(entitiesToAdd);
-			for (Map.Entry<String, Long> entry : entitiesToAdd.entrySet()) {
-				by(entry.getKey()).dbId = entry.getValue();
-			}
-		}
+		init(values, server.getDataManager().getArenaService());
 
 		initialized = true;
 	}
 
 	public static Arena by(String name) {
 		for (Arena arena : values) {
-			if (arena.name.equals(name)) {
+			if (arena.name.equalsIgnoreCase(name)) {
 				return arena;
 			}
 		}

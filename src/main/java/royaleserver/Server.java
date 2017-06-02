@@ -62,7 +62,6 @@ public class Server {
 
 	private OrderedMemoryAwareThreadPoolExecutor bossExec;
 	private OrderedMemoryAwareThreadPoolExecutor ioExec;
-	private ServerBootstrap networkServer;
 	private Channel channel;
 
 	public Server() throws ServerException {
@@ -114,10 +113,8 @@ public class Server {
 		dataManager = new DataManager(config.database);
 
 		logger.info("Loading data...");
-		//Rarity.init(this);
+		Rarity.init(this);
 		Arena.init(this);
-
-		if (true) return;
 		Card.init(this);
 		GameMode.init(this);
 		Chest.init(this);
@@ -130,7 +127,7 @@ public class Server {
 		int workingThreadsCount = 4;
 		bossExec = new OrderedMemoryAwareThreadPoolExecutor(1, 400000000, 2000000000, 60, TimeUnit.SECONDS);
 		ioExec = new OrderedMemoryAwareThreadPoolExecutor(workingThreadsCount, 400000000, 2000000000, 60, TimeUnit.SECONDS);
-		networkServer = new ServerBootstrap(new NioServerSocketChannelFactory(bossExec, ioExec, workingThreadsCount));
+		ServerBootstrap networkServer = new ServerBootstrap(new NioServerSocketChannelFactory(bossExec, ioExec, workingThreadsCount));
 		networkServer.setOption("backlog", 500);
 		networkServer.setOption("connectTimeoutMillis", 10000);
 		networkServer.setPipelineFactory(new ServerPipelineFactory());
@@ -149,10 +146,12 @@ public class Server {
 		running = false;
 
 		logger.info("Stopping the server...");
-		try {
-			channel.unbind().await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		if (channel != null) {
+			try {
+				channel.unbind().await();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
 		logger.info("Disconnecting the clients...");
@@ -161,11 +160,18 @@ public class Server {
 		}
 
 		logger.info("Closing server...");
-		try {
-			channel.close().await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		if (channel != null) {
+			try {
+				channel.close().await();
+				bossExec.shutdown();
+				ioExec.shutdown();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+
+		logger.info("Stopping data manager...");
+		dataManager.stop();
 
 		logger.info("Server stopped!");
 	}
