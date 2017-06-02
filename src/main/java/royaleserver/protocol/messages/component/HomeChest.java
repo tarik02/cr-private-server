@@ -31,7 +31,7 @@ public class HomeChest extends Component {
 		stream.putRrsInt32(4);
 
 		if (first) {
-			stream.putRrsInt32(1);
+			stream.putRrsInt32(slot + 1);
 		}
 
 		stream.putSCID(chest.getScid());
@@ -44,7 +44,7 @@ public class HomeChest extends Component {
 			stream.putRrsInt32((int)System.currentTimeMillis());
 		}
 
-		stream.putRrsInt32(slot + 1);
+		stream.putRrsInt32(slot);
 
 		stream.putRrsInt32(1);
 		stream.putRrsInt32(slot);

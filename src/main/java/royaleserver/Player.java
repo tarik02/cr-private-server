@@ -64,9 +64,12 @@ public class Player implements MessageHandler, CommandHandler {
 			entity.setLogicLastExpLevel(expLevel);
 		}
 
-		response.homeChests = new HomeChest[entity.getHomeChests().size()];
+		List<HomeChestEntity> homeChests = new ArrayList<>(entity.getHomeChests());
+		homeChests.sort(Comparator.comparingInt(HomeChestEntity::getSlot));
+
+		response.homeChests = new HomeChest[homeChests.size()];
 		int i = 0;
-		for (HomeChestEntity homeChestEntity : entity.getHomeChests()) {
+		for (HomeChestEntity homeChestEntity : homeChests) {
 			HomeChest homeChest = response.homeChests[i++] = new HomeChest();
 			homeChest.slot = homeChestEntity.getSlot();
 			homeChest.chest = homeChestEntity.getLogicChest();
