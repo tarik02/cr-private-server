@@ -10,7 +10,7 @@ import royaleserver.utils.SCID;
 
 import java.util.*;
 
-public class Card {
+public final class Card extends DBLogic {
 	public static final int TYPE_CHARACTER = 26;
 	public static final int TYPE_BUILDING = 27;
 	public static final int TYPE_SPELL = 28;
@@ -19,9 +19,6 @@ public class Card {
 	private int index;
 	private SCID scid;
 
-	private long dbId;
-
-	private String name;
 	private Arena unlockArena;
 	private Rarity rarity;
 	private int elixirCost;
@@ -63,7 +60,7 @@ public class Card {
 	}
 
 	private static boolean initialized = false;
-	private static List<Card> cards = new ArrayList<>();
+	private static List<Card> values = new ArrayList<>();
 
 	public static void init(Server server) throws Server.ServerException {
 		if (initialized) {
@@ -75,6 +72,8 @@ public class Card {
 		indexCounter = loadCards(server, TYPE_CHARACTER, server.getAssetManager().open("csv_logic/spells_characters.csv"), indexCounter);
 		indexCounter = loadCards(server, TYPE_BUILDING, server.getAssetManager().open("csv_logic/spells_buildings.csv"), indexCounter);
 		indexCounter = loadCards(server, TYPE_SPELL, server.getAssetManager().open("csv_logic/spells_other.csv"), indexCounter);
+
+		init(values, server.getDataManager().getCardService());
 
 		initialized = true;
 	}
@@ -90,8 +89,6 @@ public class Card {
 		Column csv_NotInUse = csv_cards.getColumn("NotInUse");
 
 		int cardIndex = 0;
-
-		cardService.beginResolve();
 		for (Row csv_card : csv_cards.getRows()) {
 			Card card = new Card();
 
@@ -105,19 +102,16 @@ public class Card {
 			card.elixirCost = csv_ManaCost.getValue(csv_card).asInt();
 			card.notInUse = csv_NotInUse.getValue(csv_card).asBoolean();
 
-			card.dbId = cardService.resolve(card.name).getId();
-
-			cards.add(card);
+			values.add(card);
 			++indexCounter;
 		}
-		cardService.endResolve();
 
 		return indexCounter;
 	}
 
 	public static Card by(String name) {
-		for (Card card : cards) {
-			if (card.getName().equals(name)) {
+		for (Card card : values) {
+			if (card.getName().equalsIgnoreCase(name)) {
 				return card;
 			}
 		}
@@ -126,7 +120,7 @@ public class Card {
 	}
 
 	public static Card byDB(long id) {
-		for (Card card : cards) {
+		for (Card card : values) {
 			if (card.getDbId() == id) {
 				return card;
 			}
@@ -141,7 +135,7 @@ public class Card {
 			candidates.put(rarity, new ArrayList<>());
 		}
 
-		for (Card card : cards) {
+		for (Card card : values) {
 			if (!card.notInUse && card.getUnlockArena().getArena() <= arena.getArena()) {
 				candidates.get(card.getRarity()).add(card);
 			}

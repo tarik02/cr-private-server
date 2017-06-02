@@ -1,6 +1,8 @@
 package royaleserver.utils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class LogManager {
 	private LogManager() {}
@@ -38,6 +40,13 @@ public class LogManager {
 			}
 
 			mainLogger.start();
+		}
+	}
+
+	public static void shutdown() {
+		if (mainLogger != null) {
+			mainLogger.stop();
+			mainLogger = null;
 		}
 	}
 }

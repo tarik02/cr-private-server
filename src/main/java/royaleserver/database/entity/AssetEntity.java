@@ -5,7 +5,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "assets")
-@NamedQuery(name = "getAssetByName", query = "SELECT c FROM AssetEntity c WHERE c.name = :name")
+@NamedQuery(name = "AssetEntity.byName", query = "SELECT assetEntity FROM AssetEntity assetEntity WHERE assetEntity.name = :name")
 public class AssetEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

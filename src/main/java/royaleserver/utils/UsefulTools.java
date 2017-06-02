@@ -6,7 +6,7 @@ import java.util.Map;
 public class UsefulTools {
     public static int getTypeRes(String resourceName)
     {
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        Map<String, Integer> map = new HashMap<>();
         
         map.put("Gold", 1);
         map.put("ChallengesWins", 2);

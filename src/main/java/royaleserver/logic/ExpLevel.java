@@ -4,18 +4,14 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
-import royaleserver.database.service.ExpLevelService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpLevel {
-	private long dbId;
+public final class ExpLevel extends DBLogic {
 	private int index;
-	private int name;
-
+	private int numericName;
 	private int expToNextLevel;
-
 	private int totalExp;
 
 	private ExpLevel() {}
@@ -28,8 +24,8 @@ public class ExpLevel {
 		return index;
 	}
 
-	public int getName() {
-		return name;
+	public int getNumericName() {
+		return numericName;
 	}
 
 	public int getExpToNextLevel() {
@@ -48,35 +44,31 @@ public class ExpLevel {
 			return;
 		}
 
-		ExpLevelService LevelService = server.getDataManager().getExpLevelService();
-
 		Table csv_levels = server.getAssetManager().open("csv_logic/exp_levels.csv").csv();
 		Column csv_Name = csv_levels.getColumn("Name");
 		Column csv_ExpToNextLevel = csv_levels.getColumn("ExpToNextLevel");
 
-		LevelService.beginResolve();
 		int i = 1, totalExp = 0;
 		for (Row csv_level : csv_levels.getRows()) {
 			ExpLevel expLevel = new ExpLevel();
 
 			expLevel.index = i++;
-			expLevel.name = csv_level.getValue(csv_Name).asInt();
+			expLevel.name = String.valueOf(expLevel.numericName = csv_level.getValue(csv_Name).asInt());
 			expLevel.expToNextLevel = csv_level.getValue(csv_ExpToNextLevel).asInt();
 			expLevel.totalExp = totalExp;
 			totalExp += expLevel.expToNextLevel;
 
-			expLevel.dbId = LevelService.resolve(expLevel.name).getId();
-
 			values.add(expLevel);
 		}
-		LevelService.endResolve();
+
+		init(values, server.getDataManager().getExpLevelService());
 
 		initialized = true;
 	}
 
 	public static ExpLevel by(int name) {
 		for (ExpLevel expLevel : values) {
-			if (expLevel.name == name) {
+			if (expLevel.numericName == name) {
 				return expLevel;
 			}
 		}

@@ -8,7 +8,7 @@ import royaleserver.csv.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Rarity {
+public final class Rarity {
 	private String name;
 	private int levelCount;
 	private int donateCapacity, sortCapacity, donateReward, donateXP;
