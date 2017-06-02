@@ -197,7 +197,7 @@ public class Server {
 	}
 
 	protected void tick() {
-		if (tickCounter % 2.5 * 60 * 20 == 0) { // Every 2.5 minutes
+		if (tickCounter % (2.5 * 60 * 20) == 0) { // Every 2.5 minutes
 			synchronized (players) {
 				for (Player player : players) {
 					player.updateOnline();
@@ -292,6 +292,11 @@ public class Server {
 		public void messageReceived(ChannelHandlerContext context, MessageEvent e) {
 			if (e.getChannel().isOpen()) {
 				Message message = (Message)e.getMessage();
+				if (message == null) {
+					context.getChannel().close();
+					return;
+				}
+
 				logger.debug("> %s", message.getClass().getSimpleName());
 
 				switch (status) {
@@ -493,7 +498,12 @@ public class Server {
 			buffer.readBytes(payload);
 
 			MessageHeader header = new MessageHeader(id, payload);
-			crypto.decryptPacket(header);
+
+			try {
+				crypto.decryptPacket(header);
+			} catch (RuntimeException e) {
+				return null;
+			}
 
 			Message message = MessageFactory.create(header.id);
 
