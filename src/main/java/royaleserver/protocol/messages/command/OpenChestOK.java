@@ -39,7 +39,7 @@ public class OpenChestOK extends Command {
 
 		stream.putRrsInt32(500);
 
-		stream.putByte((byte)2);
+		stream.putByte((byte)4);
 		stream.putByte((byte)2);
 	}
 }
