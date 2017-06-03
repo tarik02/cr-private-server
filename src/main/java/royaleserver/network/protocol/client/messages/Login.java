@@ -1,11 +1,11 @@
-package royaleserver.protocol.messages.client;
+package royaleserver.network.protocol.client.messages;
 
-import royaleserver.protocol.messages.MessageHandler;
+import royaleserver.network.protocol.client.ClientMessage;
+import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.protocol.Info;
-import royaleserver.protocol.messages.Message;
 import royaleserver.utils.DataStream;
 
-public class Login extends Message {
+public class Login extends ClientMessage {
 	public static final short ID = Info.LOGIN;
 
 	public long accountId;
@@ -38,73 +38,9 @@ public class Login extends Message {
 
 	public Login() {
 		super(ID);
-
-		accountId = 0;
-		passToken = "";
-		clientMajorVersion = 0;
-		clientMinorVersion = 0;
-		clientBuild = 0;
-		resourceSha = "";
-		UDID = "";
-		openUdid = "";
-		macAddress = "";
-		device = "";
-		advertisingGuid = "";
-		osVersion = "";
-		isAndroid = 0;
-		unknown_13 = "";
-		androidID = "";
-		preferredDeviceLanguage = "";
-		unknown_16 = 0;
-		preferredLanguage = 0;
-		facebookAttributionId = "";
-		advertisingEnabled = 0;
-		appleIFV = "";
-		appStore = 0;
-		kunlunSSO = "";
-		kunlunUID = "";
-		unknown_24 = "";
-		unknown_25 = "";
-		unknown_26 = 0;
 	}
 
-	@Override
-	public void encode(DataStream stream) {
-		super.encode(stream);
-
-		stream.putBLong(accountId);
-		stream.putString(passToken);
-		stream.putRrsInt32(clientMajorVersion);
-		stream.putRrsInt32(clientMinorVersion);
-		stream.putRrsInt32(clientBuild);
-		stream.putString(resourceSha);
-		stream.putString(UDID);
-		stream.putString(openUdid);
-		stream.putString(macAddress);
-		stream.putString(device);
-		stream.putString(advertisingGuid);
-		stream.putString(osVersion);
-		stream.putByte(isAndroid);
-		stream.putString(unknown_13);
-		stream.putString(androidID);
-		stream.putString(preferredDeviceLanguage);
-		stream.putByte(unknown_16);
-		stream.putByte(preferredLanguage);
-		stream.putString(facebookAttributionId);
-		stream.putByte(advertisingEnabled);
-		stream.putString(appleIFV);
-		stream.putRrsInt32(appStore);
-		stream.putString(kunlunSSO);
-		stream.putString(kunlunUID);
-		stream.putString(unknown_24);
-		stream.putString(unknown_25);
-		stream.putByte(unknown_26);
-	}
-
-	@Override
 	public void decode(DataStream stream) {
-		super.decode(stream);
-
 		accountId = stream.getBLong();
 		passToken = stream.getString();
 		clientMajorVersion = stream.getRrsInt32();
@@ -134,7 +70,7 @@ public class Login extends Message {
 		unknown_26 = stream.getByte();
 	}
 
-	public boolean handle(MessageHandler handler) throws Throwable {
-		return handler.handleLogin(this);
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleClientMessageLogin(this);
 	}
 }

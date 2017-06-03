@@ -1,5 +1,6 @@
 package royaleserver.protocol.messages;
 
+import royaleserver.network.protocol.client.messages.Login;
 import royaleserver.protocol.messages.client.*;
 
 public interface MessageHandler {

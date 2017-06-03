@@ -2,7 +2,7 @@ package royaleserver.protocol.messages.client;
 
 import royaleserver.protocol.messages.MessageHandler;
 import royaleserver.protocol.Info;
-import royaleserver.protocol.messages.Message;
+import royaleserver.network.protocol.Message;
 import royaleserver.protocol.messages.component.CommandComponent;
 import royaleserver.utils.DataStream;
 

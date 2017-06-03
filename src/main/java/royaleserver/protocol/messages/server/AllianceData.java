@@ -3,7 +3,7 @@ package royaleserver.protocol.messages.server;
 import royaleserver.database.entity.ClanEntity;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.protocol.Info;
-import royaleserver.protocol.messages.Message;
+import royaleserver.network.protocol.Message;
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
 import royaleserver.protocol.messages.component.AllianceMemberEntry;
 import royaleserver.utils.DataStream;

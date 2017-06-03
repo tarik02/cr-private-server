@@ -1,4 +1,4 @@
-package royaleserver.protocol;
+package royaleserver.network.protocol;
 
 public class MessageHeader {
 	public short id;

@@ -4,7 +4,8 @@ import royaleserver.database.entity.*;
 import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.*;
-import royaleserver.protocol.Session;
+import royaleserver.network.NetworkSession;
+import royaleserver.network.protocol.client.messages.Login;
 import royaleserver.protocol.messages.Command;
 import royaleserver.protocol.messages.CommandHandler;
 import royaleserver.protocol.messages.MessageHandler;
@@ -25,14 +26,14 @@ public class Player implements MessageHandler, CommandHandler {
 	private static final Logger logger = LogManager.getLogger(Player.class);
 
 	protected Server server;
-	protected Session session;
+	protected NetworkSession session;
 
 	protected boolean closed;
 
 	protected PlayerEntity entity;
 	protected Random random;
 
-	public Player(PlayerEntity entity, Server server, Session session) {
+	public Player(PlayerEntity entity, Server server, NetworkSession session) {
 		this.entity = entity;
 		this.server = server;
 		this.session = session;

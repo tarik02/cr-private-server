@@ -2,7 +2,7 @@ package royaleserver.protocol.messages.server;
 
 import royaleserver.logic.Arena;
 import royaleserver.protocol.Info;
-import royaleserver.protocol.messages.Message;
+import royaleserver.network.protocol.Message;
 import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.component.PlayerClan;
 import royaleserver.protocol.messages.component.Deck;

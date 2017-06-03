@@ -1,7 +1,7 @@
 package royaleserver.crypto;
 
 import royaleserver.protocol.Info;
-import royaleserver.protocol.MessageHeader;
+import royaleserver.network.protocol.MessageHeader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

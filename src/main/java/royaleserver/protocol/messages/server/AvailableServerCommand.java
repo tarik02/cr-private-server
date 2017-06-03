@@ -1,6 +1,6 @@
 package royaleserver.protocol.messages.server;
 
-import royaleserver.protocol.messages.Message;
+import royaleserver.network.protocol.Message;
 import royaleserver.utils.DataStream;
 
 import royaleserver.protocol.messages.component.ServerCommandComponent;

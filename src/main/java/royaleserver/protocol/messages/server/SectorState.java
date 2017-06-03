@@ -4,7 +4,7 @@ import royaleserver.logic.Arena;
 import royaleserver.logic.Card;
 import royaleserver.logic.GameMode;
 import royaleserver.protocol.Info;
-import royaleserver.protocol.messages.Message;
+import royaleserver.network.protocol.Message;
 import royaleserver.protocol.messages.component.Deck;
 import royaleserver.protocol.messages.component.GameDeck;
 import royaleserver.protocol.messages.component.HomeResources;

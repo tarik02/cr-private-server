@@ -1,7 +1,7 @@
 package royaleserver.protocol.messages.server;
 
 import royaleserver.protocol.Info;
-import royaleserver.protocol.messages.Message;
+import royaleserver.network.protocol.Message;
 import royaleserver.utils.DataStream;
 
 public class Disconnected extends Message {

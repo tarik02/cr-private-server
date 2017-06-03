@@ -1,5 +1,6 @@
 package royaleserver.protocol.messages;
 
+import royaleserver.network.protocol.Message;
 import royaleserver.utils.DataStream;
 import org.reflections.Reflections;
 
