@@ -675,9 +675,21 @@ public class Player implements MessageHandler, CommandHandler {
 
 	@Override
 	public boolean handleBuyChestCommand(BuyChest command) throws Throwable {
-		AvailableServerCommand response = new AvailableServerCommand();
-		response.command.command = new OpenChestOK();
-		session.sendMessage(response);
+		switch (command.chestID) {
+		case 225:
+			command.chestID = 222;
+			break;
+		case 228:
+			command.chestID = 258;
+			break;
+		case 224:
+			command.chestID = 170;
+			break;
+		default:
+			command.chestID = 222;
+		}
+
+		openChest(Chest.byDB(command.chestID));
 
 		return true;
 	}
@@ -685,7 +697,7 @@ public class Player implements MessageHandler, CommandHandler {
 	@Override
 	public boolean handleOpenChestCommand(OpenChest command) throws Throwable {
 		int slot = command.slot;
-		System.out.println(slot);
+
 		for (HomeChestEntity homeChest : entity.getHomeChests()) {
 			if (homeChest.getSlot() == slot) {
 				if (homeChest.getStatus() == HomeChestStatus.OPENED ||
@@ -700,6 +712,11 @@ public class Player implements MessageHandler, CommandHandler {
 			}
 		}
 
+		return true;
+	}
+
+	@Override
+	public boolean handleNextCardChestCommand(NextCardChest command) throws Throwable {
 		return true;
 	}
 

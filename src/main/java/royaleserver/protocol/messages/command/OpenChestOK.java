@@ -11,13 +11,16 @@ public class OpenChestOK extends Command {
 	public int gems;
 	public ChestItem[] chestItems;
 
+	public int chestID;
+
 	public OpenChestOK() {
 		super(ID);
 
 		gold = 1000;
 		gems = 1500;
-
 		chestItems = new ChestItem[0];
+
+		chestID = 1;
 	}
 
 	@Override
@@ -37,7 +40,9 @@ public class OpenChestOK extends Command {
 		stream.putRrsInt32(gold);
 		stream.putRrsInt32(gems);
 
-		stream.putRrsInt32(500);
+		stream.putRrsInt32(chestID);
+
+		System.out.println(chestID);
 
 		stream.putByte((byte)4);
 		stream.putByte((byte)2);

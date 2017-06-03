@@ -11,7 +11,8 @@ public class BuyChest extends Command {
 	public int tickEnd;
 	public long accountID;
 
-	public byte unknown_0;
+	public byte unknown_3;
+	public int chestID;
 
 	public BuyChest() {
 		super(ID);
@@ -25,7 +26,9 @@ public class BuyChest extends Command {
 		tickEnd = stream.getRrsInt32();
 
 		accountID = stream.getRrsLong();
-		unknown_0 = stream.getByte();
+		unknown_3 = stream.getByte();
+
+		chestID = stream.getRrsInt32();
 	}
 
 	@Override
