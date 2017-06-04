@@ -1,6 +1,6 @@
 package royaleserver.crypto;
 
-import royaleserver.protocol.Info;
+import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.MessageHeader;
 
 import java.io.ByteArrayOutputStream;
@@ -31,13 +31,13 @@ public class ClientCrypto extends Crypto {
 	@Override
 	public void decryptPacket(MessageHeader message) {
 		switch (message.id) {
-		case Info.SERVER_HELLO:
-		case Info.LOGIN_FAILED:
+		case Messages.SERVER_HELLO:
+		case Messages.LOGIN_FAILED:
 			int len = ByteBuffer.wrap(message.payload, 0, 4).order(ByteOrder.LITTLE_ENDIAN).getInt(0);
 			sessionKey = Arrays.copyOfRange(message.payload, 4, 4 + len);
 			message.decrypted = message.payload;
 			break;
-		case Info.LOGIN_OK:
+		case Messages.LOGIN_OK:
 			Nonce nonce = new Nonce(clientKey, serverKey, encryptNonce.getBytes());
 			message.decrypted = decrypt(message.payload, nonce);
 
@@ -62,10 +62,10 @@ public class ClientCrypto extends Crypto {
 	@Override
 	public void encryptPacket(MessageHeader message) {
 		switch (message.id) {
-		case Info.CLIENT_HELLO:
+		case Messages.CLIENT_HELLO:
 			message.payload = message.decrypted;
 			break;
-		case Info.LOGIN:
+		case Messages.LOGIN:
 			Nonce nonce = new Nonce(clientKey, serverKey);
 			ByteArrayOutputStream toEncrypt = new ByteArrayOutputStream();
 

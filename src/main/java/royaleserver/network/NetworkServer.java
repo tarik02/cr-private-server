@@ -19,13 +19,13 @@ import royaleserver.network.protocol.MessageHeader;
 import royaleserver.network.protocol.client.ClientMessage;
 import royaleserver.network.protocol.client.ClientMessageFactory;
 import royaleserver.network.protocol.server.ServerMessage;
-import royaleserver.protocol.Info;
+import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.Message;
-import royaleserver.protocol.messages.client.ClientHello;
+import royaleserver.network.protocol.client.messages.ClientHello;
 import royaleserver.network.protocol.client.messages.Login;
-import royaleserver.protocol.messages.server.LoginFailed;
-import royaleserver.protocol.messages.server.LoginOk;
-import royaleserver.protocol.messages.server.ServerHello;
+import royaleserver.network.protocol.server.messages.LoginFailed;
+import royaleserver.network.protocol.server.messages.LoginOk;
+import royaleserver.network.protocol.server.messages.ServerHello;
 import royaleserver.utils.*;
 
 import java.net.InetSocketAddress;
@@ -130,7 +130,7 @@ public final class NetworkServer {
 
 				switch (status) {
 				case HELLO:
-					if (message.id != Info.CLIENT_HELLO) {
+					if (message.id != Messages.CLIENT_HELLO) {
 						logger.warn("Excepted ClientHello, received %s. Disconnecting...", message.getClass().getSimpleName());
 						close();
 						return;
@@ -145,7 +145,7 @@ public final class NetworkServer {
 					status = Status.LOGIN;
 					break;
 				case LOGIN:
-					if (message.id != Info.LOGIN) {
+					if (message.id != Messages.LOGIN) {
 						logger.warn("Excepted Login, received %s. Disconnecting...", message.getClass().getSimpleName());
 						close();
 						return;
@@ -338,8 +338,8 @@ public final class NetworkServer {
 
 			if (message == null) {
 				String name = null;
-				if (Info.messagesMap.containsKey(header.id)) {
-					name = Info.messagesMap.get(header.id);
+				if (Messages.messagesMap.containsKey(header.id)) {
+					name = Messages.messagesMap.get(header.id);
 				}
 
 				if (name == null) {

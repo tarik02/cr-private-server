@@ -7,6 +7,6 @@ public final class ServerCommandFactory extends Factory<Short, ServerCommand> {
 	public static final ServerCommandFactory instance = new ServerCommandFactory();
 
 	private ServerCommandFactory() {
-		super("royaleserver.network.protocol.server.command", ServerCommand.class);
+		super("royaleserver.network.protocol.server.commands", ServerCommand.class);
 	}
 }

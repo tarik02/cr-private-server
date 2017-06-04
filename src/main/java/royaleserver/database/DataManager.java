@@ -40,7 +40,7 @@ public class DataManager {
 					.append("/")
 					.append(config.mysql.database)
 					.toString());
-			properties.put("hibernate.connection.username", config.mysql.user);
+			properties.put("hibernate.connection.name", config.mysql.user);
 			properties.put("hibernate.connection.password", config.mysql.password);
 			break;
 		default:

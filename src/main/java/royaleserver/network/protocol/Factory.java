@@ -4,6 +4,7 @@ import org.reflections.Reflections;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 public abstract class Factory<KeyType, TargetClass> {
@@ -17,6 +18,16 @@ public abstract class Factory<KeyType, TargetClass> {
 
 	protected Factory(String packagePrefix, Class<TargetClass> targetClass) {
 		for (Class<? extends TargetClass> clazz : new Reflections(packagePrefix).getSubTypesOf(targetClass)) {
+			int modifiers = clazz.getModifiers();
+
+			if (Modifier.isAbstract(modifiers)) {
+				continue;
+			}
+
+			if (!Modifier.isFinal(modifiers)) {
+				logger.warn("The class %s should be final.", clazz.getName());
+			}
+
 			try {
 				KeyType key = (KeyType)clazz.getDeclaredField("ID").get(null);
 				Creator<TargetClass> value = () -> {

@@ -6,6 +6,6 @@ public final class ClientCommandFactory extends Factory<Short, ClientCommand> {
 	public static final ClientCommandFactory instance = new ClientCommandFactory();
 
 	private ClientCommandFactory() {
-		super("royaleserver.network.protocol.client.command", ClientCommand.class);
+		super("royaleserver.network.protocol.client.commands", ClientCommand.class);
 	}
 }

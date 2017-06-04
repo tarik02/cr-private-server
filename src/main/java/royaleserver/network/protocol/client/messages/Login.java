@@ -2,11 +2,11 @@ package royaleserver.network.protocol.client.messages;
 
 import royaleserver.network.protocol.client.ClientMessage;
 import royaleserver.network.protocol.client.ClientMessageHandler;
-import royaleserver.protocol.Info;
+import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
-public class Login extends ClientMessage {
-	public static final short ID = Info.LOGIN;
+public final class Login extends ClientMessage {
+	public static final short ID = Messages.LOGIN;
 
 	public long accountId;
 	public String passToken;
@@ -40,6 +40,7 @@ public class Login extends ClientMessage {
 		super(ID);
 	}
 
+	@Override
 	public void decode(DataStream stream) {
 		accountId = stream.getBLong();
 		passToken = stream.getString();
@@ -70,7 +71,8 @@ public class Login extends ClientMessage {
 		unknown_26 = stream.getByte();
 	}
 
+	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
-		return handler.handleClientMessageLogin(this);
+		return handler.handleLogin(this);
 	}
 }
