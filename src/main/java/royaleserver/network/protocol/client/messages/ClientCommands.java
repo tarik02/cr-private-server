@@ -25,7 +25,8 @@ public final class ClientCommands extends ClientMessage {
 
         commands = new ClientCommand[stream.getRrsInt32()];
         for (int i = 0; i < commands.length; i++) {
-        	commands[i] = ClientCommandFactory.instance.create((short)stream.getRrsInt32());
+        	short commandId = (short)stream.getRrsInt32();
+        	commands[i] = ClientCommandFactory.instance.create(commandId);
         	if (commands[i] == null) {
         		break;
 	        }

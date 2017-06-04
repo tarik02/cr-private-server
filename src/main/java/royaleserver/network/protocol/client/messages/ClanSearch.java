@@ -7,7 +7,7 @@ import royaleserver.utils.DataStream;
 
 import royaleserver.utils.SCID;
 
-public class ClanSearch extends ClientMessage {
+public final class ClanSearch extends ClientMessage {
 	public static final short ID = Messages.CLAN_SEARCH;
 
 	public String searchString;

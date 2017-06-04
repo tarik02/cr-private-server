@@ -7,7 +7,7 @@ import royaleserver.protocol.messages.Component;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.SCID;
 
-public class PlayerClan extends Component {
+public final class PlayerClan extends Component {
 	public long id;
 	public String name;
 	public SCID badge;

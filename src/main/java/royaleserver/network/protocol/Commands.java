@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Commands {
+public final class Commands {
 	private Commands() {}
 
 	// Server commands

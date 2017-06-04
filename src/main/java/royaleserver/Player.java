@@ -9,6 +9,7 @@ import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.network.protocol.client.commands.*;
 import royaleserver.network.protocol.client.messages.*;
 import royaleserver.network.protocol.server.commands.ChestOpenOk;
+import royaleserver.network.protocol.server.commands.NameSet;
 import royaleserver.network.protocol.server.components.PlayerClan;
 import royaleserver.network.protocol.server.messages.*;
 import royaleserver.protocol.messages.component.*;
@@ -376,21 +377,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		return true;
 	}
 
-	/*@Override
-	public boolean handleClientHello(ClientHello message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleLogin(Login message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleClientCapabilities(ConnectionInfo message) throws Throwable {
-		return true;
-	}
-
+	/*
 	@Override
 	public boolean handleCancelMatchmake(MatchmakeCancel message) throws Throwable {
 		MatchmakeCancelOk response = new MatchmakeCancelOk();
@@ -480,7 +467,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	}
 
 	@Override
-	public boolean handleAvatarNameCheckRequest(NameCheckRequest message) throws Throwable {
+	public boolean handleAvatarNameCheckRequest(NameCheck message) throws Throwable {
 		AvatarNameCheckResponse response = new AvatarNameCheckResponse();
 		if (checkNickname(message.name)) {
 			response.username = message.name;
@@ -839,12 +826,37 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	@Override
 	public boolean handleConnectionInfo(ConnectionInfo message) throws Throwable {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean handleHomeAskData(HomeAskData message) throws Throwable {
-		return false;
+		HomeDataVisited response = new HomeDataVisited();
+		PlayerEntity responseEntity;
+
+		if (message.accountId == entity.getId()) {
+			responseEntity = entity;
+			response.isMyProfile = true;
+		} else {
+			PlayerService playerService = server.getDataManager().getPlayerService();
+			responseEntity = playerService.get(message.accountId);
+			response.isMyProfile = false;
+		}
+
+		if (responseEntity != null) {
+			Arena arena = responseEntity.getLogicArena();
+			response.homeId = responseEntity.getId();
+			response.arena = arena;
+			response.trophies = responseEntity.getTrophies();
+			response.level = responseEntity.getLogicExpLevel();
+			response.name = responseEntity.getName();
+
+			response.clan = PlayerClan.from(responseEntity);
+		}
+
+		session.sendMessage(response);
+
+		return true;
 	}
 
 	@Override
@@ -865,22 +877,62 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	@Override
 	public boolean handleMatchmakeCancel(MatchmakeCancel message) throws Throwable {
-		return false;
+		MatchmakeCancelOk response = new MatchmakeCancelOk();
+		MatchmakeInfo response2 = new MatchmakeInfo();
+
+		session.sendMessage(response);
+		session.sendMessage(response2);
+
+		return true;
 	}
 
 	@Override
 	public boolean handleMatchmakeStart(MatchmakeStart message) throws Throwable {
-		return false;
+		SectorState response = new SectorState();
+
+		response.homeID = entity.getId();
+		response.isTrainer = 1;
+		response.username = "Tester";
+		response.wins = 100;
+		response.looses = 100;
+		response.arena = Arena.by("Arena_T");
+		response.trophies = 3500;
+		response.gold = 10000;
+		response.gems = 10000;
+		response.levelExperience = 0;
+		response.level = 13;
+
+		session.sendMessage(response);
+		return true;
 	}
 
 	@Override
 	public boolean handleNameChange(NameChange message) throws Throwable {
-		return false;
+		NameSet command = new NameSet();
+
+		if (checkNickname(message.name)) {
+			command.name = message.name;
+		} else {
+			command.name = entity.getName();
+		}
+
+		CommandResponse response = new CommandResponse();
+		response.command = command;
+		session.sendMessage(response);
+
+		return true;
 	}
 
 	@Override
-	public boolean handleNameCheckRequest(NameCheckRequest message) throws Throwable {
-		return false;
+	public boolean handleNameCheck(NameCheck message) throws Throwable {
+		NameCheckOk response = new NameCheckOk();
+		if (checkNickname(message.name)) {
+			response.name = message.name;
+		} else {
+			response.name = entity.getName(); // Return old nickname back
+		}
+		session.sendMessage(response);
+		return true;
 	}
 
 	@Override

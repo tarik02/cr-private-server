@@ -5,7 +5,7 @@ import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
-public class ClanLeave extends ClientMessage {
+public final class ClanLeave extends ClientMessage {
 	public static final short ID = Messages.CLAN_LEAVE;
 
 	public ClanLeave() {

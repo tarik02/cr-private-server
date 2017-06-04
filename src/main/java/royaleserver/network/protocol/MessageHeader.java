@@ -1,6 +1,6 @@
 package royaleserver.network.protocol;
 
-public class MessageHeader {
+public final class MessageHeader {
 	public short id;
 	public byte[] payload;
 	public byte[] decrypted;

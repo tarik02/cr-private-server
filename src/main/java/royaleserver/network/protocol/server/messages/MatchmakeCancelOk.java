@@ -5,7 +5,7 @@ import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 
-public class MatchmakeCancelOk extends ServerMessage {
+public final class MatchmakeCancelOk extends ServerMessage {
 	public static final short ID = Messages.MATCHMAKE_CANCEL_OK;
 
 	public MatchmakeCancelOk() {

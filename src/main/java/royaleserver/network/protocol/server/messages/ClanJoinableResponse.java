@@ -6,7 +6,7 @@ import royaleserver.utils.DataStream;
 
 import royaleserver.protocol.messages.component.AllianceHeaderEntry;
 
-public class ClanJoinableResponse extends ServerMessage {
+public final class ClanJoinableResponse extends ServerMessage {
 	public static final short ID = Messages.CLAN_JOINABLE_RESPONSE;
 
 	public AllianceHeaderEntry[] alliances;

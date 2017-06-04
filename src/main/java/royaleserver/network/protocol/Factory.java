@@ -5,6 +5,7 @@ import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Factory<KeyType, TargetClass> {
@@ -14,7 +15,7 @@ public abstract class Factory<KeyType, TargetClass> {
 		TargetClass create();
 	}
 
-	private Map<KeyType, Creator<TargetClass>> creators;
+	private Map<KeyType, Creator<TargetClass>> creators = new HashMap<>();
 
 	protected Factory(String packagePrefix, Class<TargetClass> targetClass) {
 		for (Class<? extends TargetClass> clazz : new Reflections(packagePrefix).getSubTypesOf(targetClass)) {

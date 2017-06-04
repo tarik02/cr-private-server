@@ -5,7 +5,7 @@ import royaleserver.network.protocol.Commands;
 import royaleserver.network.protocol.server.ServerCommand;
 import royaleserver.utils.DataStream;
 
-public class ClanLeaveOk extends ServerCommand {
+public final class ClanLeaveOk extends ServerCommand {
 	public static final short ID = Commands.CLAN_LEAVE_OK;
 
 	public long allianceId;

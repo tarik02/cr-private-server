@@ -5,12 +5,12 @@ import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
-public final class NameCheckRequest extends ClientMessage {
-	public static final short ID = Messages.NAME_CHECK_REQUEST;
+public final class NameCheck extends ClientMessage {
+	public static final short ID = Messages.NAME_CHECK;
 
 	public String name;
 
-	public NameCheckRequest() {
+	public NameCheck() {
 		super(ID);
 	}
 
@@ -21,6 +21,6 @@ public final class NameCheckRequest extends ClientMessage {
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
-		return handler.handleNameCheckRequest(this);
+		return handler.handleNameCheck(this);
 	}
 }

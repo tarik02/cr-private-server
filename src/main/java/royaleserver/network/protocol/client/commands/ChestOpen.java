@@ -5,7 +5,7 @@ import royaleserver.network.protocol.client.ClientCommand;
 import royaleserver.network.protocol.client.ClientCommandHandler;
 import royaleserver.utils.DataStream;
 
-public class ChestOpen extends ClientCommand {
+public final class ChestOpen extends ClientCommand {
 	public static final short ID = Commands.CHEST_OPEN;
 
 	public int tickStart;

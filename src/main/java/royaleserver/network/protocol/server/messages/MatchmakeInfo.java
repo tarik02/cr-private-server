@@ -5,7 +5,7 @@ import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 
-public class MatchmakeInfo extends ServerMessage {
+public final class MatchmakeInfo extends ServerMessage {
 	public static final short ID = Messages.MATCHMAKE_INFO;
 
 	public MatchmakeInfo() {

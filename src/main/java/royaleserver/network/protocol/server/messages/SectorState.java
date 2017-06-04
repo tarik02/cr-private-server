@@ -11,7 +11,7 @@ import royaleserver.network.protocol.server.components.HomeResources;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 
-public class SectorState extends ServerMessage {
+public final class SectorState extends ServerMessage {
 	public static final short ID = Messages.SECTOR_STATE;
 
 	public long homeID;

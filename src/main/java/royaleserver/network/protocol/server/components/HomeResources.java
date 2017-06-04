@@ -5,7 +5,7 @@ import royaleserver.utils.DataStream;
 import java.util.Map;
 import java.util.HashMap;
 
-public class HomeResources extends Component {
+public final class HomeResources extends Component {
 	public static final int RESOURCE_GOLD = 1;
 	public static final int RESOURCE_CHALLENGE_WINS = 2; // challenge wins (not max!)
 	public static final int RESOURCE_CHEST_COINT = 3;

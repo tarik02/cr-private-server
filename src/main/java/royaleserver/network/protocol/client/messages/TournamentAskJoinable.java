@@ -5,7 +5,7 @@ import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
-public class TournamentAskJoinable extends ClientMessage {
+public final class TournamentAskJoinable extends ClientMessage {
 	public static final short ID = Messages.TOURNAMENT_ASK_JOINABLE;
 
 	public TournamentAskJoinable() {

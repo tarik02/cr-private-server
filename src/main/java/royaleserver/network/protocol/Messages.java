@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Messages {
+public final class Messages {
 	private Messages() {}
 
 	// Client messages
@@ -73,7 +73,7 @@ public class Messages {
 	public static final short ASK_FOR_BATTLE_REPLAY_STREAM = 14406;
 	public static final short ASK_FOR_LAST_AVATAR_TOURNAMENT_RESULTS = 14408;
 	public static final short REMOVE_AVATAR_STREAM_ENTRY = 14418;
-	public static final short NAME_CHECK_REQUEST = 14600;
+	public static final short NAME_CHECK = 14600;
 	public static final short LOGIC_DEVICE_LINK_CODE_STATUS = 16000;
 	public static final short TOURNAMENT_ASK_JOINABLE = 16103;
 	public static final short SEARCH_TOURNAMENTS = 16113;
@@ -96,7 +96,7 @@ public class Messages {
 	public static final short AVATAR_IN_GAME_STATUS_UPDATED = 20206;
 	public static final short ALLIANCE_ONLINE_STATUS_UPDATED = 20207;
 	public static final short BATTLE_RESULT = 20225;
-	public static final short AVATAR_NAME_CHECK_RESPONSE = 20300;
+	public static final short NAME_CHECK_OK = 20300;
 	public static final short OPPONENT_LEFT_MATCH_NOTIFICATION = 20801;
 	public static final short OPPONENT_REJOINS_MATCH_NOTIFICATION = 20802;
 	public static final short SECTOR_HEARBEAT = 21902;
