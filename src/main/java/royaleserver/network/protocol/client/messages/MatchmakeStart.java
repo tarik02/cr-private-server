@@ -6,7 +6,7 @@ import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
 public final class MatchmakeStart extends ClientMessage {
-    public static final short ID = Messages.MatchmakeStart;
+    public static final short ID = Messages.MATCHMAKE_START;
 
     public MatchmakeStart() {
         super(ID);

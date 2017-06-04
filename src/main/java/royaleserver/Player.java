@@ -160,7 +160,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 			ExpLevel nextLevel;
 
 			do {
-				nextLevel = ExpLevel.by(level.getName() + 1);
+				nextLevel = ExpLevel.by(level.getNumericName() + 1);
 				newExp -= level.getExpToNextLevel();
 
 				if (nextLevel == null) {
@@ -693,7 +693,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	}
 
 	@Override
-	public boolean handleStartMission(MatchmakeStart message) throws Throwable {
+	public boolean handleStartMission(MATCHMAKE_START message) throws Throwable {
 		SectorState response = new SectorState();
 
 		response.homeID = entity.getId();

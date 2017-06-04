@@ -12,11 +12,7 @@ public class Hex {
 
 	private static boolean isPrintable(char ch) {
 		int index = (int)ch;
-		if (index > 255) {
-			return false;
-		}
-
-		return ((PRINTABLE[index / 8] >> (index % 8)) & 0x01) == 1;
+		return index <= 255 && ((PRINTABLE[index / 8] >> (index % 8)) & 0x01) == 1;
 	}
 
 	public static String dump(final byte[] buffer) {

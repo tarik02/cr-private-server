@@ -34,7 +34,7 @@ public class Messages {
 	public static final short SEND_BATTLE_EVENT = 12951;
 	public static final short HOME_ASK_DATA_OWN = 14101;
 	public static final short CLIENT_COMMANDS = 14102;
-	public static final short MatchmakeStart = 14104;
+	public static final short MATCHMAKE_START = 14104;
 	public static final short HOME_LOGIC_STOPPED = 14105;
 	public static final short MATCHMAKE_CANCEL = 14107;
 	public static final short CHANGE_HOME_NAME = 14108;

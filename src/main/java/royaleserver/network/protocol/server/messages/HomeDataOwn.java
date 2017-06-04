@@ -4,6 +4,7 @@ import royaleserver.network.protocol.Messages;
 import royaleserver.protocol.messages.component.Card;
 import royaleserver.protocol.messages.component.Deck;
 import royaleserver.protocol.messages.component.HomeChest;
+import royaleserver.protocol.messages.component.PlayerClan;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 
@@ -229,7 +230,7 @@ public final class HomeDataOwn extends HomeData {
 
 		stream.putRrsInt32(7);
 
-		Map<String, Integer> mp = new HashMap<String, Integer>();
+		Map<String, Integer> mp = new HashMap<>();
 
 		mp.put("Gold", gold);
 		mp.put("ChallengesWins", 0);

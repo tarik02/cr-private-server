@@ -81,10 +81,7 @@ public class PlayerCardEntity implements java.io.Serializable {
 
 		PlayerCardEntity that = (PlayerCardEntity)o;
 
-		if (!player.equals(that.player)) {
-			return false;
-		}
-		return card.equals(that.card);
+		return player.equals(that.player) && card.equals(that.card);
 	}
 
 	@Override

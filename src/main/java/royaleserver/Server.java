@@ -34,8 +34,6 @@ public class Server {
 
 	protected final Set<Player> players = new LinkedHashSet<>();
 
-
-
 	public Server() throws ServerException {
 		this(null);
 	}
@@ -122,6 +120,9 @@ public class Server {
 		logger.info("Closing the server...");
 		networkServer.close();
 
+		logger.info("Stopping data manager...");
+		dataManager.stop();
+
 		logger.info("Server stopped!");
 	}
 
@@ -146,7 +147,7 @@ public class Server {
 	}
 
 	protected void tick() {
-		if (tickCounter % 2.5 * 60 * 20 == 0) { // Every 2.5 minutes
+		if (tickCounter % (2.5 * 60 * 20) == 0) { // Every 2.5 minutes
 			synchronized (players) {
 				for (Player player : players) {
 					player.updateOnline();

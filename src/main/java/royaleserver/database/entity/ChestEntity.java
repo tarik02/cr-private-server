@@ -1,34 +1,16 @@
 package royaleserver.database.entity;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "chests")
-@NamedQuery(name = "ChestEntity.getByName", query = "SELECT c FROM ChestEntity c WHERE c.name = :name")
-public class ChestEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+@NamedQuery(name = "ChestEntity.all", query = "SELECT chestEntity FROM ChestEntity chestEntity")
+public class ChestEntity extends LogicEntity<ChestEntity> {
+	public ChestEntity() {}
 
-	@Column(nullable = false, unique = true)
-	private String name;
-
-
-	public long getId() {
-		return id;
-	}
-
-	public ChestEntity setId(long id) {
-		this.id = id;
-		return this;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public ChestEntity setName(String name) {
-		this.name = name;
-		return this;
+	public ChestEntity(String name) {
+		super(name);
 	}
 }
