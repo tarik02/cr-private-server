@@ -1,10 +1,9 @@
-package royaleserver.protocol.messages.component;
+package royaleserver.network.protocol.server.components;
 
 import royaleserver.logic.Chest;
-import royaleserver.protocol.messages.Component;
 import royaleserver.utils.DataStream;
 
-public class HomeChest extends Component {
+public class HomeChest {
 	public static final byte STATUS_STATIC = 0;
 	public static final byte STATUS_OPENED = 1;
 	public static final byte STATUS_OPENING = 8;
@@ -16,17 +15,9 @@ public class HomeChest extends Component {
 	public int ticksToOpen; // Remains ticks to open
 
 	public HomeChest() {
-		first = false;
-		slot = 0;
-		chest = Chest.by("Silver");
-		status = STATUS_STATIC;
-		ticksToOpen = 0;
 	}
 
-	@Override
 	public void encode(DataStream stream) {
-		super.encode(stream);
-
 		stream.putRrsInt32(0);
 		stream.putRrsInt32(4);
 
@@ -49,11 +40,6 @@ public class HomeChest extends Component {
 		stream.putRrsInt32(1);
 		stream.putRrsInt32(slot);
 		stream.putRrsInt32(0);
-	}
-
-	@Override
-	public void decode(DataStream stream) {
-		super.decode(stream);
 	}
 }
 

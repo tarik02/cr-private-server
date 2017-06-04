@@ -1,10 +1,12 @@
 package royaleserver.network.protocol.server.messages;
 
-import royaleserver.protocol.messages.component.*;
-import royaleserver.utils.*;
-
 import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.server.ServerMessage;
+import royaleserver.network.protocol.server.components.HomeChest;
+import royaleserver.protocol.messages.component.Card;
+import royaleserver.protocol.messages.component.Deck;
+import royaleserver.utils.DataStream;
+import royaleserver.utils.Hex;
 
 public final class HomeDataOwn extends HomeData {
 	public static final short ID = Messages.HOME_DATA_OWN;
@@ -180,147 +182,7 @@ public final class HomeDataOwn extends HomeData {
 
 		stream.put(Hex.toByteArray("0000007f00007f00007f1411b31f901b000381030800011a270109008e0c0000fa0716079ef3b0171f0108003d0689c3b21797030005002a08a9c4d317870c00070081010700050008000109009f050006000c0686e8ab17100005000f06b9a6ab171e0003002806809bb817b60200040002aeeae51890fcd91a02aeeae51890fcd91a00028ed2f83e8fd2f83e048dd2f83e8cd2f83e8ed2f83e9cd2f83e019dd2f83e019081a1fe0b00b90101018ae6bf3301139f0301a9410e7fb012880300000000000000"));
 
-
-
-		//////// BEGIN SAME PART
-
-		/*stream.putRrsLong(homeId);
-		stream.putRrsLong(homeId);
-		stream.putRrsLong(homeId);
-
-		// name
-		if (username == null) {
-			stream.putString(""); // Username is not set
-		} else {
-			stream.putString(username);
-		}
-
-		stream.putRrsInt32(0); // changes of name. If 1 can't change
-
-		stream.putByte((byte)arena.getArena());
-		stream.putRrsInt32(trophies);
-
-		// unk
-		stream.putRrsInt32(657);
-
-		// # STATS #
-		// # Legend Trophies
-		stream.putRrsInt32(0);
-
-		// # Current trophies = Season Highest
-		stream.putRrsInt32(0);
-
-		// # UNK
-		stream.putRrsInt32(0);
-
-		// # Best season => leaderboard
-		stream.putRrsInt32(0);
-
-		// # Best season => trophies
-		stream.putRrsInt32(0);
-
-		// # UNK
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(31);
-
-		stream.putRrsInt32(0); // # Leaderboard nr  => previous season
-		stream.putRrsInt32(0); // # Trophies        => previous season
-
-		// # UNK
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(0);
-
-		stream.putRrsInt32(7);
-
-		Map<String, Integer> mp = new HashMap<>();
-
-		mp.put("Gold", gold);
-		mp.put("ChallengesWins", 0);
-		mp.put("ChestCount", 3);
-		mp.put("StarCount", 0);
-
-		mp.put("FreeGold", gold);
-		mp.put("Unk_0", 827);
-
-		mp.put("RewardGold", 0);
-		mp.put("RewardCount", 0);
-		mp.put("Unk_1", 557);
-		mp.put("CardRedBadge", 229);
-		mp.put("ChallengeCardsWon", 242);
-
-		mp.put("Unk_2", 231);
-		mp.put("Unk_3", 234);
-
-		mp.put("TournamentCardsWon", 759);
-		mp.put("Unk_4", 1307334552);
-
-		mp.put("Unk_5", 13);
-		mp.put("Unk_6", 0);
-
-		mp.put("GameMode", 72000012);
-
-		// # COUNT OF RESOURCES #
-		stream.putRrsInt32(mp.size());
-
-		Set<String> keys = mp.keySet();
-
-		for (int i = 0; i < keys.size(); i++) {
-			String key = keys.toArray()[i].toString();
-			int typeOfItem = UsefulTools.getTypeRes(key);
-
-			stream.putByte((byte)5);
-			stream.putRrsInt32(typeOfItem);
-			stream.putRrsInt32(mp.get(key));
-		}
-		// # ENDSTAT #
-
-		stream.put(Hex.toByteArray("001e3c001a3c0199e3013c0299e3013c0399e3013c040a3c050a3c060a3c0785013c0885013c0985013c0a013c0b860c3c0c860c3c0d860c3c0e013c0f013c10013c118d0b3c120b3c130b3c140b3c15b9013c16b9013c17b9013c180d3c190d3c1a0d3c1b99e3013c1c99e3013c1d99e301173c00013c01013c02013c03013c04013c05013c06013c07013c08013c09013c0a013c0e013c11013c12013c13013c15013c16013c17013c18013c19013c1a013c1b013c1c01090506b1350507"));
-
-		stream.putRrsInt32(0); // three crowns wins
-
-		stream.put(Hex.toByteArray("050885010509a2eae518050a99e301050b1f05140b0515881b051b0a88011a00001a01001a02001a03001a04001a05001a06001a07001a08001a09001a0a001a0b001a0c001a0d001a0e001a0f001a10001a11001a12001a13001a14001a15001a16001a17001a18001a19001a1a001a1b001a1c001a1d221a1e001a1f001a20001a21001a22001a23001a24001a25001a26001a27001a28001a29001a2aa2021a2b001a2d001a2e001b00001b01001b02001b03001b04001b05001b06001b07001b08001b09001b0a001c00001c01001c02001c03001c04001c05001c06001c07001c08001c09001c0a001c0b001c0c001c0d001c100900"));
-
-		stream.putRrsInt32(gems);
-		stream.putRrsInt32(gems);
-
-		stream.putRrsInt32(levelExperience);
-		stream.putRrsInt32(level);
-
-		stream.putRrsInt32(1);
-
-		if(username == null) {
-			stream.putRrsInt32(0);
-		} else if (clan == null) {
-			stream.putRrsInt32(1);
-		} else {
-			stream.putRrsInt32(9);
-			clan.encode(stream);
-		}
-
-		// Games played
-		stream.putRrsInt32(0);
-
-		// Matches played => tournament stats
-		stream.putRrsInt32(0);
-
-		// ?
-		stream.putRrsInt32(0);
-
-		// Wins
-		stream.putRrsInt32(0);
-
-		// Losses
-		stream.putRrsInt32(0);*/
-
 		super.encode(stream);
-
-		//////// END SAME PART
-
-
-
-
-
 
 		// WinStreak
 		stream.putByte((byte)127); // 127 = -64 (varint) = null

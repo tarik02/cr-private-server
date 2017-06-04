@@ -1,15 +1,14 @@
 package royaleserver.network.protocol.server.messages;
 
-import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.Messages;
+import royaleserver.network.protocol.server.ServerMessage;
+import royaleserver.network.protocol.server.components.ClanHeader;
 import royaleserver.utils.DataStream;
-
-import royaleserver.protocol.messages.component.AllianceHeaderEntry;
 
 public final class ClanJoinableResponse extends ServerMessage {
 	public static final short ID = Messages.CLAN_JOINABLE_RESPONSE;
 
-	public AllianceHeaderEntry[] alliances;
+	public ClanHeader[] clans;
 
 	public ClanJoinableResponse() {
 		super(ID);
@@ -22,10 +21,10 @@ public final class ClanJoinableResponse extends ServerMessage {
 
 	@Override
 	public void encode(DataStream stream) {
-		stream.putRrsInt32(alliances.length);
+		stream.putRrsInt32(clans.length);
 
-		for (int i = 0; i < alliances.length; ++i) {
-			alliances[i].encode(stream);
+		for (int i = 0; i < clans.length; ++i) {
+			clans[i].encode(stream);
 		}
 	}
 }

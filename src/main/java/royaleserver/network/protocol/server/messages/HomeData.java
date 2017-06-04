@@ -9,9 +9,10 @@ import royaleserver.network.protocol.server.components.PlayerClan;
 import royaleserver.utils.DataStream;
 
 public abstract class HomeData extends ServerMessage {
+	public boolean isMyProfile;
+
 	public long homeId;
 	public String name;
-	public boolean isMyProfile;
 	public int nameChangesCount;
 
 	public PlayerClan clan;
@@ -50,7 +51,7 @@ public abstract class HomeData extends ServerMessage {
 		}
 		stream.putRrsInt32(nameChangesCount);
 
-		stream.putByte((byte)arena.getArena());
+		stream.putByte((byte)(arena.getIndex() + 1));
 		stream.putRrsInt32(trophies);
 
 		stream.putRrsInt32(657); // unk_6
