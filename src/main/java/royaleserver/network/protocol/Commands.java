@@ -23,7 +23,7 @@ public final class Commands {
 	public static final short CHALLENGE_BUY = 537;
 
 
-	public static final Map<Short, String> messagesMap = createMap();
+	public static final Map<Short, String> commandsMap = createMap();
 
 	private static Map<Short, String> createMap() {
 		Map<Short, String> map = new HashMap<>();
