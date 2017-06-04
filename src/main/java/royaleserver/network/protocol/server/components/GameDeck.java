@@ -1,9 +1,8 @@
-package royaleserver.protocol.messages.component;
+package royaleserver.network.protocol.server.components;
 
-import royaleserver.protocol.messages.Component;
 import royaleserver.utils.DataStream;
 
-public class GameDeck extends Component {
+public class GameDeck {
 	public GameCard cards[];
 
 	public GameDeck() {
@@ -15,10 +14,7 @@ public class GameDeck extends Component {
 		}
 	}
 
-	@Override
 	public void encode(DataStream stream) {
-		super.encode(stream);
-
 		if (cards.length != 8) {
 			throw new RuntimeException("cards.length must be 4");
 		}
@@ -26,10 +22,5 @@ public class GameDeck extends Component {
 		for (GameCard card : cards) {
 			card.encode(stream);
 		}
-	}
-
-	@Override
-	public void decode(DataStream stream) {
-		super.decode(stream);
 	}
 }

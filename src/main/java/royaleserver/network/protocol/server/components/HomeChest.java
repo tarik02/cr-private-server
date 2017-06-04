@@ -14,9 +14,6 @@ public class HomeChest {
 	public byte status;
 	public int ticksToOpen; // Remains ticks to open
 
-	public HomeChest() {
-	}
-
 	public void encode(DataStream stream) {
 		stream.putRrsInt32(0);
 		stream.putRrsInt32(4);

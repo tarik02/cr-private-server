@@ -2,7 +2,7 @@ package royaleserver.network.protocol.server.commands;
 
 import royaleserver.network.protocol.Commands;
 import royaleserver.network.protocol.server.ServerCommand;
-import royaleserver.protocol.messages.component.ChestItem;
+import royaleserver.network.protocol.server.components.ChestItem;
 import royaleserver.utils.DataStream;
 
 public final class ChestOpenOk extends ServerCommand {

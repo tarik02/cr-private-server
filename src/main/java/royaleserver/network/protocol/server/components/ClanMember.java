@@ -13,7 +13,7 @@ public class ClanMember {
 	public int score;
 	public int donations;
 	public int unknown_8;
-	public byte currenRank;
+	public byte currentRank;
 	public byte previousRank;
 	public int clanChestCrowns;
 	public int unknown_12;
@@ -22,9 +22,6 @@ public class ClanMember {
 	public byte unknown_15;
 	public byte unknown_16;
 	public long homeID;
-
-	public ClanMember() {
-	}
 
 	public void encode(DataStream stream) {
 		stream.putBLong(avatarId);
@@ -36,7 +33,7 @@ public class ClanMember {
 		stream.putRrsInt32(score);
 		stream.putRrsInt32(donations);
 		stream.putVarInt32(unknown_8);
-		stream.putByte(currenRank);
+		stream.putByte(currentRank);
 		stream.putByte(previousRank);
 		stream.putRrsInt32(clanChestCrowns);
 		stream.putRrsInt32(unknown_12);

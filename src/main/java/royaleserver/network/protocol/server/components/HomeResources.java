@@ -1,11 +1,11 @@
 package royaleserver.network.protocol.server.components;
 
-import royaleserver.protocol.messages.Component;
 import royaleserver.utils.DataStream;
-import java.util.Map;
-import java.util.HashMap;
 
-public final class HomeResources extends Component {
+import java.util.HashMap;
+import java.util.Map;
+
+public final class HomeResources {
 	public static final int RESOURCE_GOLD = 1;
 	public static final int RESOURCE_CHALLENGE_WINS = 2; // challenge wins (not max!)
 	public static final int RESOURCE_CHEST_COINT = 3;
@@ -40,11 +40,8 @@ public final class HomeResources extends Component {
 		resources = new HashMap<>();
 	}
 
-	@Override
 	public void encode(DataStream stream) {
-		super.encode(stream);
-
-		stream.putRrsInt32(resources.size());
+				stream.putRrsInt32(resources.size());
 		for (Map.Entry<Integer, Integer> entry : resources.entrySet()) {
 			stream.putByte((byte)5);
 			stream.putRrsInt32(entry.getKey());

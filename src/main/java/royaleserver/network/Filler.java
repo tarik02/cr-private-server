@@ -4,16 +4,11 @@ import royaleserver.database.entity.*;
 import royaleserver.logic.ClanRole;
 import royaleserver.network.protocol.server.commands.ClanJoinOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
-import royaleserver.network.protocol.server.components.ClanHeader;
-import royaleserver.network.protocol.server.components.ClanMember;
-import royaleserver.network.protocol.server.components.HomeChest;
-import royaleserver.network.protocol.server.components.PlayerClan;
+import royaleserver.network.protocol.server.components.*;
 import royaleserver.network.protocol.server.messages.ClanData;
 import royaleserver.network.protocol.server.messages.HomeData;
 import royaleserver.network.protocol.server.messages.HomeDataOwn;
 import royaleserver.network.protocol.server.messages.HomeDataVisited;
-import royaleserver.protocol.messages.component.Card;
-import royaleserver.protocol.messages.component.Deck;
 
 public final class Filler {
 	private Filler() {}
@@ -99,7 +94,7 @@ public final class Filler {
 		message.score = entity.getTrophies();
 		message.donations = 0; // TODO:
 		message.unknown_8 = 0;
-		message.currenRank = 4; // ?
+		message.currentRank = 4; // ?
 		message.previousRank = 4; // ?
 		message.clanChestCrowns = 0;
 		message.unknown_12 = 0;
@@ -205,8 +200,16 @@ public final class Filler {
 		}
 
 		message.decks = new Deck[3]; // TODO:
-		for (i = 0; i < 3; ++i) {
-			message.decks[i] = new Deck();
+		for (i = 0; i < message.decks.length; ++i) {
+			Deck deck = new Deck();
+			deck.cards = new Card[8];
+			for (int j = 0; j < deck.cards.length; ++j) {
+				Card card = new Card();
+				card.card = royaleserver.logic.Card.by("Knight");
+				deck.cards[j] = card;
+			}
+
+			message.decks[i] = deck;
 		}
 
 		message.offers = new String[]{}; // TODO:
@@ -236,6 +239,7 @@ public final class Filler {
 
 	public static void fill(HomeDataVisited message, PlayerEntity entity, boolean isMyProfile) {
 		fill((HomeData)message, entity);
+		message.isMyProfile = isMyProfile;
 
 		message.place = 0; // TODO:
 

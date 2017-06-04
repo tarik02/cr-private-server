@@ -2,9 +2,9 @@ package royaleserver.network.protocol.server.messages;
 
 import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.server.ServerMessage;
+import royaleserver.network.protocol.server.components.Card;
+import royaleserver.network.protocol.server.components.Deck;
 import royaleserver.network.protocol.server.components.HomeChest;
-import royaleserver.protocol.messages.component.Card;
-import royaleserver.protocol.messages.component.Deck;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 

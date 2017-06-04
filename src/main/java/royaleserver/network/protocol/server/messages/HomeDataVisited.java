@@ -2,7 +2,7 @@ package royaleserver.network.protocol.server.messages;
 
 import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.server.ServerMessage;
-import royaleserver.protocol.messages.component.Deck;
+import royaleserver.network.protocol.server.components.Deck;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
 

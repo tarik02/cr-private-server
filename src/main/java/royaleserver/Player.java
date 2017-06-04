@@ -18,9 +18,9 @@ import royaleserver.network.protocol.server.commands.ChestOpenOk;
 import royaleserver.network.protocol.server.commands.ClanJoinOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.commands.NameSet;
+import royaleserver.network.protocol.server.components.ChestItem;
 import royaleserver.network.protocol.server.components.ClanHeader;
 import royaleserver.network.protocol.server.messages.*;
-import royaleserver.protocol.messages.component.ChestItem;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
@@ -173,7 +173,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		for (Map.Entry<royaleserver.logic.Card, Integer> card : cards.entrySet()) {
 			ChestItem chestItem = new ChestItem();
 			chestItem.card = card.getKey().getIndex();
-			chestItem.quantity = card.getValue();
+			chestItem.count = card.getValue();
 
 			command.chestItems[i++] = chestItem;
 		}
