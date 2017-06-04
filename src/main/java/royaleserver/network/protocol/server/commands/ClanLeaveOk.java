@@ -15,6 +15,11 @@ public final class ClanLeaveOk extends ServerCommand {
 	}
 
 	@Override
+	public ServerCommand create() {
+		return new ClanLeaveOk();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putBLong(allianceId);
 

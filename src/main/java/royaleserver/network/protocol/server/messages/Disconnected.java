@@ -16,6 +16,11 @@ public final class Disconnected extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new Disconnected();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putRrsInt32(unknown_0);
 	}

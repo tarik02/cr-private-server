@@ -8,16 +8,26 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class Factory<KeyType, TargetClass> {
+public abstract class Factory<KeyType, TargetClass extends FactoryTarget> {
 	private static final Logger logger = LogManager.getLogger(Factory.class);
 
-	protected interface Creator<TargetClass> {
-		TargetClass create();
-	}
+	private final String packagePrefix;
+	private final Class<TargetClass> targetClass;
 
-	private Map<KeyType, Creator<TargetClass>> creators = new HashMap<>();
+	private final Map<KeyType, FactoryTarget<TargetClass>> creators = new HashMap<>();
+	private boolean initialized = false;
 
 	protected Factory(String packagePrefix, Class<TargetClass> targetClass) {
+		this.packagePrefix = packagePrefix;
+		this.targetClass = targetClass;
+	}
+
+	public final void init() {
+		if (initialized) {
+			return;
+		}
+		initialized = true;
+
 		for (Class<? extends TargetClass> clazz : new Reflections(packagePrefix).getSubTypesOf(targetClass)) {
 			int modifiers = clazz.getModifiers();
 
@@ -25,20 +35,19 @@ public abstract class Factory<KeyType, TargetClass> {
 				continue;
 			}
 
-			if (!Modifier.isFinal(modifiers)) {
-				logger.warn("The class %s should be final.", clazz.getName());
-			}
-
 			try {
 				KeyType key = (KeyType)clazz.getDeclaredField("ID").get(null);
-				Creator<TargetClass> value = () -> {
-					try {
-						return clazz.newInstance();
-					} catch (InstantiationException | IllegalAccessException e) {
-						logger.error("Cannot create object of %s.", e, clazz.getName());
-						return null;
-					}
-				};
+				FactoryTarget<TargetClass> value = null;
+				try {
+					value = clazz.newInstance();
+				} catch (InstantiationException | IllegalAccessException e) {
+					logger.error("Cannot create object of %s.", e, clazz.getName());
+					continue;
+				}
+
+				if (!clazz.equals(value.create().getClass())) {
+					logger.fatal("Class %s has bad FactoryTarget.create.", clazz.getName());
+				}
 
 				creators.put(key, value);
 			} catch (IllegalAccessException | NoSuchFieldException e) {
@@ -48,7 +57,7 @@ public abstract class Factory<KeyType, TargetClass> {
 	}
 
 	public final TargetClass create(KeyType key) {
-		Creator<TargetClass> creator = creators.getOrDefault(key, null);
+		FactoryTarget<TargetClass> creator = creators.getOrDefault(key, null);
 		return creator == null ? null : creator.create();
 	}
 }

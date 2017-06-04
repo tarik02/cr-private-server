@@ -21,6 +21,16 @@ public final class ChestOpen extends ClientCommand {
 	}
 
 	@Override
+	public ClientCommand create() {
+		return new ChestOpen();
+	}
+
+	@Override
+	public boolean handle(ClientCommandHandler handler) throws Throwable {
+		return handler.handleChestOpen(this);
+	}
+
+	@Override
 	public void decode(DataStream stream) {
 		tickStart = stream.getRrsInt32();
 		tickEnd = stream.getRrsInt32();
@@ -29,10 +39,5 @@ public final class ChestOpen extends ClientCommand {
 		unknown_1 = stream.getRrsInt32();
 
 		slot = stream.getRrsInt32();
-	}
-
-	@Override
-	public boolean handle(ClientCommandHandler handler) throws Throwable {
-		return handler.handleChestOpen(this);
 	}
 }

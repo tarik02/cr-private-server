@@ -13,12 +13,16 @@ public final class MatchmakeCancel extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
-
+	public ClientMessage create() {
+		return new MatchmakeCancel();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleMatchmakeCancel(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }

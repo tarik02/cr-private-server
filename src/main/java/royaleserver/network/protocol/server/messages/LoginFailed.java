@@ -25,6 +25,11 @@ public final class LoginFailed extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new LoginFailed();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putRrsInt32(errorCode);
 		stream.putString(resourceFingerprintData);

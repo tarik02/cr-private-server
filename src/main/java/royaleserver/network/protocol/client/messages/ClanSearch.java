@@ -24,6 +24,16 @@ public final class ClanSearch extends ClientMessage {
 	}
 
 	@Override
+	public ClientMessage create() {
+		return new ClanSearch();
+	}
+
+	@Override
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleClanSearch(this);
+	}
+
+	@Override
 	public void decode(DataStream stream) {
 		searchString = stream.getString();
 		desiredRegion = stream.getSCID();
@@ -33,10 +43,5 @@ public final class ClanSearch extends ClientMessage {
 		findOnlyJoinableClans = stream.getBoolean();
 		unknown_6 = stream.getBInt();
 		unknown_7 = stream.getBInt();
-	}
-
-	@Override
-	public boolean handle(ClientMessageHandler handler) throws Throwable {
-		return handler.handleClanSearch(this);
 	}
 }

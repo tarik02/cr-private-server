@@ -6,18 +6,23 @@ import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
 public final class MatchmakeStart extends ClientMessage {
-    public static final short ID = Messages.MATCHMAKE_START;
+	public static final short ID = Messages.MATCHMAKE_START;
 
-    public MatchmakeStart() {
-        super(ID);
-    }
+	public MatchmakeStart() {
+		super(ID);
+	}
 
-    @Override
-    public void decode(DataStream stream) {
-    }
+	@Override
+	public ClientMessage create() {
+		return new MatchmakeStart();
+	}
 
-    @Override
-    public boolean handle(ClientMessageHandler handler) throws Throwable {
-        return handler.handleMatchmakeStart(this);
-    }
+	@Override
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleMatchmakeStart(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
+	}
 }

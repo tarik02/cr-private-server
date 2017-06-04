@@ -1,9 +1,10 @@
 package royaleserver.network.protocol.client;
 
-import royaleserver.network.protocol.Command;
+import royaleserver.network.protocol.*;
+
 import royaleserver.utils.DataStream;
 
-public abstract class ClientCommand extends Command {
+public abstract class ClientCommand extends Command implements FactoryTarget<ClientCommand> {
 	public ClientCommand(short id) {
 		super(id);
 	}

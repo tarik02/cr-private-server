@@ -12,6 +12,11 @@ public final class Pong extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new Pong();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 	}
 }

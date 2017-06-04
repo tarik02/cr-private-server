@@ -6,21 +6,26 @@ import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
 public final class NameChange extends ClientMessage {
-    public static final short ID = Messages.NAME_CHANGE;
-    
-    public String name;
+	public static final short ID = Messages.NAME_CHANGE;
 
-    public NameChange() {
-        super(ID);
-    }
+	public String name;
 
-    @Override
-    public void decode(DataStream stream) {
-        name = stream.getString();
-    }
+	public NameChange() {
+		super(ID);
+	}
 
-    @Override
-    public boolean handle(ClientMessageHandler handler) throws Throwable {
-        return handler.handleNameChange(this);
-    }
+	@Override
+	public ClientMessage create() {
+		return new NameChange();
+	}
+
+	@Override
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleNameChange(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
+		name = stream.getString();
+	}
 }

@@ -13,11 +13,16 @@ public final class ChallengeBuy extends ClientCommand {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
+	public ClientCommand create() {
+		return new ChallengeBuy();
 	}
 
 	@Override
 	public boolean handle(ClientCommandHandler handler) throws Throwable {
 		return handler.handleChallengeBuy(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }

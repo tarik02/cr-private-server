@@ -8,35 +8,40 @@ import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
 public final class ClientCommands extends ClientMessage {
-    public static final short ID = Messages.CLIENT_COMMANDS;
+	public static final short ID = Messages.CLIENT_COMMANDS;
 
-    public int tick;
-    public int checksum;
-    public ClientCommand[] commands;
+	public int tick;
+	public int checksum;
+	public ClientCommand[] commands;
 
-    public ClientCommands() {
-        super(ID);
-    }
+	public ClientCommands() {
+		super(ID);
+	}
 
-    @Override
-    public void decode(DataStream stream) {
-        tick = stream.getRrsInt32();
-        checksum = stream.getRrsInt32();
+	@Override
+	public ClientMessage create() {
+		return new ClientCommands();
+	}
 
-        commands = new ClientCommand[stream.getRrsInt32()];
-        for (int i = 0; i < commands.length; i++) {
-        	short commandId = (short)stream.getRrsInt32();
-        	commands[i] = ClientCommandFactory.instance.create(commandId);
-        	if (commands[i] == null) {
-        		break;
-	        }
+	@Override
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleClientCommands(this);
+	}
 
-	        commands[i].decode(stream);
-        }
-    }
+	@Override
+	public void decode(DataStream stream) {
+		tick = stream.getRrsInt32();
+		checksum = stream.getRrsInt32();
 
-    @Override
-    public boolean handle(ClientMessageHandler handler) throws Throwable {
-        return handler.handleClientCommands(this);
-    }
+		commands = new ClientCommand[stream.getRrsInt32()];
+		for (int i = 0; i < commands.length; i++) {
+			short commandId = (short)stream.getRrsInt32();
+			commands[i] = ClientCommandFactory.instance.create(commandId);
+			if (commands[i] == null) {
+				break;
+			}
+
+			commands[i].decode(stream);
+		}
+	}
 }

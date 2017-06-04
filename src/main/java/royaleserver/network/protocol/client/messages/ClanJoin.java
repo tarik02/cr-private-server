@@ -19,16 +19,21 @@ public final class ClanJoin extends ClientMessage {
 	}
 
 	@Override
+	public ClientMessage create() {
+		return new ClanJoin();
+	}
+
+	@Override
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleClanJoin(this);
+	}
+
+	@Override
 	public void decode(DataStream stream) {
 		allianceId = stream.getBLong();
 		unknown_1 = stream.getByte();
 		unknown_2 = stream.getByte();
 		unknown_3 = stream.getByte();
 		unknown_4 = stream.getByte();
-	}
-
-	@Override
-	public boolean handle(ClientMessageHandler handler) throws Throwable {
-		return handler.handleClanJoin(this);
 	}
 }

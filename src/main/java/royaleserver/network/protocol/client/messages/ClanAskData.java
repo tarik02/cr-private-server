@@ -15,12 +15,17 @@ public final class ClanAskData extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
-		clanId = stream.getBLong();
+	public ClientMessage create() {
+		return new ClanAskData();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleClanAskData(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
+		clanId = stream.getBLong();
 	}
 }

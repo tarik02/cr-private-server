@@ -13,11 +13,16 @@ public final class ClanLeave extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
+	public ClientMessage create() {
+		return new ClanLeave();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleClanLeave(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }

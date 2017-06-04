@@ -20,6 +20,16 @@ public final class DeckChangeCard extends ClientCommand {
 	}
 
 	@Override
+	public ClientCommand create() {
+		return new DeckChangeCard();
+	}
+
+	@Override
+	public boolean handle(ClientCommandHandler handler) throws Throwable {
+		return handler.handleDeckChangeCard(this);
+	}
+
+	@Override
 	public void decode(DataStream stream) {
 		tickStart = stream.getRrsInt32();
 		tickEnd = stream.getRrsInt32();
@@ -27,10 +37,5 @@ public final class DeckChangeCard extends ClientCommand {
 		accountId = stream.getRrsLong();
 		cardIndex = stream.getVarInt32();
 		slot = stream.getVarInt32();
-	}
-
-	@Override
-	public boolean handle(ClientCommandHandler handler) throws Throwable {
-		return handler.handleDeckChangeCard(this);
 	}
 }

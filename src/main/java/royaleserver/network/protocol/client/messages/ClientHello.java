@@ -22,6 +22,16 @@ public final class ClientHello extends ClientMessage {
 	}
 
 	@Override
+	public ClientMessage create() {
+		return new ClientHello();
+	}
+
+	@Override
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleClientHello(this);
+	}
+
+	@Override
 	public void decode(DataStream stream) {
 		protocol = stream.getBInt();
 		keyVersion = stream.getBInt();
@@ -31,10 +41,5 @@ public final class ClientHello extends ClientMessage {
 		contentHash = stream.getString();
 		deviceType = stream.getBInt();
 		appStore = stream.getBInt();
-	}
-
-	@Override
-	public boolean handle(ClientMessageHandler handler) throws Throwable {
-		return handler.handleClientHello(this);
 	}
 }

@@ -36,6 +36,11 @@ public final class LoginOk extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new LoginOk();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putBLong(userId);
 		stream.putBLong(homeId);

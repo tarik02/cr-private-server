@@ -13,7 +13,12 @@ public final class MatchmakeCancelOk extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new MatchmakeCancelOk();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
-		stream.put(Hex.toByteArray("00"));
+		stream.putByte((byte)0x00);
 	}
 }

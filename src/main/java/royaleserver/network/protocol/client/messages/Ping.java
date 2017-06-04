@@ -13,12 +13,16 @@ public final class Ping extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
-
+	public ClientMessage create() {
+		return new Ping();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handlePing(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }

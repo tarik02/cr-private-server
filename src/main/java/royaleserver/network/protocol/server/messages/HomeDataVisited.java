@@ -1,9 +1,10 @@
 package royaleserver.network.protocol.server.messages;
 
+import royaleserver.utils.*;
+
 import royaleserver.network.protocol.Messages;
+import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.protocol.messages.component.Deck;
-import royaleserver.utils.DataStream;
-import royaleserver.utils.Hex;
 
 public final class HomeDataVisited extends HomeData {
 	public static final short ID = Messages.HOME_DATA_VISITED;
@@ -13,6 +14,11 @@ public final class HomeDataVisited extends HomeData {
 
 	public HomeDataVisited() {
 		super(ID);
+	}
+
+	@Override
+	public ServerMessage create() {
+		return new HomeDataVisited();
 	}
 
 	@Override

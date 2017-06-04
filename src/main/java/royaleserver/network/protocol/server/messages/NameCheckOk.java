@@ -14,6 +14,11 @@ public final class NameCheckOk extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new NameCheckOk();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putString(name);
 	}

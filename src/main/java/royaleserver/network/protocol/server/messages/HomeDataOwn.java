@@ -1,11 +1,10 @@
 package royaleserver.network.protocol.server.messages;
 
+import royaleserver.protocol.messages.component.*;
+import royaleserver.utils.*;
+
 import royaleserver.network.protocol.Messages;
-import royaleserver.protocol.messages.component.Card;
-import royaleserver.protocol.messages.component.Deck;
-import royaleserver.protocol.messages.component.HomeChest;
-import royaleserver.utils.DataStream;
-import royaleserver.utils.Hex;
+import royaleserver.network.protocol.server.ServerMessage;
 
 public final class HomeDataOwn extends HomeData {
 	public static final short ID = Messages.HOME_DATA_OWN;
@@ -26,6 +25,11 @@ public final class HomeDataOwn extends HomeData {
 
 	public HomeDataOwn() {
 		super(ID);
+	}
+
+	@Override
+	public ServerMessage create() {
+		return new HomeDataOwn();
 	}
 
 	@Override

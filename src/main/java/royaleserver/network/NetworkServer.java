@@ -1,37 +1,26 @@
 package royaleserver.network;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import java.nio.*;
+import org.jboss.netty.buffer.*;
 import org.jboss.netty.channel.*;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
-import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
-import org.jboss.netty.handler.codec.replay.VoidEnum;
-import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
-import royaleserver.Player;
-import royaleserver.Server;
-import royaleserver.crypto.ClientCrypto;
-import royaleserver.crypto.ServerCrypto;
-import royaleserver.database.entity.PlayerEntity;
-import royaleserver.database.service.PlayerService;
-import royaleserver.network.protocol.MessageHeader;
-import royaleserver.network.protocol.client.ClientMessage;
-import royaleserver.network.protocol.client.ClientMessageFactory;
-import royaleserver.network.protocol.server.ServerMessage;
-import royaleserver.network.protocol.Messages;
-import royaleserver.network.protocol.Message;
-import royaleserver.network.protocol.client.messages.ClientHello;
-import royaleserver.network.protocol.client.messages.Login;
-import royaleserver.network.protocol.server.messages.LoginFailed;
-import royaleserver.network.protocol.server.messages.LoginOk;
-import royaleserver.network.protocol.server.messages.ServerHello;
+import org.jboss.netty.handler.codec.replay.*;
+import royaleserver.*;
+import royaleserver.crypto.*;
+import royaleserver.network.protocol.*;
+import royaleserver.network.protocol.client.*;
+import royaleserver.network.protocol.client.messages.*;
+import royaleserver.network.protocol.server.*;
+import royaleserver.network.protocol.server.messages.*;
 import royaleserver.utils.*;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.concurrent.TimeUnit;
+import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
+import royaleserver.database.entity.PlayerEntity;
+import royaleserver.database.service.PlayerService;
 
 public final class NetworkServer {
 	private static final Logger logger = LogManager.getLogger(NetworkServer.class);
@@ -46,6 +35,11 @@ public final class NetworkServer {
 
 	public NetworkServer(Server server) {
 		this.server = server;
+
+		ClientCommandFactory.instance.init();
+		ClientMessageFactory.instance.init();
+		ServerCommandFactory.instance.init();
+		ServerMessageFactory.instance.init();
 	}
 
 	public void start() {

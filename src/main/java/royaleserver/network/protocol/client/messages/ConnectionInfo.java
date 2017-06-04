@@ -16,13 +16,18 @@ public final class ConnectionInfo extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
-		ping = stream.getRrsInt32();
-		connectionInterface = stream.getString();
+	public ClientMessage create() {
+		return new ConnectionInfo();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleConnectionInfo(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
+		ping = stream.getRrsInt32();
+		connectionInterface = stream.getString();
 	}
 }

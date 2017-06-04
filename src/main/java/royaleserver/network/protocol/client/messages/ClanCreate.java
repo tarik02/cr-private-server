@@ -25,6 +25,16 @@ public final class ClanCreate extends ClientMessage {
 	}
 
 	@Override
+	public ClientMessage create() {
+		return new ClanCreate();
+	}
+
+	@Override
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleClanCreate(this);
+	}
+
+	@Override
 	public void decode(DataStream stream) {
 		name = stream.getString();
 		description = stream.getString();
@@ -32,10 +42,5 @@ public final class ClanCreate extends ClientMessage {
 		type = stream.getRrsInt32();
 		minTrophies = stream.getRrsInt32();
 		location = stream.getSCID();
-	}
-
-	@Override
-	public boolean handle(ClientMessageHandler handler) throws Throwable {
-		return handler.handleClanCreate(this);
 	}
 }

@@ -15,12 +15,17 @@ public final class HomeAskData extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
-		accountId = stream.getBLong();
+	public ClientMessage create() {
+		return new HomeAskData();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleHomeAskData(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
+		accountId = stream.getBLong();
 	}
 }

@@ -41,6 +41,16 @@ public final class Login extends ClientMessage {
 	}
 
 	@Override
+	public ClientMessage create() {
+		return new Login();
+	}
+
+	@Override
+	public boolean handle(ClientMessageHandler handler) throws Throwable {
+		return handler.handleLogin(this);
+	}
+
+	@Override
 	public void decode(DataStream stream) {
 		accountId = stream.getBLong();
 		passToken = stream.getString();
@@ -69,10 +79,5 @@ public final class Login extends ClientMessage {
 		unknown_24 = stream.getString();
 		unknown_25 = stream.getString();
 		unknown_26 = stream.getByte();
-	}
-
-	@Override
-	public boolean handle(ClientMessageHandler handler) throws Throwable {
-		return handler.handleLogin(this);
 	}
 }

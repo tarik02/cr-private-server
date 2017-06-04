@@ -29,6 +29,11 @@ public final class ClanData extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new ClanData();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		header.encode(stream);
 		stream.putString(description);

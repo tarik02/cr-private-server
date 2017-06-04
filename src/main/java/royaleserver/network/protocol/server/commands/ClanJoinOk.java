@@ -20,6 +20,11 @@ public final class ClanJoinOk extends ServerCommand {
 	}
 
 	@Override
+	public ServerCommand create() {
+		return new ClanJoinOk();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putBLong(allianceId);
 		stream.putString(name);

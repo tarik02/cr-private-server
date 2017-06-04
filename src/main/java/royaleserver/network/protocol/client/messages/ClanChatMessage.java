@@ -15,12 +15,17 @@ public final class ClanChatMessage extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
-		message = stream.getString();
+	public ClientMessage create() {
+		return new ClanChatMessage();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleClanChatMessage(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
+		message = stream.getString();
 	}
 }

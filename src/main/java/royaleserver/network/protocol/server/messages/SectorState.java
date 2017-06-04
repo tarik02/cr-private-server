@@ -82,6 +82,11 @@ public final class SectorState extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new SectorState();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putByte((byte)0);
 		stream.putByte((byte)33);

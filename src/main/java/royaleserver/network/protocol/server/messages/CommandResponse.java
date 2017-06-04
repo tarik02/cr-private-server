@@ -17,6 +17,11 @@ public final class CommandResponse extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new CommandResponse();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putRrsInt32(command.id);
 		command.encode(stream);

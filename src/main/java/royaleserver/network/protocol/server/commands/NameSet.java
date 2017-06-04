@@ -14,6 +14,11 @@ public final class NameSet extends ServerCommand {
 	}
 
 	@Override
+	public ServerCommand create() {
+		return new NameSet();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putString(name);
 

@@ -14,6 +14,11 @@ public final class ServerHello extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new ServerHello();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putByteSet(sessionKey);
 	}

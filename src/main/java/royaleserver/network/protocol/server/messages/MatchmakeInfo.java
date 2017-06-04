@@ -13,7 +13,12 @@ public final class MatchmakeInfo extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new MatchmakeInfo();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
-		stream.put(Hex.toByteArray("00 00 00 00"));
+		stream.putBInt(0);
 	}
 }

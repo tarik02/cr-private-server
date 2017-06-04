@@ -15,12 +15,17 @@ public final class NameCheck extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
-		name = stream.getString();
+	public ClientMessage create() {
+		return new NameCheck();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleNameCheck(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
+		name = stream.getString();
 	}
 }

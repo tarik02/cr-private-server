@@ -13,11 +13,16 @@ public final class ClanAskJoinable extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
+	public ClientMessage create() {
+		return new ClanAskJoinable();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleClanAskJoinable(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }

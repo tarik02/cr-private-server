@@ -13,10 +13,16 @@ public final class InboxAsk extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
+	public ClientMessage create() {
+		return new InboxAsk();
 	}
 
+	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleInboxAsk(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }

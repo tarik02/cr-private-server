@@ -13,10 +13,16 @@ public final class TournamentAskJoinable extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
+	public ClientMessage create() {
+		return new TournamentAskJoinable();
 	}
 
+	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleTournamentAskJoinable(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }

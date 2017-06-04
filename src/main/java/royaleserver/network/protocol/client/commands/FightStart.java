@@ -13,11 +13,16 @@ public final class FightStart extends ClientCommand {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
+	public ClientCommand create() {
+		return new FightStart();
 	}
 
 	@Override
 	public boolean handle(ClientCommandHandler handler) throws Throwable {
 		return handler.handleFightStart(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }

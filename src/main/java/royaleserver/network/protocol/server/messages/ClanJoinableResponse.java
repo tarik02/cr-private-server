@@ -16,6 +16,11 @@ public final class ClanJoinableResponse extends ServerMessage {
 	}
 
 	@Override
+	public ServerMessage create() {
+		return new ClanJoinableResponse();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putRrsInt32(alliances.length);
 

@@ -17,6 +17,11 @@ public final class ChestOpenOk extends ServerCommand {
 	}
 
 	@Override
+	public ServerCommand create() {
+		return new ChestOpenOk();
+	}
+
+	@Override
 	public void encode(DataStream stream) {
 		stream.putByte((byte)1);
 		stream.putByte((byte)0);

@@ -13,11 +13,16 @@ public final class HomeAskDataOwn extends ClientMessage {
 	}
 
 	@Override
-	public void decode(DataStream stream) {
+	public ClientMessage create() {
+		return new HomeAskDataOwn();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
 		return handler.handleHomeAskDataOwn(this);
+	}
+
+	@Override
+	public void decode(DataStream stream) {
 	}
 }
