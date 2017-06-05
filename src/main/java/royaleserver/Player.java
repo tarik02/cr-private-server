@@ -301,6 +301,11 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		return true;
 	}
 
+	public String getReadableIdentifier() {
+		return entity.getName() + "#" + entity.getId();
+	}
+
+
 	// Messages
 
 	@Override

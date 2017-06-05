@@ -7,7 +7,8 @@ import royaleserver.config.Config;
 import royaleserver.database.DataManager;
 import royaleserver.logic.*;
 import royaleserver.network.NetworkServer;
-import royaleserver.utils.*;
+import royaleserver.utils.LogManager;
+import royaleserver.utils.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -150,7 +151,11 @@ public class Server {
 		if (tickCounter % (2.5 * 60 * 20) == 0) { // Every 2.5 minutes
 			synchronized (players) {
 				for (Player player : players) {
-					player.updateOnline();
+					try {
+						player.updateOnline();
+					} catch (RuntimeException e) {
+						logger.error("Error while saving player %s.", e, player.getReadableIdentifier());
+					}
 				}
 			}
 		}
