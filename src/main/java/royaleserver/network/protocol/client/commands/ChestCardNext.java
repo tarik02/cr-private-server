@@ -18,7 +18,7 @@ public final class ChestCardNext extends ClientCommand {
 	}
 
 	@Override
-	public boolean handle(ClientCommandHandler handler) {
+	public boolean handle(ClientCommandHandler handler) throws Throwable {
 		return handler.handleChestCardNext(this);
 	}
 
