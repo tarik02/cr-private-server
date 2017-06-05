@@ -19,7 +19,7 @@ public class HomeChest {
 		stream.putRrsInt32(4);
 
 		if (first) {
-			stream.putRrsInt32(1);
+			stream.putRrsInt32(1 + slot);
 		}
 
 		stream.putSCID(chest.getScid());

@@ -14,8 +14,8 @@ public class AssetEntity {
 	@Column(length = 128, unique = true, nullable = false)
 	private String name;
 
+	@Column(nullable = false, columnDefinition = "TIMESTAMP")
 	@Temporal(value = TemporalType.TIMESTAMP)
-	@Column(nullable = false)
 	private Date lastUpdated;
 
 	public long getId() {

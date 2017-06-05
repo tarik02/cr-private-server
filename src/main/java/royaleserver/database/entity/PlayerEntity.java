@@ -31,13 +31,13 @@ public class PlayerEntity implements Identifiable<Long> {
 	@Column(length = 32, nullable = true)
 	private String name;
 
+	@Column(nullable = false, columnDefinition = "TIMESTAMP")
 	@Temporal(value = TemporalType.TIMESTAMP)
-	@Column(nullable = false)
-	private Date registeredDate;
+	private Date registeredDate = new Date();
 
+	@Column(nullable = false, columnDefinition = "TIMESTAMP")
 	@Temporal(value = TemporalType.TIMESTAMP)
-	@Column(nullable = false)
-	private Date lastOnlineStatusUpdate;
+	private Date lastOnlineStatusUpdate = new Date();
 
 	@Column(nullable = false)
 	private boolean online = false;

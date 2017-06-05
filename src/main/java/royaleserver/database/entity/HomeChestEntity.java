@@ -26,13 +26,13 @@ public class HomeChestEntity implements java.io.Serializable {
 	@Column(nullable = false)
 	private HomeChestStatus status;
 
-	@Column(nullable = true)
+	@Column(nullable = true, columnDefinition = "TIMESTAMP")
 	@Temporal(value = TemporalType.TIMESTAMP)
-	private Date openStart;
+	private Date openStart = null;
 
-	@Column(nullable = true)
+	@Column(nullable = true, columnDefinition = "TIMESTAMP")
 	@Temporal(value = TemporalType.TIMESTAMP)
-	private Date openEnd;
+	private Date openEnd = null;
 
 
 	public PlayerEntity getPlayer() {
