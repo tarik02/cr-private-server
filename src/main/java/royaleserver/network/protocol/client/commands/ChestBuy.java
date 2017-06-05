@@ -38,6 +38,6 @@ public final class ChestBuy extends ClientCommand {
 		accountId = stream.getRrsLong();
 		unknown_3 = stream.getByte();
 
-		chest = chest.by(stream.getRrsInt32());
+		chest = Chest.by(stream.getRrsInt32());
 	}
 }
