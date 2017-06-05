@@ -1,7 +1,7 @@
 package royaleserver.crypto;
 
-import royaleserver.protocol.Info;
-import royaleserver.protocol.MessageHeader;
+import royaleserver.network.protocol.Messages;
+import royaleserver.network.protocol.MessageHeader;
 import royaleserver.utils.Hex;
 
 import java.io.ByteArrayOutputStream;
@@ -24,10 +24,10 @@ public class ServerCrypto extends Crypto {
 	@Override
 	public void decryptPacket(MessageHeader message) {
 		switch (message.id) {
-		case Info.CLIENT_HELLO:
+		case Messages.CLIENT_HELLO:
 			message.decrypted = message.payload;
 			break;
-		case Info.LOGIN:
+		case Messages.LOGIN:
 			clientKey = Arrays.copyOfRange(message.payload, 0, 32);
 			byte[] cipherText = Arrays.copyOfRange(message.payload, 32, message.payload.length);
 
@@ -57,11 +57,11 @@ public class ServerCrypto extends Crypto {
 	@Override
 	public void encryptPacket(MessageHeader message) {
 		switch (message.id) {
-		case Info.SERVER_HELLO:
-		case Info.LOGIN_FAILED:
+		case Messages.SERVER_HELLO:
+		case Messages.LOGIN_FAILED:
 			message.payload = message.decrypted;
 			break;
-		case Info.LOGIN_OK:
+		case Messages.LOGIN_OK:
 			Nonce nonce = new Nonce(clientKey, serverKey, decryptNonce.getBytes());
 			ByteArrayOutputStream toEncrypt = new ByteArrayOutputStream();
 

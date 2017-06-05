@@ -1,6 +1,6 @@
 package royaleserver.crypto;
 
-import royaleserver.protocol.MessageHeader;
+import royaleserver.network.protocol.MessageHeader;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 

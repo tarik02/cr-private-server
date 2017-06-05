@@ -35,9 +35,11 @@ public class Main {
 				configFile = null;
 			}
 
-			new Server();
+			new Server().stop();
 		} catch (Throwable e) {
 			logger.fatal(e.getMessage(), e);
 		}
+
+		LogManager.shutdown();
 	}
 }

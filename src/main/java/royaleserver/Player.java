@@ -1,107 +1,65 @@
 package royaleserver;
 
-import royaleserver.database.entity.*;
+import royaleserver.database.entity.ClanEntity;
+import royaleserver.database.entity.HomeChestEntity;
+import royaleserver.database.entity.HomeChestStatus;
+import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.*;
-import royaleserver.protocol.Session;
-import royaleserver.protocol.messages.Command;
-import royaleserver.protocol.messages.CommandHandler;
-import royaleserver.protocol.messages.MessageHandler;
-import royaleserver.protocol.messages.client.*;
-import royaleserver.protocol.messages.command.*;
-import royaleserver.protocol.messages.command.stream.AllianceEventStreamEntry;
-import royaleserver.protocol.messages.component.*;
-import royaleserver.protocol.messages.component.Card;
-import royaleserver.protocol.messages.server.*;
+import royaleserver.network.protocol.client.commands.*;
+import royaleserver.network.protocol.server.commands.NameSet;
+import royaleserver.network.protocol.server.components.ClanMember;
+import royaleserver.network.Filler;
+import royaleserver.network.NetworkSession;
+import royaleserver.network.protocol.client.ClientCommand;
+import royaleserver.network.protocol.client.ClientCommandHandler;
+import royaleserver.network.protocol.client.ClientMessageHandler;
+import royaleserver.network.protocol.client.messages.*;
+import royaleserver.network.protocol.server.commands.ChestOpenOk;
+import royaleserver.network.protocol.server.commands.ClanCreateOk;
+import royaleserver.network.protocol.server.commands.ClanLeaveOk;
+import royaleserver.network.protocol.server.components.ChestItem;
+import royaleserver.network.protocol.server.components.ClanHeader;
+import royaleserver.network.protocol.server.messages.*;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
-public class Player implements MessageHandler, CommandHandler {
+public class Player implements ClientMessageHandler, ClientCommandHandler {
 	private static final Logger logger = LogManager.getLogger(Player.class);
 
 	protected Server server;
-	protected Session session;
+	protected NetworkSession session;
 
 	protected boolean closed;
 
 	protected PlayerEntity entity;
 	protected Random random;
 
-	public Player(PlayerEntity entity, Server server, Session session) {
+	protected Clan clan;
+
+
+	public Player(PlayerEntity entity, Server server, NetworkSession session) {
 		this.entity = entity;
 		this.server = server;
 		this.session = session;
 
 		this.closed = false;
-		server.addPlayer(this);
-
 		random = new Random(entity.getRandomSeed());
+
+
+		server.addPlayer(this);
+		clan = server.resolveClan(this);
 	}
 
 	/**
 	 * @apiNote For internal usage only
 	 */
 	public void sendOwnHomeData() {
-		OwnHomeData response = new OwnHomeData();
-
-		Arena arena = entity.getLogicArena();
-		response.homeId = entity.getId();
-		response.arena = arena;
-		response.lastArena = arena;
-		response.trophies = entity.getTrophies();
-		response.username = entity.getName();
-		response.gold = entity.getGold();
-		response.gems = entity.getGems();
-		response.levelExperience = entity.getExpLevelExperience();
-
-		ExpLevel expLevel = entity.getLogicExpLevel(), lastExpLevel = entity.getLogicLastExpLevel();
-		response.level = expLevel.getIndex();
-		response.lastLevel = lastExpLevel.getIndex();
-		if (expLevel != lastExpLevel) {
-			entity.setLogicLastExpLevel(expLevel);
-		}
-
-		response.homeChests = new HomeChest[entity.getHomeChests().size()];
-		int i = 0;
-		for (HomeChestEntity homeChestEntity : entity.getHomeChests()) {
-			HomeChest homeChest = response.homeChests[i++] = new HomeChest();
-			homeChest.slot = homeChestEntity.getSlot();
-			homeChest.chest = homeChestEntity.getLogicChest();
-			switch (homeChestEntity.getStatus()) {
-			case IDLE:
-				homeChest.status = HomeChest.STATUS_STATIC;
-				break;
-			case OPENING:
-				if (homeChestEntity.getOpenEnd().getTime() < System.currentTimeMillis()) {
-					homeChestEntity.setStatus(HomeChestStatus.OPENED);
-					server.getDataManager().getHomeChestService().put(homeChestEntity);
-				} else {
-					homeChest.status = HomeChest.STATUS_OPENING;
-					homeChest.ticksToOpen = (int)((homeChestEntity.getOpenEnd().getTime() - System.currentTimeMillis()) / 50); // Convert millis to ticks
-					break;
-				}
-			case OPENED:
-				homeChest.status = HomeChest.STATUS_OPENED;
-				break;
-			}
-		}
-
-		response.cards = new Card[entity.getCards().size()];
-		i = 0;
-		for (PlayerCardEntity cardEntity : entity.getCards()) {
-			Card card = response.cards[i++] = new Card();
-			card.card = cardEntity.getLogicCard();
-			card.level = cardEntity.getLevel();
-			card.count = cardEntity.getCount();
-		}
-
-		response.clan = PlayerClan.from(entity);
+		HomeDataOwn response = new HomeDataOwn();
+		Filler.fill(response, entity);
 
 		session.sendMessage(response);
 	}
@@ -120,7 +78,7 @@ public class Player implements MessageHandler, CommandHandler {
 			ExpLevel nextLevel;
 
 			do {
-				nextLevel = ExpLevel.by(level.getName() + 1);
+				nextLevel = ExpLevel.by(level.getNumericName() + 1);
 				newExp -= level.getExpToNextLevel();
 
 				if (nextLevel == null) {
@@ -211,7 +169,7 @@ public class Player implements MessageHandler, CommandHandler {
 		int minGold = chest.getMinGoldPerCard() * realSpellsCount;
 		int maxGold = chest.getMaxGoldPerCard() * realSpellsCount;
 
-		OpenChestOK command = new OpenChestOK();
+		ChestOpenOk command = new ChestOpenOk();
 		command.gold = minGold + random.nextInt(maxGold - minGold);
 		command.gems = 0;
 		command.chestItems = new ChestItem[cards.size()];
@@ -221,13 +179,13 @@ public class Player implements MessageHandler, CommandHandler {
 		for (Map.Entry<royaleserver.logic.Card, Integer> card : cards.entrySet()) {
 			ChestItem chestItem = new ChestItem();
 			chestItem.card = card.getKey().getIndex();
-			chestItem.quantity = card.getValue();
+			chestItem.count = card.getValue();
 
 			command.chestItems[i++] = chestItem;
 		}
 
-		AvailableServerCommand response = new AvailableServerCommand();
-		response.command.command = command;
+		CommandResponse response = new CommandResponse();
+		response.command = command;
 		session.sendMessage(response);
 	}
 
@@ -309,6 +267,9 @@ public class Player implements MessageHandler, CommandHandler {
 		}
 		closed = true;
 
+		if (clan != null) {
+			clan.removePlayer(this);
+		}
 		server.removePlayer(this);
 		entity.setOnline(false);
 		save();
@@ -336,320 +297,49 @@ public class Player implements MessageHandler, CommandHandler {
 		return true;
 	}
 
-
-	// Handlers
-
-	@Override
-	public boolean handleClientHello(ClientHello message) throws Throwable {
-		return false;
-	}
+	// Messages
 
 	@Override
-	public boolean handleLogin(Login message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleClientCapabilities(ClientCapabilities message) throws Throwable {
-		return true;
-	}
-
-	@Override
-	public boolean handleCancelMatchmake(CancelMatchmake message) throws Throwable {
-		CancelMatchmakeDone response = new CancelMatchmakeDone();
-		session.sendMessage(response);
-
-		MatchmakeInfo response_1 = new MatchmakeInfo();
-		session.sendMessage(response_1);
-
-		return true;
-	}
-
-	@Override
-	public boolean handleKeepAlive(KeepAlive message) throws Throwable {
-		KeepAliveOk response = new KeepAliveOk();
-		session.sendMessage(response);
-		return true;
-	}
-
-	@Override
-	public boolean handleInboxOpened(InboxOpened message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleEndClientTurn(EndClientTurn message) throws Throwable {
-		boolean handled = true;
-
-		for (CommandComponent commandComponent : message.commands) {
-			Command command = commandComponent.command;
-
-			if (command == null) {
-				handled = false;
-				continue;
-			}
-
-			handled = handled && command.handle(this);
-		}
-
-		return handled;
-	}
-
-	@Override
-	public boolean handleVisitHome(VisitHome message) throws Throwable {
-		VisitedHomeData response = new VisitedHomeData();
-		PlayerEntity responseEntity;
-
-		if (message.accountID == entity.getId()) {
-			responseEntity = entity;
-			response.isMyProfile = true;
-		} else {
-			PlayerService playerService = server.getDataManager().getPlayerService();
-			responseEntity = playerService.get(message.accountID);
-			response.isMyProfile = false;
-		}
-
-		if (responseEntity != null) {
-			Arena arena = responseEntity.getLogicArena();
-			response.homeID = responseEntity.getId();
-			response.arena = arena;
-			response.trophies = responseEntity.getTrophies();
-			response.level = responseEntity.getLogicExpLevel().getIndex();
-			response.username = responseEntity.getName();
-
-			response.clan = PlayerClan.from(responseEntity);
-		}
-
-		session.sendMessage(response);
-		return true;
-	}
-
-	@Override
-	public boolean handleHomeBattleReplay(HomeBattleReplay message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleAskForAllianceData(AskForAllianceData message) throws Throwable {
-		ClanService clanService = server.getDataManager().getClanService();
-		ClanEntity clan = clanService.searchById(message.allianceId);
+	public boolean handleClanAskData(ClanAskData message) throws Throwable {
+		final ClanService clanService = server.getDataManager().getClanService();
+		final ClanEntity clan = clanService.searchById(message.clanId);
 
 		if (clan != null) {
-			AllianceData allianceData = AllianceData.from(clan);
-
-			AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
-			response_1.membersOnline = (byte)server.getOnlinePlayersByClan(message.allianceId);
-			response_1.unknown_1 = 0;
-
-			server.sendAllInClan(clan, response_1);
-			session.sendMessage(allianceData);
+			final ClanData response = new ClanData();
+			Filler.fill(response, clan);
+			session.sendMessage(response);
 		}
 
 		return true;
 	}
 
 	@Override
-	public boolean handleAvatarNameCheckRequest(AvatarNameCheckRequest message) throws Throwable {
-		AvatarNameCheckResponse response = new AvatarNameCheckResponse();
-		if (checkNickname(message.username)) {
-			response.username = message.username;
-		} else {
-			response.username = entity.getName(); // Return old nickname back
-		}
-		session.sendMessage(response);
-
-		return true;
-	}
-
-	@Override
-	public boolean handleChangeAvatarName(ChangeAvatarName message) throws Throwable {
-		SetNickname command = new SetNickname();
-
-		if (checkNickname(message.username)) {
-			command.nickname = message.username;
-		} else {
-			command.nickname = entity.getName();
-		}
-
-		AvailableServerCommand response = new AvailableServerCommand();
-		response.command.command = command;
-		session.sendMessage(response);
-
-		return true;
-	}
-
-	@Override
-	public boolean handleAskForJoinableAlliancesList(AskForJoinableAlliancesList message) throws Throwable {
+	public boolean handleClanAskJoinable(ClanAskJoinable message) throws Throwable {
 		final ClanService clanService = server.getDataManager().getClanService();
 		final List<ClanEntity> clans = clanService.search(null, 0, 0, 0, true);
 
-		JoinableAllianceList response = new JoinableAllianceList();
-		response.alliances = new AllianceHeaderEntry[clans.size()];
+		ClanJoinableResponse response = new ClanJoinableResponse();
+		response.clans = new ClanHeader[clans.size()];
 
 		int i = 0;
 		for (ClanEntity clan : clans) {
-			response.alliances[i] = AllianceHeaderEntry.from(clan);
-
-			++i;
+			ClanHeader header = new ClanHeader();
+			Filler.fill(header, clan);
+			response.clans[i++] = header;
 		}
 
-		session.sendMessage(response); // TODO: Change response message
-
-		return true;
-	}
-
-	@Override
-	public boolean handleAskForJoinableTournaments(AskForJoinableTournaments message) throws Throwable {
-		TournamentListSend response = new TournamentListSend();
 		session.sendMessage(response);
 
 		return true;
 	}
 
 	@Override
-	public boolean handleJoinAlliance(JoinAlliance message) throws Throwable {
-		ClanService clanService = server.getDataManager().getClanService();
-		ClanEntity clan = clanService.searchById(message.allianceId);
-
-		if (clan != null && entity.getClan() == null && entity.getTrophies() >= clan.getRequiredTrophies()) {
-			entity.setClan(clan);
-			entity.setLogicClanRole(ClanRole.by("Member"));
-			clan.getMembers().add(entity);
-			save();
-
-			JoinClan command = JoinClan.from(clan);
-
-			AvailableServerCommand response = new AvailableServerCommand();
-			response.command.command = command;
-
-			// Отправляем оповещение всем игрокам клана о том, что вошел новый игрок.
-			AllianceMember allianceMember = new AllianceMember();
-			allianceMember.member = AllianceMemberEntry.from(entity);
-
-			// Обновляем статус онлайна
-			AllianceOnlineStatusUpdated allianceOnlineStatusUpdated = new AllianceOnlineStatusUpdated();
-			allianceOnlineStatusUpdated.membersOnline = 1;
-			allianceOnlineStatusUpdated.unknown_1 = 0;
-
-			// Отправляем пакет (надпись 'В клан вошел новый игрок') всем игрокам в клане
-			// После AllianceStreamEntry происходит автоматический запрос AllianceData (AskForAllianceData)
-
-			// Команда
-			AllianceEventStreamEntry allianceEventStreamEntry = new AllianceEventStreamEntry();
-			allianceEventStreamEntry.type = 3;
-			allianceEventStreamEntry.initiatorId = entity.getId();
-			allianceEventStreamEntry.initiatorName = entity.getName();
-
-			// Сам AllianceStreamEntry
-			AllianceStreamEntry allianceStreamEntry = new AllianceStreamEntry();
-
-			allianceStreamEntry.entry.entryId = clan.getId();
-			allianceStreamEntry.entry.senderAvatarId = entity.getId();
-			allianceStreamEntry.entry.senderAvatarId2 = entity.getId();
-
-			allianceStreamEntry.entry.senderName = entity.getName();
-			allianceStreamEntry.entry.senderLevel = entity.getExpLevelExperience();
-			allianceStreamEntry.entry.senderRole = 1;
-			allianceStreamEntry.entry.ageSeconds = 0;
-			allianceStreamEntry.entry.isRemoved = 0;
-
-			allianceStreamEntry.entry.command = allianceEventStreamEntry;
-
-			server.sendAllInClanOthers(entity, clan, allianceMember);
-			server.sendAllInClan(clan, allianceStreamEntry);
-			server.sendAllInClan(clan, allianceOnlineStatusUpdated);
-
-			session.sendMessage(response);
-		}
-
-		return true;
-	}
-
-	@Override
-	public boolean handleLeaveAlliance(LeaveAlliance message) throws Throwable {
-		ClanService clanService = server.getDataManager().getClanService();
-		ClanEntity clan = entity.getClan();
-
-		if (clan != null) {
-			LeaveClanOK command = LeaveClanOK.from(clan);
-
-			CancelChallengeDone response = new CancelChallengeDone();
-
-			AvailableServerCommand response_1 = new AvailableServerCommand();
-			response_1.command.command = command;
-
-			clan.getMembers().remove(entity);
-			entity.setClan(null);
-			entity.setClanRole(null);
-			save();
-
-			session.sendMessage(response);
-			session.sendMessage(response_1);
-		}
-
-		return true;
-	}
-
-	@Override
-	public boolean handleDonateAllianceUnit(DonateAllianceUnit message) throws Throwable {
+	public boolean handleClanChatMessage(ClanChatMessage message) throws Throwable {
 		return false;
 	}
 
 	@Override
-	public boolean handleSearchAlliances(SearchAlliances message) throws Throwable {
-		final ClanService clanService = server.getDataManager().getClanService();
-		final List<ClanEntity> clans = clanService.search(message.searchString, message.minMembers, message.maxMembers, message.minTrophies, message.findOnlyJoinableClans);
-
-		JoinableAllianceList response = new JoinableAllianceList();
-		response.alliances = new AllianceHeaderEntry[clans.size()];
-
-		int i = 0;
-		for (ClanEntity clan : clans) {
-			response.alliances[i] = AllianceHeaderEntry.from(clan);
-
-			++i;
-		}
-
-		session.sendMessage(response); // TODO: Change response message
-
-		return true;
-	}
-
-	@Override
-	public boolean handleAskForAllianceRankingList(AskForAllianceRankingList message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleAskForTVContent(AskForTVContent message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleAskForAvatarRankingList(AskForAvatarRankingList message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleAskForAvatarLocalRanking(AskForAvatarLocalRanking message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleAskForAvatarStream(AskForAvatarStream message) throws Throwable {
-		AvatarStream avatarStream = new AvatarStream();
-		avatarStream.unknown_0 = 0;
-		session.sendMessage(avatarStream);
-		return true;
-	}
-
-	@Override
-	public boolean handleAskForBattleReplayStream(AskForBattleReplayStream message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleCreateAlliance(CreateAlliance message) throws Throwable {
+	public boolean handleClanCreate(ClanCreate message) throws Throwable {
 		ClanBadge badge = ClanBadge.by(message.badge);
 		if (badge == null) {
 			logger.warn("Player " + entity.getName() + "#" + entity.getId() + " tried to create clan with unknown badge.");
@@ -674,14 +364,157 @@ public class Player implements MessageHandler, CommandHandler {
 			entity.setClan(clan);
 			entity.setLogicClanRole(ClanRole.by("Leader"));
 			clan.getMembers().add(entity);
+			this.clan = server.resolveClan(this);
 			save();
 
+
 			// Send some information about clan
-			JoinClan command = JoinClan.from(clan);
+			ClanCreateOk command = new ClanCreateOk();
+			Filler.fill(command, clan);
 
-			AvailableServerCommand response = new AvailableServerCommand();
-			response.command.command = command;
+			CommandResponse response = new CommandResponse();
+			response.command = command;
 
+			/*AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
+			response_1.membersOnline = 1;
+			response_1.unknown_1 = 0;*/
+
+			session.sendMessage(response);
+			//session.sendMessage(response_1);
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean handleClanJoin(ClanJoin message) throws Throwable {
+		final ClanService clanService = server.getDataManager().getClanService();
+		final ClanEntity clanEntity = clanService.searchById(message.clanId);
+
+		if (clanEntity != null && entity.getClan() == null && entity.getTrophies() >= clanEntity.getRequiredTrophies()) {
+			entity.setClan(clanEntity);
+			entity.setLogicClanRole(ClanRole.by("Member"));
+			clanEntity.getMembers().add(entity);
+			save();
+
+			ClanCreateOk command = new ClanCreateOk(); // TODO: Find out ClanJoinOk
+			Filler.fill(command, clanEntity);
+			CommandResponse response = new CommandResponse();
+			response.command = command;
+			session.sendMessage(response);
+
+			clan = server.resolveClan(this);
+			clan.joinPlayer(this);
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean handleClanLeave(ClanLeave message) throws Throwable {
+		final ClanService clanService = server.getDataManager().getClanService();
+		final ClanEntity clanEntity = entity.getClan();
+
+		if (clanEntity != null) {
+			ClanLeaveOk command = new ClanLeaveOk();
+			Filler.fill(command, clanEntity);
+
+			CommandResponse response = new CommandResponse();
+			response.command = command;
+			session.sendMessage(response);
+
+			if (clan != null) {
+				clan.leavePlayer(this);
+			}
+			clan = server.resolveClan(this);
+
+			entity.setClan(null);
+			entity.setClanRole(null);
+			save();
+
+			Set<PlayerEntity> members = clanEntity.getMembers();
+			members.remove(entity);
+			if (members.size() == 0) {
+				clanService.remove(clanEntity);
+			} else if (entity.getLogicClanRole() == ClanRole.by("Leader")) {
+				int memberIndex = members.size();
+				Iterator<PlayerEntity> iterator = members.iterator();
+
+				for (int i = 0; i < memberIndex; ++i) {
+					iterator.next();
+				}
+
+				PlayerEntity newLeader = iterator.next();
+				newLeader.setLogicClanRole(ClanRole.by("Leader"));
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean handleClanSearch(ClanSearch message) throws Throwable {
+		final ClanService clanService = server.getDataManager().getClanService();
+		final List<ClanEntity> clans = clanService.search(message.searchString, message.minMembers, message.maxMembers, message.minTrophies, message.findOnlyJoinableClans);
+
+		ClanJoinableResponse response = new ClanJoinableResponse();
+		response.clans = new ClanHeader[clans.size()];
+
+		int i = 0;
+		for (ClanEntity clanEntity : clans) {
+			ClanHeader clan = new ClanHeader();
+			Filler.fill(clan, clanEntity);
+			response.clans[i++] = clan;
+		}
+
+		session.sendMessage(response); // TODO: Change response message
+
+		return true;
+	}
+
+	@Override
+	public boolean handleClientCommands(ClientCommands message) throws Throwable {
+		boolean handled = true;
+
+		for (ClientCommand command : message.commands) {
+			if (command != null) {
+				if (!command.handle(this)) {
+					handled = false;
+					break;
+				}
+			}
+		}
+
+		return handled;
+	}
+
+	@Override
+	public boolean handleClientHello(ClientHello message) throws Throwable {
+		return false;
+	}
+
+	@Override
+	public boolean handleConnectionInfo(ConnectionInfo message) throws Throwable {
+		return true;
+	}
+
+	@Override
+	public boolean handleHomeAskData(HomeAskData message) throws Throwable {
+		PlayerEntity responseEntity;
+		boolean isMyProfile;
+
+		if (message.accountId == entity.getId()) {
+			responseEntity = entity;
+			isMyProfile = true;
+		} else {
+			PlayerService playerService = server.getDataManager().getPlayerService();
+			responseEntity = playerService.get(message.accountId);
+			isMyProfile = false;
+		}
+
+		if (responseEntity != null) {
+			HomeDataVisited response = new HomeDataVisited();
+			Filler.fill(response, responseEntity, isMyProfile);
 			session.sendMessage(response);
 		}
 
@@ -689,7 +522,34 @@ public class Player implements MessageHandler, CommandHandler {
 	}
 
 	@Override
-	public boolean handleStartMission(StartMission message) throws Throwable {
+	public boolean handleHomeAskDataOwn(HomeAskDataOwn message) throws Throwable {
+		sendOwnHomeData();
+		return true;
+	}
+
+	@Override
+	public boolean handleInboxAsk(InboxAsk message) throws Throwable {
+		return false;
+	}
+
+	@Override
+	public boolean handleLogin(Login message) throws Throwable {
+		return false;
+	}
+
+	@Override
+	public boolean handleMatchmakeCancel(MatchmakeCancel message) throws Throwable {
+		MatchmakeCancelOk response = new MatchmakeCancelOk();
+		MatchmakeInfo response2 = new MatchmakeInfo();
+
+		session.sendMessage(response);
+		session.sendMessage(response2);
+
+		return true;
+	}
+
+	@Override
+	public boolean handleMatchmakeStart(MatchmakeStart message) throws Throwable {
 		SectorState response = new SectorState();
 
 		response.homeID = entity.getId();
@@ -709,31 +569,68 @@ public class Player implements MessageHandler, CommandHandler {
 	}
 
 	@Override
-	public boolean handleGoHome(GoHome message) throws Throwable {
-		sendOwnHomeData();
-		return true;
-	}
+	public boolean handleNameChange(NameChange message) throws Throwable {
+		NameSet command = new NameSet();
 
+		if (checkNickname(message.name)) {
+			command.name = message.name;
+			entity.setName(message.name);
+		} else {
+			command.name = entity.getName();
+		}
 
-	@Override
-	public boolean handleBuyChestCommand(BuyChest command) throws Throwable {
-		AvailableServerCommand response = new AvailableServerCommand();
-		response.command.command = new OpenChestOK();
+		CommandResponse response = new CommandResponse();
+		response.command = command;
 		session.sendMessage(response);
 
 		return true;
 	}
 
 	@Override
-	public boolean handleOpenChestCommand(OpenChest command) throws Throwable {
+	public boolean handleNameCheck(NameCheck message) throws Throwable {
+		NameCheckOk response = new NameCheckOk();
+		if (checkNickname(message.name)) {
+			response.name = message.name;
+		} else {
+			response.name = entity.getName(); // Return old nickname back
+		}
+		session.sendMessage(response);
+		return true;
+	}
+
+	@Override
+	public boolean handlePing(Ping message) throws Throwable {
+		session.sendMessage(new Pong());
+		return true;
+	}
+
+	@Override
+	public boolean handleTournamentAskJoinable(TournamentAskJoinable message) throws Throwable {
+		return false;
+	}
+
+	// Commands
+
+	@Override
+	public boolean handleChallengeBuy(ChallengeBuy command) throws Throwable {
+		return false;
+	}
+
+	@Override
+	public boolean handleChestBuy(ChestBuy command) throws Throwable {
+		return false;
+	}
+
+	@Override
+	public boolean handleChestOpen(ChestOpen command) throws Throwable {
 		int slot = command.slot;
-		System.out.println(slot);
+
 		for (HomeChestEntity homeChest : entity.getHomeChests()) {
 			if (homeChest.getSlot() == slot) {
 				if (homeChest.getStatus() == HomeChestStatus.OPENED ||
 						(homeChest.getStatus() == HomeChestStatus.OPENING &&
 								homeChest.getOpenEnd().getTime() < System.currentTimeMillis())) {
-					//server.getDataManager().getHomeChestService().delete(homeChest);
+					server.getDataManager().getHomeChestService().delete(homeChest);
 
 					openChest(homeChest.getLogicChest());
 				}
@@ -746,16 +643,12 @@ public class Player implements MessageHandler, CommandHandler {
 	}
 
 	@Override
-	public boolean handleSetNickname(SetNickname command) throws Throwable {
-		if (checkNickname(command.nickname)) {
-			entity.setName(command.nickname);
-		}
-
-		return true;
+	public boolean handleDeckChangeCard(DeckChangeCard command) throws Throwable {
+		return false;
 	}
 
 	@Override
-	public boolean handleStartFight(StartFight command) throws Throwable {
+	public boolean handleFightStart(FightStart command) throws Throwable {
 		SectorState response = new SectorState();
 
 		response.homeID = entity.getId();
@@ -771,18 +664,7 @@ public class Player implements MessageHandler, CommandHandler {
 		response.level = 13;
 
 		session.sendMessage(response);
-		addExperience(1000);
 
-		return false;
-	}
-
-	@Override
-	public boolean handleClanChatMessage(ClanChatMessage message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleChangeDeckCardCommand(ChangeDeckCard command) throws Throwable {
-		return false;
+		return true;
 	}
 }

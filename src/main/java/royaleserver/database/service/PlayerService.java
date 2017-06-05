@@ -1,20 +1,21 @@
 package royaleserver.database.service;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import royaleserver.database.entity.PlayerEntity;
+import royaleserver.database.util.Transaction;
 import royaleserver.logic.Arena;
 import royaleserver.logic.ExpLevel;
 import royaleserver.utils.StringUtils;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Random;
 
-public class PlayerService {
+public class PlayerService extends Service {
 	private final Random random = new Random(System.currentTimeMillis());
-	private final EntityManager entityManager;
 
-	public PlayerService(EntityManager entityManager) {
-		this.entityManager = entityManager;
+	public PlayerService(SessionFactory sessionFactory) {
+		super(sessionFactory);
 	}
 
 	public PlayerEntity create() {
@@ -36,31 +37,37 @@ public class PlayerService {
 	}
 
 	public PlayerEntity add(PlayerEntity entity){
-		entityManager.getTransaction().begin();
-		PlayerEntity fromDB = entityManager.merge(entity);
-		entityManager.getTransaction().commit();
-		return fromDB;
+		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+			PlayerEntity fromDB = (PlayerEntity)session.merge(entity);
+			transaction.commit();
+			return fromDB;
+		}
 	}
 
 	public void delete(PlayerEntity entity){
-		entityManager.getTransaction().begin();
-		entityManager.remove(entity);
-		entityManager.getTransaction().commit();
+		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+			session.remove(entity);
+			transaction.commit();
+		}
 	}
 
 	public PlayerEntity get(long id){
-		return entityManager.find(PlayerEntity.class, id);
+		try (Session session = getSession()) {
+			return session.find(PlayerEntity.class, id);
+		}
 	}
 
 	public void update(PlayerEntity entity){
-		entityManager.getTransaction().begin();
-		entityManager.merge(entity);
-		entityManager.getTransaction().commit();
+		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+			session.merge(entity);
+			transaction.commit();
+		}
 	}
 
 	public void clear() {
-		entityManager.getTransaction().begin();
-		entityManager.createNamedQuery(".clear").executeUpdate();
-		entityManager.getTransaction().commit();
+		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+			session.createNamedQuery(".clear").executeUpdate();
+			transaction.commit();
+		}
 	}
 }
