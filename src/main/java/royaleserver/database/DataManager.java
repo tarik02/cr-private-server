@@ -12,7 +12,6 @@ import java.lang.reflect.Modifier;
 import java.util.Properties;
 
 public class DataManager {
-	//private final EntityManager entityManager;
 	private final SessionFactory sessionFactory;
 	private final DataServices services;
 
@@ -42,6 +41,7 @@ public class DataManager {
 					.append("/")
 					.append(config.mysql.database)
 					.toString());
+
 			properties.setProperty("hibernate.connection.username", config.mysql.user);
 			properties.setProperty("hibernate.connection.password", config.mysql.password);
 			break;
