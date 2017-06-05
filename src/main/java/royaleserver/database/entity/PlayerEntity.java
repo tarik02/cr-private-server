@@ -185,7 +185,7 @@ public class PlayerEntity implements Identifiable<Long> {
 	}
 
 	public Arena getLogicArena() {
-		return Arena.byDB(arena.getId());
+		return Arena.by(arena.getId() - 1);
 	}
 
 	public PlayerEntity setLogicArena(Arena arena) {
