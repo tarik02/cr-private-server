@@ -28,7 +28,7 @@ public class PlayerEntity implements Identifiable<Long> {
 	)
 	private Long id;
 
-	@Column(length = 32, unique = true, nullable = true)
+	@Column(length = 32, nullable = true)
 	private String name;
 
 	@Temporal(value = TemporalType.TIMESTAMP)
