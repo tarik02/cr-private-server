@@ -9,7 +9,7 @@ public class ChestItem {
 	public int count;
 	public byte unknown_4;
 	public byte unknown_5;
-	public byte unknown_6;
+	public byte cardOrder;
 
 	public void encode(DataStream stream) {
 		stream.putRrsInt32(card);
@@ -18,6 +18,6 @@ public class ChestItem {
 		stream.putRrsInt32(count);
 		stream.putByte(unknown_4);
 		stream.putByte(unknown_5);
-		stream.putByte(unknown_6);
+		stream.putByte(cardOrder);
 	}
 }

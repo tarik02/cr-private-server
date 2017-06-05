@@ -11,8 +11,12 @@ public final class ChestOpenOk extends ServerCommand {
 	public int gold;
 	public int gems;
 	public ChestItem[] chestItems;
-
 	public int chestId;
+
+	public byte unknown_7;
+	public byte unknown_8;
+
+	public boolean isDraft;
 
 	public ChestOpenOk() {
 		super(ID);
@@ -26,7 +30,7 @@ public final class ChestOpenOk extends ServerCommand {
 	@Override
 	public void encode(DataStream stream) {
 		stream.putByte((byte)1);
-		stream.putByte((byte)0);
+		stream.putBoolean(isDraft);
 
 		stream.putRrsInt32(chestItems.length);
 		for (ChestItem chestItem : chestItems) {
@@ -40,7 +44,19 @@ public final class ChestOpenOk extends ServerCommand {
 
 		stream.putRrsInt32(chestId);
 
-		stream.putByte((byte)4);
-		stream.putByte((byte)2);
+		if (isDraft) {
+			stream.putRrsInt32(0);
+			stream.putRrsInt32(0);
+			stream.putRrsInt32(0);
+			stream.putRrsInt32(0);
+			stream.putRrsInt32(5787);
+			stream.putRrsInt32(10);
+
+			stream.putRrsInt32(-64);
+			stream.putRrsInt32(-64);
+		}
+
+		stream.putByte(unknown_7);
+		stream.putByte(unknown_8);
 	}
 }

@@ -22,6 +22,7 @@ public final class Chest extends DBLogic implements Cloneable {
 	private int rareChance, epicChance, legendaryChance;
 	private Card[] guaranteedSpells;
 	private int minGoldPerCard, maxGoldPerCard;
+	private boolean draftChest;
 
 	private Chest() {}
 
@@ -93,6 +94,10 @@ public final class Chest extends DBLogic implements Cloneable {
 		return maxGoldPerCard;
 	}
 
+	public boolean isDraftChest() {
+		return draftChest;
+	}
+
 	public int getOpenTicks() {
 		return (((timeTakenDays * 24 + timeTakesHours) * 60 + timeTakenMinutes) * 60 + timeTakenSeconds) * 20;
 	}
@@ -128,6 +133,7 @@ public final class Chest extends DBLogic implements Cloneable {
 		Column csv_GuaranteedSpells = csv_chests.getColumn("GuaranteedSpells");
 		Column csv_MinGoldPerCard = csv_chests.getColumn("MinGoldPerCard");
 		Column csv_MaxGoldPerCard = csv_chests.getColumn("MaxGoldPerCard");
+		Column csv_DraftChest = csv_chests.getColumn("DraftChest");
 
 		int i = 0;
 		for (Row csv_chest : csv_chests.getRows()) {
@@ -176,6 +182,7 @@ public final class Chest extends DBLogic implements Cloneable {
 
 			chest.minGoldPerCard = csv_chest.getValue(csv_MinGoldPerCard).asInt(chest.minGoldPerCard);
 			chest.maxGoldPerCard = csv_chest.getValue(csv_MaxGoldPerCard).asInt(chest.maxGoldPerCard);
+			chest.draftChest = csv_chest.getValue(csv_DraftChest).asBoolean(chest.draftChest);
 
 			values.add(chest);
 			++i;

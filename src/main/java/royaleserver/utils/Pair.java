@@ -25,15 +25,18 @@ public final class Pair<A, B> {
 		return (hashFirst + hashSecond) * hashSecond + hashFirst;
 	}
 
-	public boolean equals(Object other) {
-		if (other instanceof Pair) {
-			Pair otherPair = (Pair)other;
-			return ((this.first == otherPair.first || (this.first != null && otherPair.first != null &&
-					this.first.equals(otherPair.first))) && (this.second == otherPair.second ||
-					(this.second != null && otherPair.second != null && this.second.equals(otherPair.second))));
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Pair)) {
+			return false;
 		}
 
-		return false;
+		Pair<?, ?> pair = (Pair<?, ?>)o;
+
+		return first != null ? first.equals(pair.first) : pair.first == null;
 	}
 
 	public final String toString() {

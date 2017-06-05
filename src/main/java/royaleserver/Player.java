@@ -1,31 +1,31 @@
 package royaleserver;
 
-import java.util.*;
-import royaleserver.logic.*;
-import royaleserver.network.protocol.client.commands.*;
-import royaleserver.network.protocol.client.messages.*;
-import royaleserver.network.protocol.server.messages.*;
-
 import royaleserver.database.entity.ClanEntity;
 import royaleserver.database.entity.HomeChestEntity;
 import royaleserver.database.entity.HomeChestStatus;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerService;
+import royaleserver.logic.*;
 import royaleserver.network.Filler;
 import royaleserver.network.NetworkSession;
 import royaleserver.network.protocol.client.ClientCommand;
 import royaleserver.network.protocol.client.ClientCommandHandler;
 import royaleserver.network.protocol.client.ClientMessageHandler;
+import royaleserver.network.protocol.client.commands.*;
+import royaleserver.network.protocol.client.messages.*;
 import royaleserver.network.protocol.server.commands.ChestOpenOk;
 import royaleserver.network.protocol.server.commands.ClanJoinOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.commands.NameSet;
 import royaleserver.network.protocol.server.components.ChestItem;
 import royaleserver.network.protocol.server.components.ClanHeader;
+import royaleserver.network.protocol.server.messages.*;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 import royaleserver.utils.Pair;
+
+import java.util.*;
 
 public class Player implements ClientMessageHandler, ClientCommandHandler {
 	private static final Logger logger = LogManager.getLogger(Player.class);
@@ -98,34 +98,35 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		Rarity epic = Rarity.by("Epic");
 		Rarity legendary = Rarity.by("Legendary");
 
-		Set<Pair<royaleserver.logic.Card, Integer>> cards = new TreeSet<>(
-				Comparator.comparingInt(a -> a.first().getRarity().getSortCapacity() * a.second()));
+		List<Pair<royaleserver.logic.Card, Integer>> cards = new ArrayList<>();
+
+		boolean isDraft = chest.isDraftChest();
 
 		float rewardMultiplier = chest.getArena().getChestRewardMultiplier() / 100;
 		int minimumSpellsCount = (int)(chest.getRandomSpells() * rewardMultiplier);
 		int minimumDifferentSpells = (int)(chest.getDifferentSpells() * rewardMultiplier);
 
-		int minimumRare = minimumSpellsCount / chest.getRareChance();
-		int minimumEpic = minimumSpellsCount / chest.getEpicChance();
-		int minimumLegendary = minimumSpellsCount / chest.getLegendaryChance();
+		float minimumRare = (float)minimumSpellsCount / (float)chest.getRareChance();
+		float minimumEpic = (float)minimumSpellsCount / (float)chest.getEpicChance();
+		float minimumLegendary = (float)minimumSpellsCount / (float)chest.getLegendaryChance();
 
 		float rareCount = minimumRare + entity.getRareChance();
 		float epicCount = minimumEpic + entity.getEpicChance();
 		float legendaryCount = minimumLegendary + entity.getLegendaryChance();
-		float commonCount = minimumSpellsCount - minimumRare - minimumEpic - minimumLegendary;
+		float commonCount = minimumSpellsCount - rareCount - epicCount - legendaryCount;
 
-		int differentCommon = countDifferent(commonCount, minimumSpellsCount, minimumDifferentSpells);
 		int differentRare = countDifferent(rareCount, minimumSpellsCount, minimumDifferentSpells);
 		int differentEpic = countDifferent(epicCount, minimumSpellsCount, minimumDifferentSpells);
 		int differentLegendary = countDifferent(legendaryCount, minimumSpellsCount, minimumDifferentSpells);
+		int differentCommon = minimumDifferentSpells - differentRare - differentEpic - differentLegendary;
 
 		int realSpellsCount = (int)(commonCount + rareCount + epicCount + legendaryCount);
 
 		Map<Rarity, List<royaleserver.logic.Card>> candidates = royaleserver.logic.Card.select(entity.getLogicArena());
-		commonCount -= generateCards(cards, candidates.get(common), differentCommon, (int)commonCount);
-		rareCount -= generateCards(cards, candidates.get(rare), differentRare, (int)rareCount);
-		epicCount -= generateCards(cards, candidates.get(epic), differentEpic, (int)epicCount);
-		legendaryCount -= generateCards(cards, candidates.get(legendary), differentLegendary, (int)legendaryCount);
+		commonCount -= generateCards(cards, candidates.get(common), differentCommon, (int)commonCount, isDraft);
+		rareCount -= generateCards(cards, candidates.get(rare), differentRare, (int)rareCount, isDraft);
+		epicCount -= generateCards(cards, candidates.get(epic), differentEpic, (int)epicCount, isDraft);
+		legendaryCount -= generateCards(cards, candidates.get(legendary), differentLegendary, (int)legendaryCount, isDraft);
 
 		entity.setRareChance(rareCount);
 		entity.setEpicChance(epicCount);
@@ -139,57 +140,77 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		command.gems = 0; // TODO:
 		command.chestItems = new ChestItem[cards.size()];
 
+		cards.sort(Comparator.comparingInt(a -> a.first().getRarity().getSortCapacity() * a.second()));
 		int i = 0;
 		for (Pair<royaleserver.logic.Card, Integer> card : cards) {
 			ChestItem chestItem = new ChestItem();
 			chestItem.card = card.first().getIndex();
 			chestItem.count = card.second();
+			chestItem.cardOrder = isDraft ? (byte)((i + 1) % 2) : 0;
 
 			command.chestItems[i++] = chestItem;
 		}
+
+		command.isDraft = isDraft;
+
+		//if (isDraft) {
+			command.unknown_7 = 4;
+			command.unknown_8 = 2;
+		//}
 
 		CommandResponse response = new CommandResponse();
 		response.command = command;
 		session.sendMessage(response);
 	}
 
-	private int generateCards(Set<Pair<royaleserver.logic.Card, Integer>> cards, List<royaleserver.logic.Card> candidates,
-	                          int different, int count) {
+	private int generateCards(List<Pair<royaleserver.logic.Card, Integer>> cards, List<royaleserver.logic.Card> candidates,
+	                          int different, int count, boolean isDraft) {
 		int first;
 		if (different == 1) {
 			first = count;
 		} else {
-			first = (int)(count / different * (0.1f + random.nextFloat()));
+			first = (int)Math.ceil(count / different * (1f + random.nextFloat()));
 		}
 
 		int current = first;
 		int sum = 0;
 
-		while (sum < count && different != 1 && sum + current <= count) {
+		while (different != 1 && sum + current <= count) {
 			sum += current;
 
-			addCard(cards, candidates, current);
+			if (isDraft) {
+				addCard(cards, candidates, current);
+				addCard(cards, candidates, current);
+			} else {
+				addCard(cards, candidates, current);
+			}
 
 			current *= 1f + random.nextFloat();
 			--different;
 		}
 
 		if (sum < count) {
-			addCard(cards, candidates, count - sum);
+			if (isDraft) {
+				addCard(cards, candidates, count - sum);
+				addCard(cards, candidates, count - sum);
+			} else {
+				addCard(cards, candidates, count - sum);
+			}
 		}
 
 		return count;
 	}
 
-	private void addCard(Set<Pair<royaleserver.logic.Card, Integer>> cards, List<royaleserver.logic.Card> candidates, int count) {
+	private void addCard(List<Pair<royaleserver.logic.Card, Integer>> cards, List<royaleserver.logic.Card> candidates, int count) {
 		if (candidates.size() != 0) {
 			int index = random.nextInt(candidates.size());
-			cards.add(new Pair<>(candidates.remove(index), count));
+			Pair<Card, Integer> pair = new Pair<>(candidates.remove(index), count);
+			cards.add(pair);
 		}
 	}
 
 	protected int countDifferent(float rarityCount, int count, int different) {
-		return (int)Math.ceil(rarityCount / ((float)count) * different);
+		return (int)Math.ceil((float)different * (rarityCount / (float)count));
 	}
 
 	/**
@@ -607,7 +628,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	@Override
 	public boolean handleChestCardNext(ChestCardNext command) throws Throwable {
 		// TODO: Draft chests
-		return true;
+		return false;
 	}
 
 	@Override
