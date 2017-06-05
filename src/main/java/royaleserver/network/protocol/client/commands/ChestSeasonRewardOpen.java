@@ -5,21 +5,21 @@ import royaleserver.network.protocol.client.ClientCommand;
 import royaleserver.network.protocol.client.ClientCommandHandler;
 import royaleserver.utils.DataStream;
 
-public final class ChestCardNext extends ClientCommand {
-	public static final short ID = Commands.CHEST_CARD_NEXT;
+public final class ChestSeasonRewardOpen extends ClientCommand {
+	public static final short ID = Commands.CHEST_SEASON_REWARD_OPEN;
 
-	public ChestCardNext() {
+	public ChestSeasonRewardOpen() {
 		super(ID);
 	}
 
 	@Override
 	public ClientCommand create() {
-		return new ChestCardNext();
+		return new ChestSeasonRewardOpen();
 	}
 
 	@Override
 	public boolean handle(ClientCommandHandler handler) throws Throwable {
-		return handler.handleChestCardNext(this);
+		return handler.handleChestSeasonRewardOpen(this);
 	}
 
 	@Override

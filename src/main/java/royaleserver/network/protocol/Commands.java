@@ -22,6 +22,7 @@ public final class Commands {
 	public static final short FIGHT_START = 525;
 	public static final short CHEST_CARD_NEXT = 526;
 	public static final short CHALLENGE_BUY = 537;
+	public static final short CHEST_SEASON_REWARD_OPEN = 556;
 
 
 	public static final Map<Short, String> commandsMap = createMap();

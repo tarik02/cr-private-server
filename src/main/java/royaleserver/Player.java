@@ -652,6 +652,12 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		return true;
 	}
 
+	@Override
+	public boolean handleChestSeasonRewardOpen(ChestSeasonRewardOpen command) throws Throwable {
+		// TODO: Find out needed chest and open it
+		return false;
+	}
+
 	public boolean handleDeckChangeCard(DeckChangeCard command) throws Throwable {
 		return false;
 	}
