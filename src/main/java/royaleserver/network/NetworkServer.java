@@ -1,26 +1,40 @@
 package royaleserver.network;
 
-import java.nio.*;
-import org.jboss.netty.buffer.*;
+import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
-import org.jboss.netty.handler.codec.replay.*;
-import royaleserver.*;
-import royaleserver.crypto.*;
-import royaleserver.network.protocol.*;
-import royaleserver.network.protocol.client.*;
-import royaleserver.network.protocol.client.messages.*;
-import royaleserver.network.protocol.server.*;
-import royaleserver.network.protocol.server.messages.*;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
+import org.jboss.netty.handler.codec.replay.VoidEnum;
+import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
+import royaleserver.Player;
+import royaleserver.Server;
+import royaleserver.crypto.ClientCrypto;
+import royaleserver.crypto.ServerCrypto;
+import royaleserver.database.entity.PlayerEntity;
+import royaleserver.database.service.PlayerService;
+import royaleserver.network.protocol.Message;
+import royaleserver.network.protocol.MessageHeader;
+import royaleserver.network.protocol.Messages;
+import royaleserver.network.protocol.client.ClientCommandFactory;
+import royaleserver.network.protocol.client.ClientMessage;
+import royaleserver.network.protocol.client.ClientMessageFactory;
+import royaleserver.network.protocol.client.messages.ClientHello;
+import royaleserver.network.protocol.client.messages.Login;
+import royaleserver.network.protocol.server.ServerCommandFactory;
+import royaleserver.network.protocol.server.ServerMessage;
+import royaleserver.network.protocol.server.ServerMessageFactory;
+import royaleserver.network.protocol.server.messages.LoginFailed;
+import royaleserver.network.protocol.server.messages.LoginOk;
+import royaleserver.network.protocol.server.messages.ServerHello;
 import royaleserver.utils.*;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.concurrent.TimeUnit;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
-import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
-import royaleserver.database.entity.PlayerEntity;
-import royaleserver.database.service.PlayerService;
 
 public final class NetworkServer {
 	private static final Logger logger = LogManager.getLogger(NetworkServer.class);
@@ -295,10 +309,12 @@ public final class NetworkServer {
 		public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 			ctx.sendUpstream(e);
 		}
+
 		@Override
 		public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 			ctx.sendUpstream(e);
 		}
+
 		@Override
 		protected Object decode(ChannelHandlerContext channelHandlerContext, Channel arg1, ChannelBuffer buffer, VoidEnum ignored) throws Exception {
 			byte[] payload = new byte[2];
@@ -346,9 +362,19 @@ public final class NetworkServer {
 			}
 
 			try {
-				message.decode(new DataStream(header.decrypted));
+				DataStream dataStream = new DataStream(header.decrypted);
+				message.decode(dataStream);
+
+				// Messages must be decoded fully, because it can contain useful information, so we will try to decode it fully
+				if (!dataStream.eof()) {
+					logger.warn("Message %s is not decoded fully.\n\tDecoded part:\n%s\n\tOther part:\n%s",
+							message.getClass().getSimpleName(),
+							Hex.dump(header.decrypted, 0, dataStream.getOffset()),
+							Hex.dump(header.decrypted, dataStream.getOffset(), header.decrypted.length - dataStream.getOffset()));
+				}
 			} catch (Exception e) {
-				logger.error("Failed to decode packet %s, payload:\n%s", message.getClass().getSimpleName(), Hex.dump(header.decrypted));
+				logger.error("Failed to decode packet %s, payload:\n%s", message.getClass().getSimpleName(),
+						Hex.dump(header.decrypted));
 				return null;
 			}
 

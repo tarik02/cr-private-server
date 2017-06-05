@@ -11,14 +11,19 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class DataStream {
-	private final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+	private static final int DEFAULT_BUFFER_LENGTH = 128;
 
+	protected final ByteBuffer byteBuffer;
 	protected byte[] buffer;
 	protected int offset, count;
-	protected ByteBuffer byteBuffer;
 
 	public DataStream() {
-		this(new byte[32]);
+		byteBuffer = ByteBuffer.allocate(8);
+
+		buffer = new byte[DEFAULT_BUFFER_LENGTH];
+		offset = 0;
+		count = 0;
 	}
 
 	public DataStream(byte[] buffer) {
@@ -26,11 +31,10 @@ public class DataStream {
 	}
 
 	public DataStream(byte[] buffer, int offset) {
-		this.buffer = buffer;
-		this.offset = offset;
-		count = 0;
-
 		byteBuffer = ByteBuffer.allocate(8);
+
+		setBuffer(buffer);
+		setOffset(offset);
 	}
 
 	protected static int calculateVarInt32(long value) {
@@ -76,7 +80,7 @@ public class DataStream {
 
 	public DataStream setBuffer(byte[] buffer) {
 		if (buffer == null) {
-			this.buffer = new byte[32];
+			this.buffer = new byte[DEFAULT_BUFFER_LENGTH];
 			count = 0;
 		} else {
 			this.buffer = buffer;
@@ -93,7 +97,6 @@ public class DataStream {
 	public DataStream setOffset(int offset) {
 		ensureCapacity(offset);
 		this.offset = offset;
-		this.count = offset;
 
 		return this;
 	}
@@ -103,7 +106,11 @@ public class DataStream {
 	}
 
 	public int remaining() {
-		return count - offset;
+		return buffer.length - offset;
+	}
+
+	public boolean eof() {
+		return remaining() <= 0;
 	}
 
 	protected void ensureCapacity(int capacity) {
@@ -135,7 +142,6 @@ public class DataStream {
 	}
 
 	public DataStream zlibCompress() {
-
 		Deflater compressor = new Deflater();
 		compressor.setInput(this.get());
 
