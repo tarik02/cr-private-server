@@ -122,7 +122,11 @@ public final class Filler {
 		message.name = entity.getName();
 		message.nameChangesCount = 0;
 
-		fill(message.clan = new PlayerClan(), entity.getClan(), entity.getLogicClanRole());
+		if (entity.getClan() != null) {
+			fill(message.clan = new PlayerClan(), entity.getClan(), entity.getLogicClanRole());
+		} else {
+			message.clan = null;
+		}
 
 		message.gold = entity.getGold();
 		message.gems = message.freeGems = entity.getGems();
