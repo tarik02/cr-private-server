@@ -1,6 +1,5 @@
 package royaleserver.database.entity;
 
-import org.hibernate.annotations.GenericGenerator;
 import royaleserver.database.util.Identifiable;
 import royaleserver.logic.Arena;
 import royaleserver.logic.ClanRole;
@@ -18,14 +17,7 @@ import java.util.Set;
 })
 public class PlayerEntity implements Identifiable<Long> {
 	@Id
-	@GenericGenerator(
-			name = "assigned-identity",
-			strategy = "royaleserver.database.util.AssignedIdentityGenerator"
-	)
-	@GeneratedValue(
-			generator = "assigned-identity",
-			strategy = GenerationType.IDENTITY
-	)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(length = 32, nullable = true)
