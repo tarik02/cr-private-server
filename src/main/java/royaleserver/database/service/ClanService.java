@@ -24,6 +24,13 @@ public class ClanService extends Service {
 		}
 	}
 
+	public void remove(ClanEntity entity) {
+		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+			session.remove(entity);
+			transaction.commit();
+		}
+	}
+
 	public ClanEntity searchById(long id) {
 		try (Session session = getSession()) {
 			return session.createNamedQuery("ClanEntity.byId", ClanEntity.class).setParameter("id", id).getSingleResult();

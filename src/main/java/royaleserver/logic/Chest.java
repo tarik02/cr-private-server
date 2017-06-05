@@ -12,7 +12,9 @@ import java.util.List;
 public final class Chest extends DBLogic implements Cloneable {
 	public static final int SCID_HIGH = 19;
 
+	private int index;
 	private SCID scid;
+
 	private Arena arena;
 	private boolean inShop, inArenaInfo;
 	private int timeTakenDays, timeTakesHours, timeTakenMinutes, timeTakenSeconds;
@@ -22,6 +24,10 @@ public final class Chest extends DBLogic implements Cloneable {
 	private int minGoldPerCard, maxGoldPerCard;
 
 	private Chest() {}
+
+	public int getIndex() {
+		return index;
+	}
 
 	public SCID getScid() {
 		return scid;
@@ -145,7 +151,8 @@ public final class Chest extends DBLogic implements Cloneable {
 				}
 			}
 
-			chest.scid = new SCID(SCID_HIGH, i++);
+			chest.index = i;
+			chest.scid = new SCID(SCID_HIGH, i);
 
 			chest.name = csv_chest.getValue(csv_Name).asString();
 			chest.arena = Arena.by(csv_chest.getValue(csv_Arena).asString(chest.arena == null ? "" : chest.arena.getName()));
@@ -171,6 +178,7 @@ public final class Chest extends DBLogic implements Cloneable {
 			chest.maxGoldPerCard = csv_chest.getValue(csv_MaxGoldPerCard).asInt(chest.maxGoldPerCard);
 
 			values.add(chest);
+			++i;
 		}
 
 		init(values, server.getDataManager().getChestService());
@@ -181,6 +189,16 @@ public final class Chest extends DBLogic implements Cloneable {
 	public static Chest by(String name) {
 		for (Chest chest : values) {
 			if (chest.name.equals(name)) {
+				return chest;
+			}
+		}
+
+		return null;
+	}
+
+	public static Chest by(int index) {
+		for (Chest chest : values) {
+			if (chest.index == index) {
 				return chest;
 			}
 		}
