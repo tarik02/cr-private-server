@@ -38,6 +38,8 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	protected PlayerEntity entity;
 	protected Random random;
 
+	protected OpeningChest openingChest = null;
+
 	public Player(PlayerEntity entity, Server server, NetworkSession session) {
 		this.entity = entity;
 		this.server = server;
@@ -92,15 +94,35 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		}
 	}
 
-	protected void openChest(Chest chest) {
-		Rarity common = Rarity.by("Common");
-		Rarity rare = Rarity.by("Rare");
-		Rarity epic = Rarity.by("Epic");
-		Rarity legendary = Rarity.by("Legendary");
+	private void endOpeningChest() {
+		if (openingChest != null) {
+			openingChest.end();
 
-		List<Pair<royaleserver.logic.Card, Integer>> cards = new ArrayList<>();
+			// TODO: Give all
 
+			openingChest = null;
+		}
+	}
+
+	private void openChest(Chest chest) {
+		endOpeningChest();
+
+		ChestOpenOk command = new ChestOpenOk();
+		Filler.fill(command, openingChest = generateChest(chest));
+
+		CommandResponse response = new CommandResponse();
+		response.command = command;
+		session.sendMessage(response);
+	}
+
+	protected OpeningChest generateChest(Chest chest) {
 		boolean isDraft = chest.isDraftChest();
+		OpeningChest.Builder builder = OpeningChest.builder(isDraft);
+
+		final Rarity common = Rarity.by("Common");
+		final Rarity rare = Rarity.by("Rare");
+		final Rarity epic = Rarity.by("Epic");
+		final Rarity legendary = Rarity.by("Legendary");
 
 		float rewardMultiplier = chest.getArena().getChestRewardMultiplier() / 100;
 		int minimumSpellsCount = (int)(chest.getRandomSpells() * rewardMultiplier);
@@ -123,10 +145,10 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		int realSpellsCount = (int)(commonCount + rareCount + epicCount + legendaryCount);
 
 		Map<Rarity, List<royaleserver.logic.Card>> candidates = royaleserver.logic.Card.select(entity.getLogicArena());
-		commonCount -= generateCards(cards, candidates.get(common), differentCommon, (int)commonCount, isDraft);
-		rareCount -= generateCards(cards, candidates.get(rare), differentRare, (int)rareCount, isDraft);
-		epicCount -= generateCards(cards, candidates.get(epic), differentEpic, (int)epicCount, isDraft);
-		legendaryCount -= generateCards(cards, candidates.get(legendary), differentLegendary, (int)legendaryCount, isDraft);
+		commonCount -= generateCards(builder, candidates.get(common), differentCommon, (int)commonCount);
+		rareCount -= generateCards(builder, candidates.get(rare), differentRare, (int)rareCount);
+		epicCount -= generateCards(builder, candidates.get(epic), differentEpic, (int)epicCount);
+		legendaryCount -= generateCards(builder, candidates.get(legendary), differentLegendary, (int)legendaryCount);
 
 		entity.setRareChance(rareCount);
 		entity.setEpicChance(epicCount);
@@ -135,36 +157,14 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		int minGold = chest.getMinGoldPerCard() * realSpellsCount;
 		int maxGold = chest.getMaxGoldPerCard() * realSpellsCount;
 
-		ChestOpenOk command = new ChestOpenOk();
-		command.gold = minGold + random.nextInt(maxGold - minGold);
-		command.gems = 0; // TODO:
-		command.chestItems = new ChestItem[cards.size()];
+		builder.gold(minGold + random.nextInt(maxGold - minGold));
+		builder.gems(0); // TODO:
 
-		cards.sort(Comparator.comparingInt(a -> a.first().getRarity().getSortCapacity() * a.second()));
-		int i = 0;
-		for (Pair<royaleserver.logic.Card, Integer> card : cards) {
-			ChestItem chestItem = new ChestItem();
-			chestItem.card = card.first().getIndex();
-			chestItem.count = card.second();
-			chestItem.cardOrder = isDraft ? (byte)((i + 1) % 2) : 0;
-
-			command.chestItems[i++] = chestItem;
-		}
-
-		command.isDraft = isDraft;
-
-		//if (isDraft) {
-			command.unknown_7 = 4;
-			command.unknown_8 = 2;
-		//}
-
-		CommandResponse response = new CommandResponse();
-		response.command = command;
-		session.sendMessage(response);
+		return builder.build();
 	}
 
-	private int generateCards(List<Pair<royaleserver.logic.Card, Integer>> cards, List<royaleserver.logic.Card> candidates,
-	                          int different, int count, boolean isDraft) {
+	private int generateCards(OpeningChest.Builder builder, List<royaleserver.logic.Card> candidates,
+	                          int different, int count) {
 		int first;
 		if (different == 1) {
 			first = count;
@@ -175,38 +175,40 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		int current = first;
 		int sum = 0;
 
-		while (different != 1 && sum + current <= count) {
-			sum += current;
-
-			if (isDraft) {
-				addCard(cards, candidates, current);
-				addCard(cards, candidates, current);
-			} else {
-				addCard(cards, candidates, current);
+		while (different != 1 && sum + current <= count && candidates.size() > builder.optionSize() * 2) {
+			if (addStack(builder, candidates, current)) {
+				sum += current;
+				current *= 1f + random.nextFloat();
+				--different;
 			}
-
-			current *= 1f + random.nextFloat();
-			--different;
 		}
 
 		if (sum < count) {
-			if (isDraft) {
-				addCard(cards, candidates, count - sum);
-				addCard(cards, candidates, count - sum);
-			} else {
-				addCard(cards, candidates, count - sum);
+			current = count - sum;
+			if (addStack(builder, candidates, current)) {
+				sum += current;
+				current *= 1f + random.nextFloat();
+				--different;
 			}
 		}
 
-		return count;
+		return sum;
 	}
 
-	private void addCard(List<Pair<royaleserver.logic.Card, Integer>> cards, List<royaleserver.logic.Card> candidates, int count) {
-		if (candidates.size() != 0) {
-			int index = random.nextInt(candidates.size());
-			Pair<Card, Integer> pair = new Pair<>(candidates.remove(index), count);
-			cards.add(pair);
+	private boolean addStack(OpeningChest.Builder builder, List<royaleserver.logic.Card> candidates, int count) {
+		if (candidates.size() > builder.optionSize()) {
+			OpeningChest.CardStack[] stack = new OpeningChest.CardStack[builder.optionSize()];
+			for (int i = 0; i < stack.length; ++i) {
+				int index = random.nextInt(candidates.size());
+				Card candidate = candidates.remove(index);
+
+				stack[i] = new OpeningChest.CardStack(candidate, count);
+			}
+
+			return true;
 		}
+
+		return false;
 	}
 
 	protected int countDifferent(float rarityCount, int count, int different) {
@@ -632,8 +634,12 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	@Override
 	public boolean handleChestCardNext(ChestCardNext command) throws Throwable {
-		// TODO: Draft chests
 		return false;
+	}
+
+	@Override
+	public boolean handleChestDraftCardSelect(ChestDraftCardSelect command) throws Throwable {
+		return true;
 	}
 
 	@Override

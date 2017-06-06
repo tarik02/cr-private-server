@@ -2,6 +2,7 @@ package royaleserver.utils;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
 // http://stackoverflow.com/a/8138687
@@ -100,6 +101,9 @@ public class Dumper {
 					}
 
 					for (int i = 0; i < fields.length; i++) {
+						if (Modifier.isStatic(fields[i].getModifiers())) {
+							continue;
+						}
 
 						String fSimpleName = getSimpleNameWithoutArrayQualifier(fields[i].getType());
 						String fName = fields[i].getName();

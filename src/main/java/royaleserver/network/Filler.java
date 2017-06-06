@@ -1,7 +1,9 @@
 package royaleserver.network;
 
+import royaleserver.OpeningChest;
 import royaleserver.database.entity.*;
 import royaleserver.logic.ClanRole;
+import royaleserver.network.protocol.server.commands.ChestOpenOk;
 import royaleserver.network.protocol.server.commands.ClanJoinOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.components.*;
@@ -262,5 +264,29 @@ public final class Filler {
 
 			message.deck.cards[i] = card;
 		}
+	}
+
+	public static void fill(ChestOpenOk command, OpeningChest chest) {
+		command.gold = chest.gold();
+		command.gems = chest.gems();
+
+		command.items = new ChestItem[chest.cards().size() * chest.optionSize()];
+		int i = 0;
+		for (OpeningChest.CardStack[] stack : chest.cards()) {
+			for (OpeningChest.CardStack card : stack) {
+				ChestItem item = new ChestItem();
+				item.card = card.card;
+				item.count = card.count;
+				item.cardOrder = (byte)i;
+				command.items[i] = item;
+
+				++i;
+			}
+		}
+
+		command.isDraft = chest.optionSize() != 1;
+
+		command.unknown_7 = 4;
+		command.unknown_8 = 2;
 	}
 }

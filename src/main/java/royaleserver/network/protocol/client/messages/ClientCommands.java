@@ -6,8 +6,12 @@ import royaleserver.network.protocol.client.ClientMessage;
 import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
+import royaleserver.utils.LogManager;
+import royaleserver.utils.Logger;
 
 public final class ClientCommands extends ClientMessage {
+	public static final Logger logger = LogManager.getLogger(ClientCommands.class);
+
 	public static final short ID = Messages.CLIENT_COMMANDS;
 
 	public int tick;
@@ -36,12 +40,16 @@ public final class ClientCommands extends ClientMessage {
 		commands = new ClientCommand[stream.getRrsInt32()];
 		for (int i = 0; i < commands.length; i++) {
 			short commandId = (short)stream.getRrsInt32();
-			commands[i] = ClientCommandFactory.instance.create(commandId);
-			if (commands[i] == null) {
+			ClientCommand command = ClientCommandFactory.instance.create(commandId);
+
+			if (command == null) {
+				logger.warn("Unknown command %d.", commandId);
+
 				break;
 			}
 
-			commands[i].decode(stream);
+			command.decode(stream);
+			commands[i] = command;
 		}
 	}
 }
