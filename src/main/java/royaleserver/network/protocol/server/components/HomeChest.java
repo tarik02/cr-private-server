@@ -8,7 +8,9 @@ public class HomeChest {
 	public static final byte STATUS_OPENED = 1;
 	public static final byte STATUS_OPENING = 8;
 
+	public int offset;
 	public boolean first;
+	public int firstOffset;
 	public int slot;
 	public Chest chest;
 	public byte status;
@@ -16,10 +18,10 @@ public class HomeChest {
 
 	public void encode(DataStream stream) {
 		stream.putRrsInt32(0);
-		stream.putRrsInt32(4);
+		stream.putRrsInt32(offset);
 
 		if (first) {
-			stream.putRrsInt32(1 + slot);
+			stream.putRrsInt32(firstOffset);
 		}
 
 		stream.putSCID(chest.getScid());
@@ -32,7 +34,7 @@ public class HomeChest {
 			stream.putRrsInt32((int)System.currentTimeMillis());
 		}
 
-		stream.putRrsInt32(slot);
+		stream.putRrsInt32(5772); // ?? chest id (у пользователя)??
 
 		stream.putRrsInt32(1);
 		stream.putRrsInt32(slot);
