@@ -1,5 +1,6 @@
 package royaleserver.network.protocol.server.messages;
 
+import royaleserver.logic.Chest;
 import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.server.components.Card;
@@ -141,6 +142,66 @@ public final class HomeDataOwn extends HomeData {
 		// year[4]-month[2]-day[2]
 		stream.putString("{\"ID\":\"CARD_RELEASE\",\"Params\":{\"Assassin\":\"20170324\",\"Heal\":\"20170501\"}}");
 
+		// Сохрани себе где-нибудь, а потом удали. Я это для тебя писал прост))
+
+		// Когда first == true:
+		/*
+			1 слот = offset(4) - first(true) - firstOffset(1) - slot(0) == 2 ^ 0
+			2 слот = offset(4) - first(true) - firstOffset(2) - slot(1) == 2 ^ 1
+			3 слот = offset(4) - first(true) - firstOffset(4) - slot(2) == 2 ^ 2
+			4 слот = offset(4) - first(true) - firstOffset(8) - slot(3) == 2 ^ 3
+
+			из этого мы видим, что firstOffset можно получить, с помощью метода 'возведение в степень'
+		*/
+
+		// ПРИМЕР: (4 слот = offset(4) - firstOffset(8) - slot(3) == 2 ^ 3)
+		/*
+			homeChests[0] = new HomeChest();
+			homeChests[0].offset = 4;
+			homeChests[0].first = true;
+			homeChests[0].firstOffset = 8;
+			homeChests[0].chest = Chest.by(10);
+			homeChests[0].slot = 3;
+			homeChests[0].status = 0;
+		*/
+
+		// Когда first != true:
+		/*
+			В данном случае, нам нужно работать с offset, а не с firstOffset, как это было выше.
+
+			1 слот - не может быть, нужно строго соблюдать порядок и, если сундук с 'first = false' ->
+			стоит перед сундуком с 'first', то будет что-то плохое.
+
+			Offset зависит от firstOffset.
+			После сундука первого сундука = offset(4) // Если, нам нужно поставить сундук после первого, то смело делаем offset = 4
+			+ 1 после сундука первого сундука (если нужен пустой слот) = offset(8) // Если нам нужно пропустить 1 сундук после первого
+			+ 2 сундука (если нужно 2 пустых слота) = offset(16)
+
+			2 слот = offset(x) - first(false) - firstOffset(NULL) - slot(1)
+			3 слот = offset(x) - first(false) - firstOffset(NULL) - slot(2)
+			4 слот = offset(x) - first(false) - firstOffset(NULL) - slot(3)
+
+			! А вообще, если будут вопросы с сундуками, то лучше спрашивай у меня c:
+		*/
+
+		// ПРИМЕР: (1, 4 слот)
+		/*
+			homeChests[0] = new HomeChest();
+			homeChests[0].offset = 4;
+			homeChests[0].first = true;
+			homeChests[0].firstOffset = 1;
+			homeChests[0].chest = Chest.by(10);
+			homeChests[0].slot = 0;
+			homeChests[0].status = 0;
+
+			homeChests[1] = new HomeChest();
+			homeChests[1].offset = 16;
+			homeChests[1].chest = Chest.by(10);
+			homeChests[1].slot = 3;
+			homeChests[1].status = 0;
+		*/
+
+
 		if (homeChests.length != 0) {
 			homeChests[0].first = true;
 			for (HomeChest chest : homeChests) {
@@ -150,19 +211,24 @@ public final class HomeDataOwn extends HomeData {
 
 		stream.put(Hex.toByteArray("0000"));
 
-		stream.putRrsInt32(1600);
+		// free treasure chest next comedown
+		stream.putRrsInt32(72000); // 72000 = 1 hour => 1200 = 1 min => 20 = 1 sec
+
 		stream.putRrsInt32(287360); // seconds?
 		stream.putRrsInt32(1496659547); // timestamp
 
-		// unknown struct
+		// struct of CrownChest
 		stream.put(Hex.toByteArray("00007f"));
-		stream.put(Hex.toByteArray("0000000000000000000004"));
+		stream.put(Hex.toByteArray("00000000000000000000"));
+		stream.putRrsInt32(0); // count of crowns | 10 == 1 chest
 
 		// unknown struct
 		stream.put(Hex.toByteArray("00"));
 		stream.put(Hex.toByteArray("00007f"));
+
 		stream.putRrsInt32(1455020); // seconds?
 		stream.putRrsInt32(1683240); // seconds?
+
 		stream.putRrsInt32(1496732218); // timestamp
 
 		// unknown struct
@@ -180,9 +246,9 @@ public final class HomeDataOwn extends HomeData {
 		stream.putRrsInt32(2);
 		stream.putRrsInt32(2);
 
-		// time ? seconds
-		stream.putRrsInt32(888140);
-		stream.putRrsInt32(888140);
+		// next shop update
+		stream.putRrsInt32(72000); // 72000 = 1 hour => 1200 = 1 min => 20 = 1 sec
+		stream.putRrsInt32(72000);
 
 		// next update (timestamp)
 		stream.putRrsInt32((int)System.currentTimeMillis());
@@ -208,7 +274,7 @@ public final class HomeDataOwn extends HomeData {
 
 		stream.put(Hex.toByteArray("0b08935f8506000381030a00011c08010900a3030000fa078c0101b9a1bd1700001a003508b5fdb2178c22000a000d0491aa9f1700000900330abaaea017b5090008001308a3b29f17050005002e027f0400120082010800a81f000c002a0a8e95d3171300180003aeeae51890fcd91ab0eae51803aeeae51890fcd91ab0eae51800018fd2f83e078cd2f83e8dd2f83e8ed2f83e8bd2f83e8fd2f83e9cd2f83eb1d2f83e0291d2f83ea0d2f83e019081a1fe0b00bb0201018ae6bf33020087822aa60859310f83593504039bb5ae0501000413b303059b5a0b7f000000"));
 
-		stream.putRrsInt32(arena.getIndex() - 1);
+		stream.putRrsInt32((int)arena.getDbId());
 
 		stream.put(Hex.toByteArray("021f993fbc3e000020b340b33e000000000001"));
 		super.encode(stream);
