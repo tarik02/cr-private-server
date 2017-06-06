@@ -204,6 +204,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 				stack[i] = new OpeningChest.CardStack(candidate, count);
 			}
+			builder.add(stack);
 
 			return true;
 		}
