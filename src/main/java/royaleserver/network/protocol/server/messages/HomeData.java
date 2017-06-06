@@ -51,7 +51,7 @@ public abstract class HomeData extends ServerMessage {
 		}
 		stream.putRrsInt32(nameChangesCount);
 
-		stream.putByte((byte)(arena.getArena() + 1));
+		stream.putByte((byte)(arena.getIndex() + 1));
 		stream.putRrsInt32(trophies);
 
 		stream.putRrsInt32(0); // unk_6
@@ -73,7 +73,7 @@ public abstract class HomeData extends ServerMessage {
 		stream.putRrsInt32(highestTrophies);
 
 		stream.putRrsInt32(0); //unk_7 = p.readRRSInt32()
-		stream.putRrsInt32(arena.getArena() + 1); // seasonReward arena
+		stream.putRrsInt32(arena.getIndex() + 1); // seasonReward arena
 		stream.putRrsInt32(7); //always_7 = p.readRRSInt32()
 
 		HomeResources homeResources = new HomeResources();

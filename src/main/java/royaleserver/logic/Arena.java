@@ -166,16 +166,6 @@ public final class Arena extends DBLogic {
 		return null;
 	}
 
-	public static Arena by(long id) {
-		for (Arena arena : values) {
-			if (arena.arena == id) {
-				return arena;
-			}
-		}
-
-		return null;
-	}
-
 	public static Arena byDB(long id) {
 		for (Arena arena : values) {
 			if (arena.dbId == id) {
