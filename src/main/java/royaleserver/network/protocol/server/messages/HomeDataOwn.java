@@ -142,66 +142,6 @@ public final class HomeDataOwn extends HomeData {
 		// year[4]-month[2]-day[2]
 		stream.putString("{\"ID\":\"CARD_RELEASE\",\"Params\":{\"Assassin\":\"20170324\",\"Heal\":\"20170501\"}}");
 
-		// Сохрани себе где-нибудь, а потом удали. Я это для тебя писал прост))
-
-		// Когда first == true:
-		/*
-			1 слот = offset(4) - first(true) - firstOffset(1) - slot(0) == 2 ^ 0
-			2 слот = offset(4) - first(true) - firstOffset(2) - slot(1) == 2 ^ 1
-			3 слот = offset(4) - first(true) - firstOffset(4) - slot(2) == 2 ^ 2
-			4 слот = offset(4) - first(true) - firstOffset(8) - slot(3) == 2 ^ 3
-
-			из этого мы видим, что firstOffset можно получить, с помощью метода 'возведение в степень'
-		*/
-
-		// ПРИМЕР: (4 слот = offset(4) - firstOffset(8) - slot(3) == 2 ^ 3)
-		/*
-			homeChests[0] = new HomeChest();
-			homeChests[0].offset = 4;
-			homeChests[0].first = true;
-			homeChests[0].firstOffset = 8;
-			homeChests[0].chest = Chest.by(10);
-			homeChests[0].slot = 3;
-			homeChests[0].status = 0;
-		*/
-
-		// Когда first != true:
-		/*
-			В данном случае, нам нужно работать с offset, а не с firstOffset, как это было выше.
-
-			1 слот - не может быть, нужно строго соблюдать порядок и, если сундук с 'first = false' ->
-			стоит перед сундуком с 'first', то будет что-то плохое.
-
-			Offset зависит от firstOffset.
-			После сундука первого сундука = offset(4) // Если, нам нужно поставить сундук после первого, то смело делаем offset = 4
-			+ 1 после сундука первого сундука (если нужен пустой слот) = offset(8) // Если нам нужно пропустить 1 сундук после первого
-			+ 2 сундука (если нужно 2 пустых слота) = offset(16)
-
-			2 слот = offset(x) - first(false) - firstOffset(NULL) - slot(1)
-			3 слот = offset(x) - first(false) - firstOffset(NULL) - slot(2)
-			4 слот = offset(x) - first(false) - firstOffset(NULL) - slot(3)
-
-			! А вообще, если будут вопросы с сундуками, то лучше спрашивай у меня c:
-		*/
-
-		// ПРИМЕР: (1, 4 слот)
-		/*
-			homeChests[0] = new HomeChest();
-			homeChests[0].offset = 4;
-			homeChests[0].first = true;
-			homeChests[0].firstOffset = 1;
-			homeChests[0].chest = Chest.by(10);
-			homeChests[0].slot = 0;
-			homeChests[0].status = 0;
-
-			homeChests[1] = new HomeChest();
-			homeChests[1].offset = 16;
-			homeChests[1].chest = Chest.by(10);
-			homeChests[1].slot = 3;
-			homeChests[1].status = 0;
-		*/
-
-
 		if (homeChests.length != 0) {
 			homeChests[0].first = true;
 			for (HomeChest chest : homeChests) {

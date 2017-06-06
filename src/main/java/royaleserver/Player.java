@@ -277,6 +277,8 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		}
 		closed = true;
 
+		endOpeningChest();
+
 		server.removePlayer(this);
 		entity.setOnline(false);
 		save();

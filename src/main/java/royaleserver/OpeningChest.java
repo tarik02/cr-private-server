@@ -59,7 +59,6 @@ public class OpeningChest {
 	}
 
 	private final List<CardStack[]> cards;
-	private final List<CardStack[]> cards;
 	private final int gold, gems;
 	private int currentCard = 0;
 
