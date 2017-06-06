@@ -148,9 +148,29 @@ public final class HomeDataOwn extends HomeData {
 			}
 		}
 
-		// Not decoded yet
-		stream.put(Hex.toByteArray("0000809423809423849fe6920b00007f0113070102007f0000000000000000000000000000a8ced101b0f6d201a6fbee920ba8ced101b0f6d201a6fbee920b0000007f0d0000000000000002"));
+		stream.put(Hex.toByteArray("0000"));
 
+		stream.putRrsInt32(1600);
+		stream.putRrsInt32(287360); // seconds?
+		stream.putRrsInt32(1496659547); // timestamp
+
+		// unknown struct
+		stream.put(Hex.toByteArray("00007f"));
+		stream.put(Hex.toByteArray("0000000000000000000004"));
+
+		// unknown struct
+		stream.put(Hex.toByteArray("00"));
+		stream.put(Hex.toByteArray("00007f"));
+		stream.putRrsInt32(1455020); // seconds?
+		stream.putRrsInt32(1683240); // seconds?
+		stream.putRrsInt32(1496732218); // timestamp
+
+		// unknown struct
+		stream.put(Hex.toByteArray("00"));
+		stream.put(Hex.toByteArray("00007f"));
+		stream.put(Hex.toByteArray("030000000000000002"));
+
+		// last information
 		stream.putRrsInt32(lastLevel.getIndex());
 		stream.putByte((byte)36);
 		stream.putByte((byte)lastArena.getIndex());
