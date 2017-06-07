@@ -586,6 +586,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		if (checkNickname(message.name)) {
 			command.name = message.name;
 			entity.setName(message.name);
+			save(); // need?
 		} else {
 			command.name = entity.getName();
 		}
