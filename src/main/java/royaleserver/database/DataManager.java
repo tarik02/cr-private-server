@@ -33,6 +33,11 @@ public class DataManager {
 		case "mysql":
 			properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect");
 			properties.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+
+			properties.setProperty("hibernate.connection.CharSet", "utf8");
+			properties.setProperty("hibernate.connection.characterEncoding", "utf8");
+			properties.setProperty("hibernate.connection.useUnicode", "true");
+
 			properties.setProperty("hibernate.connection.url", (new StringBuilder())
 					.append("jdbc:mysql://")
 					.append(config.mysql.host)
