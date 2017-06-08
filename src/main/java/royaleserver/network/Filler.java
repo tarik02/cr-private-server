@@ -162,6 +162,7 @@ public final class Filler {
 	public static void fill(HomeDataOwn message, PlayerEntity entity, List<PlayerCard> cards) {
 		fill((HomeData)message, entity);
 		message.isMyProfile = true;
+		message.giveReward = false;
 
 		message.accountCreatedTime = (int)(entity.getRegisteredDate().getTime() / 1000);
 		message.loginTime = (int)(System.currentTimeMillis() / 1000);

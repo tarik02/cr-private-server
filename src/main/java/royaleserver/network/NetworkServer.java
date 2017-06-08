@@ -146,6 +146,21 @@ public final class NetworkServer {
 
 					ClientHello clientHello = (ClientHello)message;
 
+					if (!clientHello.contentHash.equals(server.getContentHash())) {
+						LoginFailed loginFailed = new LoginFailed();
+						loginFailed.errorCode = LoginFailed.ERROR_CODE_NEW_ASSETS;
+						loginFailed.resourceFingerprintData = server.getResourceFingerprint();
+						loginFailed.redirectDomain = "";
+						loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
+						loginFailed.updateURL = "";
+						loginFailed.reason = "";
+						loginFailed.secondsUntilMaintenanceEnd = 0;
+						loginFailed.unknown_7 = (byte)0;
+						loginFailed.unknown_8 = "";
+						sendMessage(loginFailed);
+						return;
+					}
+
 					ServerHello serverHello = new ServerHello();
 					serverHello.sessionKey = sessionKey;
 					sendMessage(serverHello);
@@ -160,20 +175,6 @@ public final class NetworkServer {
 					}
 
 					Login login = (Login)message;
-					/*if (login.resourceSha.equals("863227dfdea3a47d55da528a39c6123d17c961be")) {
-						LoginFailed loginFailed = new LoginFailed();
-						loginFailed.errorCode = 7;
-						loginFailed.resourceFingerprintData = resourceFingerprint;
-						loginFailed.redirectDomain = "";
-						loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
-						loginFailed.updateURL = "";
-						loginFailed.reason = "";
-						loginFailed.secondsUntilMaintenanceEnd = 0;
-						loginFailed.unknown_7 = (byte)0;
-						loginFailed.unknown_8 = "";
-						writeMessage(loginFailed);
-						break loop;
-					}*/
 
 					PlayerService playerService = server.getDataManager().getPlayerService();
 					PlayerEntity playerEntity;

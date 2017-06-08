@@ -173,6 +173,10 @@ public class Server {
 		return resourceFingerprint;
 	}
 
+	public String getContentHash() {
+		return config.CONTENT_HASH;
+	}
+
 	/**
 	 * @apiNote Internal usage only
 	 * @param player
