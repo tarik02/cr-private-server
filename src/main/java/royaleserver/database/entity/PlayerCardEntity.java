@@ -3,13 +3,13 @@ package royaleserver.database.entity;
 import royaleserver.logic.Card;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
-@Table(name = "player_card")
-public class PlayerCardEntity implements java.io.Serializable {
-	@Column(name = "card_id")
-	private long cardId;
-
+@Table(name = "player_card", indexes = {
+		@Index(unique = true, columnList = "player_id,card_id")
+})
+public class PlayerCardEntity implements Serializable {
 	@Id
 	@ManyToOne
 	@PrimaryKeyJoinColumn(name = "player_id", referencedColumnName = "id")
@@ -81,13 +81,16 @@ public class PlayerCardEntity implements java.io.Serializable {
 
 		PlayerCardEntity that = (PlayerCardEntity)o;
 
-		return player.equals(that.player) && card.equals(that.card);
+		if (player != null ? !player.equals(that.player) : that.player != null) {
+			return false;
+		}
+		return card != null ? card.equals(that.card) : that.card == null;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = player.hashCode();
-		result = 31 * result + card.hashCode();
+		int result = player != null ? player.hashCode() : 0;
+		result = 31 * result + (card != null ? card.hashCode() : 0);
 		return result;
 	}
 }
