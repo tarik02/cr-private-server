@@ -25,6 +25,7 @@ public final class HomeDataOwn extends HomeData {
 	public String[] challenges; // JSON
 
 	public Card[] shopCards;
+	public boolean giveReward;
 
 	public HomeDataOwn() {
 		super(ID);
@@ -213,11 +214,164 @@ public final class HomeDataOwn extends HomeData {
 		stream.put(Hex.toByteArray("00007f"));
 		stream.put(Hex.toByteArray("00007f"));
 
-		stream.put(Hex.toByteArray("0b08935f8506000381030a00011c08010900a3030000fa078c0101b9a1bd1700001a003508b5fdb2178c22000a000d0491aa9f1700000900330abaaea017b5090008001308a3b29f17050005002e027f0400120082010800a81f000c002a0a8e95d3171300180003aeeae51890fcd91ab0eae51803aeeae51890fcd91ab0eae51800018fd2f83e078cd2f83e8dd2f83e8ed2f83e8bd2f83e8fd2f83e9cd2f83eb1d2f83e0291d2f83ea0d2f83e019081a1fe0b00bb0201018ae6bf33020087822aa60859310f83593504039bb5ae0501000413b303059b5a0b7f000000"));
+		// пиздец я с этим долго мучаался
 
+		// unknown ints
+		stream.putRrsInt32(20);
+		stream.putRrsInt32(17);
+		stream.putRrsInt32(2035);
+		stream.putRrsInt32(1744);
+		stream.putRrsInt32(0);
+
+		// unk struct
+		stream.writeStructureRRS(new int[]{193, 8, 0});
+
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(26);
+		stream.putRrsInt32(39);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(9);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(782);
+
+		stream.put(Hex.toByteArray("0000"));
+		stream.put(Hex.toByteArray("fa"));
+
+		// wtf??!1
+		stream.putRrsInt32(7);
+		stream.putRrsInt32(22);
+		stream.putRrsInt32(7);
+		stream.putRrsInt32(24517854);
+		stream.putRrsInt32(31);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(8);
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(61);
+		stream.putRrsInt32(6);
+		stream.putRrsInt32(24531145);
+		stream.putRrsInt32(215);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(5);
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(42);
+		stream.putRrsInt32(8);
+		stream.putRrsInt32(24801577);
+		stream.putRrsInt32(775);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(7);
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(65);
+		stream.putRrsInt32(7);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(5);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(8);
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(9);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(351);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(6);
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(12);
+		stream.putRrsInt32(6);
+		stream.putRrsInt32(24476166);
+		stream.putRrsInt32(16);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(5);
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(15);
+		stream.putRrsInt32(6);
+		stream.putRrsInt32(24471993);
+		stream.putRrsInt32(30);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(3);
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(40);
+		stream.putRrsInt32(6);
+		stream.putRrsInt32(24577728);
+		stream.putRrsInt32(182);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(4);
+
+		stream.put(Hex.toByteArray("00"));
+
+		stream.writeStructureRRS(new int[]{26000046, 26000016});
+		stream.writeStructureRRS(new int[]{26000046, 26000016});
+
+		stream.put(Hex.toByteArray("00"));
+
+		stream.writeStructureRRS(new int[]{66000014, 66000015});
+		stream.writeStructureRRS(new int[]{66000013, 66000012, 66000014, 66000028});
+		stream.writeStructureRRS(new int[]{66000029});
+		stream.writeStructureRRS(new int[]{1608786000}); // player id?? in rrs int??
+
+		stream.put(Hex.toByteArray("00"));
+
+		stream.putRrsInt32(121); // changed
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(54000010);
+
+		stream.putRrsInt32(giveReward  ? 2 : 1); // 1 - without reward, 2 - with reward
+		stream.putRrsInt32(19); // changed
+		stream.putRrsInt32(223); // changed
+
+		stream.putRrsInt32(1); // 1
+
+		stream.put(Hex.toByteArray(giveReward  ? "59" : "a9")); // a9 - no seasonReward ||  - with seasonReward
+		stream.put(Hex.toByteArray(giveReward  ? "39" : "41"));
+
+		stream.putRrsInt32(14); // 15
+
+		if(giveReward) {
+			stream.putRrsInt32(5699);
+			stream.putRrsInt32(53);
+			stream.putRrsInt32(4);
+			stream.putRrsInt32(3);
+			stream.putRrsInt32(5623131);
+			stream.putRrsInt32(1);
+			stream.putRrsInt32(0);
+			stream.putRrsInt32(4);
+			stream.putRrsInt32(19);
+			stream.putRrsInt32(243);
+			stream.putRrsInt32(5);
+			stream.putRrsInt32(5787);
+			stream.putRrsInt32(11);
+		}
+
+		stream.put(Hex.toByteArray("7f000000"));
 		stream.putRrsInt32(arena.getIndex() + 1);
 
-		stream.put(Hex.toByteArray("021f993fbc3e000020b340b33e000000000001"));
+		// items count
+		stream.putRrsInt32(2);
+
+		// first item
+		stream.putRrsInt32(31); // type
+		stream.putRrsInt32(4057); // now/max in now season?
+		stream.putRrsInt32(4028); // best season trophies
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+
+		// second item
+		stream.putRrsInt32(32); // type
+		stream.putRrsInt32(4147); // highest trophies
+		stream.putRrsInt32(4019); // previous season trophies
+
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+
+		stream.put(Hex.toByteArray("00000001"));
+
 		super.encode(stream);
 
 		// WinStreak

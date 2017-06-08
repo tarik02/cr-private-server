@@ -63,7 +63,7 @@ public class DataStream {
 
 	public DataStream reset(boolean saveBufferCapacity) {
 		if (saveBufferCapacity) {
-			Arrays.fill(buffer, (byte) 0);
+			Arrays.fill(buffer, (byte)0);
 		} else {
 			buffer = new byte[32];
 		}
@@ -181,7 +181,7 @@ public class DataStream {
 	}
 
 	public DataStream putBoolean(boolean value) {
-		return putByte(value ? (byte) 0x01 : (byte) 0x00);
+		return putByte(value ? (byte)0x01 : (byte)0x00);
 	}
 
 	public byte getByte() {
@@ -219,7 +219,7 @@ public class DataStream {
 
 	public int getBTriad() {
 		byteBuffer.position(0);
-		return byteBuffer.order(ByteOrder.BIG_ENDIAN).put(0, (byte) 0x00).put(get(3)).getInt(0);
+		return byteBuffer.order(ByteOrder.BIG_ENDIAN).put(0, (byte)0x00).put(get(3)).getInt(0);
 	}
 
 	public DataStream putBTriad(int value) {
@@ -228,7 +228,7 @@ public class DataStream {
 
 	public int getLTriad() {
 		byteBuffer.position(0);
-		return byteBuffer.order(ByteOrder.LITTLE_ENDIAN).put(get(3)).put((byte) 0x00).getInt(0);
+		return byteBuffer.order(ByteOrder.LITTLE_ENDIAN).put(get(3)).put((byte)0x00).getInt(0);
 	}
 
 	public DataStream putLTriad(int value) {
@@ -312,7 +312,7 @@ public class DataStream {
 		} while ((b & 0x80) != 0);
 
 		value = (value >>> 1) ^ -(value & 1);
-		return (int) value;
+		return (int)value;
 	}
 
 	public DataStream putRrsInt32(int value) {
@@ -322,7 +322,7 @@ public class DataStream {
 		long b;
 
 		if (value == 0) {
-			putByte((byte) 0);
+			putByte((byte)0);
 		} else {
 			lvalue = (lvalue << 1) ^ (lvalue >> 31);
 			while (lvalue != 0) {
@@ -340,7 +340,7 @@ public class DataStream {
 					b = b | (msb << 7) | (lsb << 6); // insert msb and lsb back in
 				}
 
-				putByte((byte) b);
+				putByte((byte)b);
 				lvalue >>>= 7;
 			}
 		}
@@ -349,11 +349,11 @@ public class DataStream {
 	}
 
 	public long getRrsLong() {
-		return (((long) getRrsInt32()) << 32) | ((long) getRrsInt32());
+		return (((long)getRrsInt32()) << 32) | ((long)getRrsInt32());
 	}
 
 	public DataStream putRrsLong(long value) {
-		return putRrsInt32((int) (value >> 32)).putRrsInt32((int) value);
+		return putRrsInt32((int)(value >> 32)).putRrsInt32((int)value);
 	}
 
 	public String getString() {
@@ -363,6 +363,16 @@ public class DataStream {
 		}
 
 		return new String(get(count), UTF8_CHARSET);
+	}
+
+	public DataStream writeStructureRRS(int[] rrs) {
+		putRrsInt32(rrs.length);
+
+		for (int i = 0; i < rrs.length; i++) {
+			putRrsInt32(rrs[i]);
+		}
+
+		return this;
 	}
 
 	public DataStream putString(String value) {
@@ -496,7 +506,7 @@ public class DataStream {
 		do {
 			int bits = value & 0x7F;
 			value >>>= 7;
-			byte b = (byte) (bits + ((value != 0) ? 0x80 : 0));
+			byte b = (byte)(bits + ((value != 0) ? 0x80 : 0));
 			putByte(b);
 		} while (value != 0);
 
