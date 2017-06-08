@@ -40,6 +40,7 @@ public final class NetworkServer {
 	private static final Logger logger = LogManager.getLogger(NetworkServer.class);
 	private static final byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");
 	private static final byte[] sessionKey = Hex.toByteArray("74794DE40D62A03AC6F6E86A9815C6262AA12BEDD518F883");
+	private static final boolean useBlock = false;
 
 	private final Server server;
 	private OrderedMemoryAwareThreadPoolExecutor bossExec;
@@ -103,7 +104,8 @@ public final class NetworkServer {
 			HELLO,
 			LOGIN,
 			CONNECTED,
-			DISCONNECTING
+			DISCONNECTING,
+			BLOCKED,
 		}
 
 		private final Server server;
@@ -111,7 +113,7 @@ public final class NetworkServer {
 
 		private Channel channel;
 		private ChannelFuture lastWrite = null;
-		private Status status;
+		public Status status;
 
 		public PlayerHandler(Server server) {
 			this.server = server;
@@ -146,7 +148,24 @@ public final class NetworkServer {
 
 					ClientHello clientHello = (ClientHello)message;
 
-					if (!clientHello.contentHash.equals(server.getContentHash())) {
+					ServerHello serverHello = new ServerHello();
+					serverHello.sessionKey = sessionKey;
+					sendMessage(serverHello);
+
+					status = Status.LOGIN;
+					break;
+
+
+				case LOGIN:
+					if (message.id != Messages.LOGIN) {
+						logger.warn("Excepted Login, received %s. Disconnecting...", message.getClass().getSimpleName());
+						close();
+						return;
+					}
+
+					Login login = (Login)message;
+
+					if (!login.resourceSha.equals(server.getContentHash())) {
 						LoginFailed loginFailed = new LoginFailed();
 						loginFailed.errorCode = LoginFailed.ERROR_CODE_NEW_ASSETS;
 						loginFailed.resourceFingerprintData = server.getResourceFingerprint();
@@ -161,20 +180,22 @@ public final class NetworkServer {
 						return;
 					}
 
-					ServerHello serverHello = new ServerHello();
-					serverHello.sessionKey = sessionKey;
-					sendMessage(serverHello);
+					if(useBlock) {
+						LoginFailed loginFailed = new LoginFailed();
+						loginFailed.errorCode = LoginFailed.ERROR_CODE_ACCOUNT_BLOCKED;
+						loginFailed.resourceFingerprintData = "";
+						loginFailed.redirectDomain = "";
+						loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
+						loginFailed.updateURL = "";
+						loginFailed.reason = "";
+						loginFailed.secondsUntilMaintenanceEnd = 0;
+						loginFailed.unknown_7 = (byte)0;
+						loginFailed.unknown_8 = "";
+						sendMessage(loginFailed);
 
-					status = Status.LOGIN;
-					break;
-				case LOGIN:
-					if (message.id != Messages.LOGIN) {
-						logger.warn("Excepted Login, received %s. Disconnecting...", message.getClass().getSimpleName());
-						close();
-						return;
+						status = Status.BLOCKED;
+						break;
 					}
-
-					Login login = (Login)message;
 
 					PlayerService playerService = server.getDataManager().getPlayerService();
 					PlayerEntity playerEntity;
@@ -182,6 +203,7 @@ public final class NetworkServer {
 					if (login.accountId == 0 && login.passToken.isEmpty()) {
 						playerEntity = playerService.create();
 					} else {
+						System.out.println(login.accountId);
 						playerEntity = playerService.get(login.accountId);
 
 						if (playerEntity == null || !login.passToken.equals(playerEntity.getPassToken())) {
@@ -189,13 +211,14 @@ public final class NetworkServer {
 							loginFailed.errorCode = LoginFailed.ERROR_CODE_RESET_ACCOUNT;
 							loginFailed.resourceFingerprintData = "";
 							loginFailed.redirectDomain = "";
-							loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
-							loginFailed.updateURL = "https://play.google.com/store/apps/details?id=com.supercell.clashroyale";
-							loginFailed.reason = "";
-							loginFailed.secondsUntilMaintenanceEnd = -64;
+							loginFailed.contentURL = "";
+							loginFailed.updateURL = "";
+							loginFailed.reason = "Sorry, we can't find your account in our database. We suggest you to clean app data and try again.";
+							loginFailed.secondsUntilMaintenanceEnd = 0;
 							loginFailed.unknown_7 = (byte)0;
 							loginFailed.unknown_8 = "";
 							sendMessage(loginFailed);
+
 							return;
 						}
 					}
@@ -338,6 +361,11 @@ public final class NetworkServer {
 			buffer.readBytes(payload);
 
 			MessageHeader header = new MessageHeader(id, payload);
+
+			if(header.payload.length == 0) {
+				return null;
+			}
+
 			crypto.decryptPacket(header);
 
 			ClientMessage message = ClientMessageFactory.instance.create(header.id);

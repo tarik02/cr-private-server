@@ -58,9 +58,9 @@ public class ServerCrypto extends Crypto {
 	public void encryptPacket(MessageHeader message) {
 		switch (message.id) {
 		case Messages.SERVER_HELLO:
-		case Messages.LOGIN_FAILED:
 			message.payload = message.decrypted;
 			break;
+		case Messages.LOGIN_FAILED:
 		case Messages.LOGIN_OK:
 			Nonce nonce = new Nonce(clientKey, serverKey, decryptNonce.getBytes());
 			ByteArrayOutputStream toEncrypt = new ByteArrayOutputStream();
