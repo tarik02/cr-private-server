@@ -59,11 +59,13 @@ public class OpeningChest {
 	}
 
 	private final List<CardStack[]> cards;
+	private final List<CardStack> selectedCards;
 	private final int gold, gems;
 	private int currentCard = 0;
 
 	private OpeningChest(List<CardStack[]> cards, int gold, int gems) {
 		this.cards = Collections.unmodifiableList(cards);
+		this.selectedCards = new ArrayList<>(cards.size());
 		this.gold = gold;
 		this.gems = gems;
 	}
@@ -76,6 +78,10 @@ public class OpeningChest {
 		return cards;
 	}
 
+	public List<CardStack> selectedCards() {
+		return selectedCards;
+	}
+
 	public int gold() {
 		return gold;
 	}
@@ -86,12 +92,16 @@ public class OpeningChest {
 
 	public CardStack next(int selection) {
 		CardStack card = null;
-		if (currentCard < cards.size()) {
-			card = cards.get(currentCard)[selection >= optionSize() ? 0 : selection];
+		if (hasCards()) {
+			this.selectedCards.add(currentCard, card = cards.get(currentCard)[selection >= optionSize() ? 0 : selection]);
+			++currentCard;
 		}
 
-		++currentCard;
 		return card;
+	}
+
+	public boolean hasCards() {
+		return currentCard < cards.size();
 	}
 
 	public void end() {

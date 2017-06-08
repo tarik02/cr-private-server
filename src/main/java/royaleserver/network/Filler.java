@@ -1,7 +1,11 @@
 package royaleserver.network;
 
 import royaleserver.OpeningChest;
-import royaleserver.database.entity.*;
+import royaleserver.PlayerCard;
+import royaleserver.database.entity.ClanEntity;
+import royaleserver.database.entity.HomeChestEntity;
+import royaleserver.database.entity.HomeChestStatus;
+import royaleserver.database.entity.PlayerEntity;
 import royaleserver.logic.ClanRole;
 import royaleserver.network.protocol.server.commands.ChestOpenOk;
 import royaleserver.network.protocol.server.commands.ClanJoinOk;
@@ -11,9 +15,10 @@ import royaleserver.network.protocol.server.messages.ClanData;
 import royaleserver.network.protocol.server.messages.HomeData;
 import royaleserver.network.protocol.server.messages.HomeDataOwn;
 import royaleserver.network.protocol.server.messages.HomeDataVisited;
-import java.util.List;
+
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public final class Filler {
 	private Filler() {}
@@ -154,7 +159,7 @@ public final class Filler {
 		message.favouriteCard = null; // TODO:
 	}
 
-	public static void fill(HomeDataOwn message, PlayerEntity entity) {
+	public static void fill(HomeDataOwn message, PlayerEntity entity, List<PlayerCard> cards) {
 		fill((HomeData)message, entity);
 		message.isMyProfile = true;
 
@@ -192,13 +197,13 @@ public final class Filler {
 			message.homeChests[i++] = homeChest;
 		}
 
-		message.cards = new Card[entity.getCards().size()];
+		message.cards = new Card[cards.size()];
 		i = 0;
-		for (PlayerCardEntity cardEntity : entity.getCards()) {
+		for (PlayerCard playerCard : cards) {
 			Card card = new Card();
-			card.card = cardEntity.getLogicCard();
-			card.level = cardEntity.getLevel();
-			card.count = cardEntity.getCount();
+			card.card = playerCard.getCard();
+			card.level = playerCard.getLevel();
+			card.count = playerCard.getCount();
 
 			message.cards[i++] = card;
 		}

@@ -1,10 +1,8 @@
 package royaleserver;
 
-import royaleserver.database.entity.ClanEntity;
-import royaleserver.database.entity.HomeChestEntity;
-import royaleserver.database.entity.HomeChestStatus;
-import royaleserver.database.entity.PlayerEntity;
+import royaleserver.database.entity.*;
 import royaleserver.database.service.ClanService;
+import royaleserver.database.service.PlayerCardService;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.*;
 import royaleserver.network.Filler;
@@ -18,12 +16,10 @@ import royaleserver.network.protocol.server.commands.ChestOpenOk;
 import royaleserver.network.protocol.server.commands.ClanJoinOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.commands.NameSet;
-import royaleserver.network.protocol.server.components.ChestItem;
 import royaleserver.network.protocol.server.components.ClanHeader;
 import royaleserver.network.protocol.server.messages.*;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
-import royaleserver.utils.Pair;
 
 import java.util.*;
 
@@ -39,6 +35,9 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	protected Random random;
 
 	protected OpeningChest openingChest = null;
+	protected final ArrayList<PlayerCard> cards = new ArrayList<>();
+	protected final ArrayList<PlayerCard> cardsWon = new ArrayList<>();
+	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
 
 	public Player(PlayerEntity entity, Server server, NetworkSession session) {
 		this.entity = entity;
@@ -49,6 +48,13 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		server.addPlayer(this);
 
 		random = new Random(entity.getRandomSeed());
+
+		Set<PlayerCardEntity> cardEntities = entity.getCards();
+		cards.ensureCapacity(cardEntities.size());
+		for (PlayerCardEntity cardEntity : cardEntities) {
+			PlayerCard card = new PlayerCard(cardEntity.getLogicCard(), cardEntity.getLevel(), cardEntity.getCount());
+			cards.add(card);
+		}
 	}
 
 	/**
@@ -56,7 +62,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	 */
 	public void sendOwnHomeData() {
 		HomeDataOwn response = new HomeDataOwn();
-		Filler.fill(response, entity);
+		Filler.fill(response, entity, cards);
 
 		session.sendMessage(response);
 	}
@@ -65,7 +71,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	/**
 	 * Adds experience and increases level if needed
-	 * @param count of experience to add
+	 * @param count of experience to merge
 	 */
 	public void addExperience(int count) {
 		int newExp = entity.getExpLevelExperience() + count;
@@ -98,7 +104,27 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		if (openingChest != null) {
 			openingChest.end();
 
-			// TODO: Give all
+			List<OpeningChest.CardStack> cards = openingChest.selectedCards();
+
+			for (OpeningChest.CardStack cardStack : cards) {
+				boolean found = false;
+				for (PlayerCard card : this.cards) {
+					if (cardStack.card == card.getCard()) {
+						card.addCount(cardStack.count);
+						this.cardsToUpdate.add(card);
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
+					PlayerCard card = new PlayerCard(cardStack.card, 1, cardStack.count);
+					card.addCount(cardStack.count);
+					this.cardsWon.add(card);
+					this.cards.add(card);
+					this.cardsToUpdate.add(card);
+				}
+			}
 
 			openingChest = null;
 		}
@@ -113,6 +139,10 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		CommandResponse response = new CommandResponse();
 		response.command = command;
 		session.sendMessage(response);
+
+		if (openingChest.optionSize() == 1) {
+			endOpeningChest();
+		}
 	}
 
 	protected OpeningChest generateChest(Chest chest) {
@@ -230,7 +260,21 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	 */
 	public void save() {
 		PlayerService playerService = server.getDataManager().getPlayerService();
+		PlayerCardService playerCardService = server.getDataManager().getPlayerCardService();
 		entity.setRandomSeed(random.nextLong());
+
+		if (cardsToUpdate.size() > 0) {
+			PlayerCardEntity[] cardEntities = new PlayerCardEntity[cardsToUpdate.size()];
+
+			int i = 0;
+			for (PlayerCard card : cardsToUpdate) {
+				cardEntities[i++] = new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount());
+			}
+
+			playerCardService.merge(cardEntities);
+			cardsToUpdate.clear();
+		}
+
 		playerService.update(entity);
 	}
 
@@ -638,11 +682,18 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	@Override
 	public boolean handleChestCardNext(ChestCardNext command) throws Throwable {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean handleChestDraftCardSelect(ChestDraftCardSelect command) throws Throwable {
+		if (openingChest != null) {
+			openingChest.next(command.selection);
+			if (!openingChest.hasCards()) {
+				endOpeningChest();
+			}
+		}
+
 		return true;
 	}
 
@@ -674,7 +725,29 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	}
 
 	public boolean handleDeckChangeCard(DeckChangeCard command) throws Throwable {
-		return false;
+		if (command.slot < 0 || command.slot >= 8) {
+			return true;
+		}
+
+		boolean isNew = ((command.cardIndex >> 7) & 1) == 1;
+		int cardIndex = command.cardIndex & 0b01111111;
+
+		PlayerCard card = null;
+		if (cardIndex >= 0) {
+			if (isNew) {
+				if (cardIndex < cardsWon.size()) {
+					card = cardsWon.get(cardIndex);
+				}
+			} else if (cardIndex < cards.size()) {
+				card = cards.get(cardIndex);
+			}
+		}
+
+		if (card != null) {
+			logger.info("Set card on slot %d to %s", command.slot, card.getCard().getName());
+		}
+
+		return true;
 	}
 
 	@Override
