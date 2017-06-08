@@ -36,6 +36,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	protected OpeningChest openingChest = null;
 	protected final ArrayList<PlayerCard> cards = new ArrayList<>();
+	protected final ArrayList<PlayerCard> cardsWon = new ArrayList<>();
 	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
 
 	public Player(PlayerEntity entity, Server server, NetworkSession session) {
@@ -119,6 +120,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 				if (!found) {
 					PlayerCard card = new PlayerCard(cardStack.card, 1, cardStack.count);
 					card.addCount(cardStack.count);
+					this.cardsWon.add(card);
 					this.cards.add(card);
 					this.cardsToUpdate.add(card);
 				}
@@ -137,6 +139,10 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		CommandResponse response = new CommandResponse();
 		response.command = command;
 		session.sendMessage(response);
+
+		if (openingChest.optionSize() == 1) {
+			endOpeningChest();
+		}
 	}
 
 	protected OpeningChest generateChest(Chest chest) {
@@ -676,7 +682,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	@Override
 	public boolean handleChestCardNext(ChestCardNext command) throws Throwable {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -719,7 +725,29 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	}
 
 	public boolean handleDeckChangeCard(DeckChangeCard command) throws Throwable {
-		return false;
+		if (command.slot < 0 || command.slot >= 8) {
+			return true;
+		}
+
+		boolean isNew = ((command.cardIndex >> 7) & 1) == 1;
+		int cardIndex = command.cardIndex & 0b01111111;
+
+		PlayerCard card = null;
+		if (cardIndex >= 0) {
+			if (isNew) {
+				if (cardIndex < cardsWon.size()) {
+					card = cardsWon.get(cardIndex);
+				}
+			} else if (cardIndex < cards.size()) {
+				card = cards.get(cardIndex);
+			}
+		}
+
+		if (card != null) {
+			logger.info("Set card on slot %d to %s", command.slot, card.getCard().getName());
+		}
+
+		return true;
 	}
 
 	@Override
