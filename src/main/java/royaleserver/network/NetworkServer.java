@@ -203,7 +203,6 @@ public final class NetworkServer {
 					if (login.accountId == 0 && login.passToken.isEmpty()) {
 						playerEntity = playerService.create();
 					} else {
-						System.out.println(login.accountId);
 						playerEntity = playerService.get(login.accountId);
 
 						if (playerEntity == null || !login.passToken.equals(playerEntity.getPassToken())) {
