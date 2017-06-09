@@ -7,6 +7,7 @@ import royaleserver.database.service.PlayerService;
 import royaleserver.logic.*;
 import royaleserver.network.Filler;
 import royaleserver.network.NetworkSession;
+import royaleserver.network.NetworkSessionHandler;
 import royaleserver.network.protocol.client.ClientCommand;
 import royaleserver.network.protocol.client.ClientCommandHandler;
 import royaleserver.network.protocol.client.ClientMessageHandler;
@@ -23,13 +24,8 @@ import royaleserver.utils.Logger;
 
 import java.util.*;
 
-public class Player implements ClientMessageHandler, ClientCommandHandler {
+public class Player extends NetworkSession implements ClientMessageHandler, ClientCommandHandler {
 	private static final Logger logger = LogManager.getLogger(Player.class);
-
-	protected Server server;
-	protected NetworkSession session;
-
-	protected boolean closed;
 
 	protected PlayerEntity entity;
 	protected Random random;
@@ -39,12 +35,10 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 	protected final ArrayList<PlayerCard> cardsWon = new ArrayList<>();
 	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
 
-	public Player(PlayerEntity entity, Server server, NetworkSession session) {
-		this.entity = entity;
-		this.server = server;
-		this.session = session;
+	public Player(PlayerEntity entity, Server server, NetworkSessionHandler session) {
+		super(server, session);
 
-		this.closed = false;
+		this.entity = entity;
 		server.addPlayer(this);
 
 		random = new Random(entity.getRandomSeed());
@@ -55,6 +49,8 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 			PlayerCard card = new PlayerCard(cardEntity.getLogicCard(), cardEntity.getLevel(), cardEntity.getCount());
 			cards.add(card);
 		}
+
+		sendOwnHomeData();
 	}
 
 	/**
@@ -284,72 +280,19 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		save();
 	}
 
-	/**
-	 * Disconnect player showing the reason.
-	 *
-	 * @param reason message
-	 */
-	public void disconnect(String reason) {
-		close(reason, true);
-	}
-
-	/**
-	 * @return true if closing is success
-	 * @apiNote For internal usage only
-	 */
-	public boolean close() {
-		return close(null, true);
-	}
-
-	/**
-	 * @param reason Reason of closing
-	 * @return true if closing is success
-	 * @apiNote For internal usage only
-	 */
-	public boolean close(final String reason) {
-		return close(reason, true);
-	}
-
-	/**
-	 * @param reason         Reason of closing
-	 * @param sendDisconnect If true, then server will send LoginFailed packet
-	 * @return true if closing is success
-	 * @apiNote For internal usage only
-	 */
 	public boolean close(String reason, final boolean sendDisconnect) {
-		if (closed) {
-			return false;
-		}
-		closed = true;
+		if (super.close(reason, sendDisconnect)) {
+			endOpeningChest();
 
-		endOpeningChest();
+			server.removePlayer(this);
+			entity.setOnline(false);
+			save();
+			entity = null;
 
-		server.removePlayer(this);
-		entity.setOnline(false);
-		save();
-		entity = null;
-
-		if (reason == null) {
-			reason = "";
+			return true;
 		}
 
-		if (sendDisconnect) {
-			LoginFailed loginFailed = new LoginFailed();
-			loginFailed.errorCode = LoginFailed.ERROR_CODE_RESET_ACCOUNT;
-			loginFailed.resourceFingerprintData = "";
-			loginFailed.redirectDomain = "";
-			loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
-			loginFailed.updateURL = "";
-			loginFailed.reason = reason;
-			loginFailed.secondsUntilMaintenanceEnd = 0;
-			loginFailed.unknown_7 = (byte)0;
-			loginFailed.unknown_8 = "";
-			session.sendMessage(loginFailed);
-		}
-
-		session.close();
-
-		return true;
+		return false;
 	}
 
 	public String getReadableIdentifier() {
@@ -632,7 +575,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 		if (checkNickname(message.name)) {
 			command.name = message.name;
 			entity.setName(message.name);
-			save(); // need?
+			save();
 		} else {
 			command.name = entity.getName();
 		}
@@ -665,11 +608,6 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	@Override
 	public boolean handleTournamentAskJoinable(TournamentAskJoinable message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleUnlockAccount(UnlockAccount message) throws Throwable {
 		return false;
 	}
 

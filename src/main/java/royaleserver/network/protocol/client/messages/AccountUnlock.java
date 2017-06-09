@@ -1,11 +1,11 @@
 package royaleserver.network.protocol.client.messages;
 
+import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.client.ClientMessage;
 import royaleserver.network.protocol.client.ClientMessageHandler;
-import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
-public final class UnlockAccount extends ClientMessage {
+public final class AccountUnlock extends ClientMessage {
 	public static final short ID = Messages.UNLOCK_ACCOUNT;
 
 	public int unknown_0;
@@ -14,18 +14,18 @@ public final class UnlockAccount extends ClientMessage {
 	public String deviceToken;
 	public String unlockCode;
 
-	public UnlockAccount() {
+	public AccountUnlock() {
 		super(ID);
 	}
 
 	@Override
 	public ClientMessage create() {
-		return new UnlockAccount();
+		return new AccountUnlock();
 	}
 
 	@Override
 	public boolean handle(ClientMessageHandler handler) throws Throwable {
-		return handler.handleUnlockAccount(this);
+		return handler.handleAccountUnlock(this);
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import royaleserver.network.protocol.Handler;
 import royaleserver.network.protocol.client.messages.*;
 
 public interface ClientMessageHandler extends Handler {
+	boolean handleAccountUnlock(AccountUnlock message) throws Throwable;
 	boolean handleClanAskData(ClanAskData message) throws Throwable;
 	boolean handleClanAskJoinable(ClanAskJoinable message) throws Throwable;
 	boolean handleClanChatMessage(ClanChatMessage message) throws Throwable;
@@ -24,5 +25,4 @@ public interface ClientMessageHandler extends Handler {
 	boolean handleNameCheck(NameCheck message) throws Throwable;
 	boolean handlePing(Ping message) throws Throwable;
 	boolean handleTournamentAskJoinable(TournamentAskJoinable message) throws Throwable;
-	boolean handleUnlockAccount(UnlockAccount message) throws Throwable;
 }

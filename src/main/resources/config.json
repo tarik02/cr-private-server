@@ -1,5 +1,9 @@
 {
-	"version": 1,
+	"version": 2,
+
+	"server": {
+		"requireLoginCode": false
+	},
 
 	"database": {
 		"provider": "mysql",

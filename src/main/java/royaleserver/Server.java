@@ -95,7 +95,7 @@ public class Server {
 
 		logger.info("Starting the network thread...");
 
-		networkServer = new NetworkServer(this);
+		networkServer = new NetworkServer(this, config.server);
 		networkServer.start();
 
 		System.gc();

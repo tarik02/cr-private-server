@@ -1,13 +1,13 @@
 package royaleserver.network.protocol.server.messages;
 
-import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.Messages;
+import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.utils.DataStream;
 
 public final class LoginFailed extends ServerMessage {
 	public static final short ID = Messages.LOGIN_FAILED;
 
-	public static int ERROR_CODE_RESET_ACCOUNT = 3;
+	public static int ERROR_CODE_REASON_MESSAGE = 3;
 	public static int ERROR_CODE_NEW_ASSETS = 7;
 	public static int ERROR_CODE_MAINTENANCE = 10;
 	public static int ERROR_CODE_BANNED = 11;

@@ -9,6 +9,7 @@ import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import org.jboss.netty.handler.codec.replay.VoidEnum;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
+import royaleserver.CodeEnterPlayer;
 import royaleserver.Player;
 import royaleserver.Server;
 import royaleserver.crypto.ClientCrypto;
@@ -26,7 +27,9 @@ import royaleserver.network.protocol.client.messages.Login;
 import royaleserver.network.protocol.server.ServerCommandFactory;
 import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.server.ServerMessageFactory;
-import royaleserver.network.protocol.server.messages.*;
+import royaleserver.network.protocol.server.messages.LoginFailed;
+import royaleserver.network.protocol.server.messages.LoginOk;
+import royaleserver.network.protocol.server.messages.ServerHello;
 import royaleserver.utils.*;
 
 import java.net.InetSocketAddress;
@@ -38,7 +41,6 @@ public final class NetworkServer {
 	private static final Logger logger = LogManager.getLogger(NetworkServer.class);
 	private static final byte[] serverKey = Hex.toByteArray("9e6657f2b419c237f6aeef37088690a642010586a7bd9018a15652bab8370f4f");
 	private static final byte[] sessionKey = Hex.toByteArray("74794DE40D62A03AC6F6E86A9815C6262AA12BEDD518F883");
-	private static final boolean useBlock = false;
 
 	private final Server server;
 	private OrderedMemoryAwareThreadPoolExecutor bossExec;
@@ -46,8 +48,12 @@ public final class NetworkServer {
 	private ServerBootstrap networkServer;
 	private Channel channel;
 
-	public NetworkServer(Server server) {
+	private final boolean requireLoginCode;
+
+	public NetworkServer(Server server, royaleserver.config.Server config) {
 		this.server = server;
+
+		this.requireLoginCode = config.requireLoginCode;
 
 		ClientCommandFactory.instance.init();
 		ClientMessageFactory.instance.init();
@@ -93,28 +99,30 @@ public final class NetworkServer {
 
 			PacketFrameDecoder decoder = new PacketFrameDecoder(serverCrypto);
 			PacketFrameEncoder encoder = new PacketFrameEncoder(serverCrypto);
-			return Channels.pipeline(decoder, encoder, new PlayerHandler(NetworkServer.this.server));
+			return Channels.pipeline(decoder, encoder, new PlayerHandler(NetworkServer.this));
 		}
 	}
 
-	private static class PlayerHandler extends SimpleChannelUpstreamHandler implements NetworkSession {
+	private static class PlayerHandler extends SimpleChannelUpstreamHandler implements NetworkSessionHandler {
 		private enum Status {
 			HELLO,
 			LOGIN,
 			CONNECTED,
-			DISCONNECTING,
-			BLOCKED,
+			DISCONNECTING
 		}
 
 		private final Server server;
-		private Player player;
+		private final NetworkServer networkServer;
+		private NetworkSession session;
 
 		private Channel channel;
 		private ChannelFuture lastWrite = null;
-		public Status status;
+		private Status status;
 
-		public PlayerHandler(Server server) {
-			this.server = server;
+		public PlayerHandler(NetworkServer networkServer) {
+			this.server = networkServer.server;
+			this.networkServer = networkServer;
+
 			status = Status.HELLO;
 		}
 
@@ -125,8 +133,8 @@ public final class NetworkServer {
 
 		@Override
 		public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-			if (player != null) {
-				player.close("", false);
+			if (session != null) {
+				session.close("", false);
 			}
 		}
 
@@ -152,8 +160,6 @@ public final class NetworkServer {
 
 					status = Status.LOGIN;
 					break;
-
-
 				case LOGIN:
 					if (message.id != Messages.LOGIN) {
 						logger.warn("Excepted Login, received %s. Disconnecting...", message.getClass().getSimpleName());
@@ -163,7 +169,6 @@ public final class NetworkServer {
 
 					Login login = (Login)message;
 
-					// update assets
 					if (!login.resourceSha.equals(server.getContentHash())) {
 						LoginFailed loginFailed = new LoginFailed();
 						loginFailed.errorCode = LoginFailed.ERROR_CODE_NEW_ASSETS;
@@ -177,20 +182,23 @@ public final class NetworkServer {
 						loginFailed.unknown_8 = "";
 						sendMessage(loginFailed);
 
+						close();
 						return;
 					}
 
 					PlayerService playerService = server.getDataManager().getPlayerService();
-					PlayerEntity playerEntity;
+					PlayerEntity playerEntity = null;
 
 					if (login.accountId == 0 && login.passToken.isEmpty()) {
-						playerEntity = playerService.create();
+						if (!networkServer.requireLoginCode) {
+							playerEntity = playerService.create();
+						}
 					} else {
 						playerEntity = playerService.get(login.accountId);
 
 						if (playerEntity == null || !login.passToken.equals(playerEntity.getPassToken())) {
 							LoginFailed loginFailed = new LoginFailed();
-							loginFailed.errorCode = LoginFailed.ERROR_CODE_RESET_ACCOUNT;
+							loginFailed.errorCode = LoginFailed.ERROR_CODE_REASON_MESSAGE;
 							loginFailed.resourceFingerprintData = "";
 							loginFailed.redirectDomain = "";
 							loginFailed.contentURL = "";
@@ -201,41 +209,17 @@ public final class NetworkServer {
 							loginFailed.unknown_8 = "";
 							sendMessage(loginFailed);
 
+							close();
 							return;
 						}
 					}
 
-					LoginOk loginOk = new LoginOk();
-					loginOk.userId = loginOk.homeId = playerEntity.getId();
-					loginOk.userToken = playerEntity.getPassToken();
-					loginOk.gameCenterId = "";
-					loginOk.facebookId = "";
-					loginOk.serverMajorVersion = 3; // TODO: Make it constant
-					loginOk.serverBuild = 193; // TODO: Make it constant
-					loginOk.contentVersion = 8; // TODO: Make it constant
-					loginOk.environment = "prod";
-					loginOk.sessionCount = 5;
-					loginOk.playTimeSeconds = 114; // TODO: Get it from store
-					loginOk.daysSinceStartedPlaying = 0; // TODO: Get it from store
-					loginOk.facebookAppId = "1475268786112433";
-					loginOk.serverTime = String.valueOf(System.currentTimeMillis());
-					loginOk.accountCreatedDate = String.valueOf(System.currentTimeMillis() - 50000); // TODO: Get it from store
-					loginOk.unknown_16 = 0;
-					loginOk.googleServiceId = "";
-					loginOk.unknown_18 = "";
-					loginOk.unknown_19 = "";
-					loginOk.region = "UA"; // TODO: Make it from config
-					loginOk.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com"; // TODO: Make it from config
-					loginOk.eventAssetsURL = "https://event-assets.clashroyale.com"; // TODO: Make it from config
-					loginOk.unknown_23 = 1;
-					sendMessage(loginOk);
-
-					if (useBlock) {
+					if (playerEntity == null) {
 						LoginFailed loginFailed = new LoginFailed();
 						loginFailed.errorCode = LoginFailed.ERROR_CODE_ACCOUNT_BLOCKED;
 						loginFailed.resourceFingerprintData = "";
 						loginFailed.redirectDomain = "";
-						loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
+						loginFailed.contentURL = "";
 						loginFailed.updateURL = "";
 						loginFailed.reason = "";
 						loginFailed.secondsUntilMaintenanceEnd = 0;
@@ -243,26 +227,49 @@ public final class NetworkServer {
 						loginFailed.unknown_8 = "";
 						sendMessage(loginFailed);
 
-						status = Status.BLOCKED;
-						break;
-					} else {
-						player = new Player(playerEntity, server, this);
-						player.sendOwnHomeData();
-
+						session = new CodeEnterPlayer(server, this);
 						status = Status.CONNECTED;
-						break;
+					} else {
+						LoginOk loginOk = new LoginOk();
+						loginOk.userId = loginOk.homeId = playerEntity.getId();
+						loginOk.userToken = playerEntity.getPassToken();
+						loginOk.gameCenterId = "";
+						loginOk.facebookId = "";
+						loginOk.serverMajorVersion = 3; // TODO: Make it constant
+						loginOk.serverBuild = 193; // TODO: Make it constant
+						loginOk.contentVersion = 8; // TODO: Make it constant
+						loginOk.environment = "prod";
+						loginOk.sessionCount = 5;
+						loginOk.playTimeSeconds = 114; // TODO: Get it from store
+						loginOk.daysSinceStartedPlaying = 0; // TODO: Get it from store
+						loginOk.facebookAppId = "1475268786112433";
+						loginOk.serverTime = String.valueOf(System.currentTimeMillis());
+						loginOk.accountCreatedDate = String.valueOf(playerEntity.getRegisteredDate().getTime()); // TODO: Get it from store
+						loginOk.unknown_16 = 0;
+						loginOk.googleServiceId = "";
+						loginOk.unknown_18 = "";
+						loginOk.unknown_19 = "";
+						loginOk.region = "UA"; // TODO: Make it from config
+						loginOk.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com"; // TODO: Make it from config
+						loginOk.eventAssetsURL = "https://event-assets.clashroyale.com"; // TODO: Make it from config
+						loginOk.unknown_23 = 1;
+						sendMessage(loginOk);
+
+						session = new Player(playerEntity, server, this);
+						status = Status.CONNECTED;
 					}
 				case CONNECTED:
 					try {
-						if (!message.handle(player)) {
+						if (!message.handle(session)) {
 							logger.warn("Failed to handle message %s:\n%s", message.getClass().getSimpleName(), Dumper.dump(message));
 						}
+					} catch (UnhandledMessageException e2) {
+						close();
 					} catch (Throwable e2) {
-						logger.error("Failed to handle message %s:\n%s. Error throwed:", e2, message.getClass().getSimpleName(), Dumper.dump(message));
+						logger.error("Failed to handle message %s:\n%s. Error threw:", e2, message.getClass().getSimpleName(), Dumper.dump(message));
 					}
 					break;
 				case DISCONNECTING:
-
 					break;
 				}
 			}
@@ -284,7 +291,7 @@ public final class NetworkServer {
 		public void close() {
 			status = Status.DISCONNECTING;
 
-			if (lastWrite != null) {
+			if (lastWrite != null && !lastWrite.isDone()) {
 				lastWrite.addListener(ChannelFutureListener.CLOSE);
 			} else {
 				channel.close();
@@ -340,6 +347,8 @@ public final class NetworkServer {
 
 		@Override
 		protected Object decode(ChannelHandlerContext channelHandlerContext, Channel arg1, ChannelBuffer buffer, VoidEnum ignored) throws Exception {
+			// TODO: Optimize it(use FrameDecoder instead of ReplayingDecoder)
+
 			byte[] payload = new byte[2];
 			buffer.readBytes(payload);
 			short id = ByteBuffer
