@@ -10,6 +10,7 @@ import java.util.Arrays;
 
 public class ServerCrypto extends Crypto {
 	protected ClientCrypto client;
+	protected Nonce nonce;
 
 	public ServerCrypto() {
 		privateKey = Hex.toByteArray("1891d401fadb51d25d3a9174d472a9f691a45b974285d47729c45c6538070d85");
@@ -61,8 +62,12 @@ public class ServerCrypto extends Crypto {
 			message.payload = message.decrypted;
 			break;
 		case Messages.LOGIN_FAILED:
+			if(nonce != null) {
+				message.payload = encrypt(message.decrypted);
+				break;
+			}
 		case Messages.LOGIN_OK:
-			Nonce nonce = new Nonce(clientKey, serverKey, decryptNonce.getBytes());
+			nonce = new Nonce(clientKey, serverKey, decryptNonce.getBytes());
 			ByteArrayOutputStream toEncrypt = new ByteArrayOutputStream();
 
 			try {

@@ -6,7 +6,7 @@ import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 
 public final class UnlockAccount extends ClientMessage {
-	public static final short ID = Messages.TOURNAMENT_ASK_JOINABLE;
+	public static final short ID = Messages.UNLOCK_ACCOUNT;
 
 	public int unknown_0;
 	public int unknown_1;
@@ -20,7 +20,7 @@ public final class UnlockAccount extends ClientMessage {
 
 	@Override
 	public ClientMessage create() {
-		return new TournamentAskJoinable();
+		return new UnlockAccount();
 	}
 
 	@Override

@@ -26,9 +26,7 @@ import royaleserver.network.protocol.client.messages.Login;
 import royaleserver.network.protocol.server.ServerCommandFactory;
 import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.server.ServerMessageFactory;
-import royaleserver.network.protocol.server.messages.LoginFailed;
-import royaleserver.network.protocol.server.messages.LoginOk;
-import royaleserver.network.protocol.server.messages.ServerHello;
+import royaleserver.network.protocol.server.messages.*;
 import royaleserver.utils.*;
 
 import java.net.InetSocketAddress;
@@ -165,6 +163,7 @@ public final class NetworkServer {
 
 					Login login = (Login)message;
 
+					// update assets
 					if (!login.resourceSha.equals(server.getContentHash())) {
 						LoginFailed loginFailed = new LoginFailed();
 						loginFailed.errorCode = LoginFailed.ERROR_CODE_NEW_ASSETS;
@@ -177,24 +176,8 @@ public final class NetworkServer {
 						loginFailed.unknown_7 = (byte)0;
 						loginFailed.unknown_8 = "";
 						sendMessage(loginFailed);
+
 						return;
-					}
-
-					if(useBlock) {
-						LoginFailed loginFailed = new LoginFailed();
-						loginFailed.errorCode = LoginFailed.ERROR_CODE_ACCOUNT_BLOCKED;
-						loginFailed.resourceFingerprintData = "";
-						loginFailed.redirectDomain = "";
-						loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
-						loginFailed.updateURL = "";
-						loginFailed.reason = "";
-						loginFailed.secondsUntilMaintenanceEnd = 0;
-						loginFailed.unknown_7 = (byte)0;
-						loginFailed.unknown_8 = "";
-						sendMessage(loginFailed);
-
-						status = Status.BLOCKED;
-						break;
 					}
 
 					PlayerService playerService = server.getDataManager().getPlayerService();
@@ -248,10 +231,28 @@ public final class NetworkServer {
 					sendMessage(loginOk);
 
 					player = new Player(playerEntity, server, this);
-					player.sendOwnHomeData();
 
-					status = Status.CONNECTED;
-					break;
+					if (useBlock) {
+						LoginFailed loginFailed = new LoginFailed();
+						loginFailed.errorCode = LoginFailed.ERROR_CODE_ACCOUNT_BLOCKED;
+						loginFailed.resourceFingerprintData = "";
+						loginFailed.redirectDomain = "";
+						loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
+						loginFailed.updateURL = "";
+						loginFailed.reason = "";
+						loginFailed.secondsUntilMaintenanceEnd = 0;
+						loginFailed.unknown_7 = (byte)0;
+						loginFailed.unknown_8 = "";
+						sendMessage(loginFailed);
+
+						status = Status.BLOCKED;
+						break;
+					} else {
+						player.sendOwnHomeData();
+
+						status = Status.CONNECTED;
+						break;
+					}
 				case CONNECTED:
 					try {
 						if (!message.handle(player)) {
