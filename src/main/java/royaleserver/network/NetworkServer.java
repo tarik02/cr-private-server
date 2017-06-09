@@ -230,8 +230,6 @@ public final class NetworkServer {
 					loginOk.unknown_23 = 1;
 					sendMessage(loginOk);
 
-					player = new Player(playerEntity, server, this);
-
 					if (useBlock) {
 						LoginFailed loginFailed = new LoginFailed();
 						loginFailed.errorCode = LoginFailed.ERROR_CODE_ACCOUNT_BLOCKED;
@@ -248,6 +246,7 @@ public final class NetworkServer {
 						status = Status.BLOCKED;
 						break;
 					} else {
+						player = new Player(playerEntity, server, this);
 						player.sendOwnHomeData();
 
 						status = Status.CONNECTED;

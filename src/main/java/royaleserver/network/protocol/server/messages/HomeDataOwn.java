@@ -25,7 +25,7 @@ public final class HomeDataOwn extends HomeData {
 	public String[] challenges; // JSON
 
 	public Card[] shopCards;
-	public boolean giveReward;
+	public boolean giveSeasonReward;
 
 	public HomeDataOwn() {
 		super(ID);
@@ -319,18 +319,18 @@ public final class HomeDataOwn extends HomeData {
 		stream.putRrsInt32(1);
 		stream.putRrsInt32(54000010);
 
-		stream.putRrsInt32(giveReward ? 2 : 1); // 1 - without reward, 2 - with reward
+		stream.putRrsInt32(giveSeasonReward ? 2 : 1); // 1 - without reward, 2 - with reward
 		stream.putRrsInt32(19); // changed
 		stream.putRrsInt32(223); // changed
 
 		stream.putRrsInt32(1); // 1
 
-		stream.put(Hex.toByteArray(giveReward ? "59" : "a9")); // a9 - no seasonReward ||  - with seasonReward
-		stream.put(Hex.toByteArray(giveReward ? "39" : "41"));
+		stream.put(Hex.toByteArray(giveSeasonReward ? "59" : "a9")); // a9 - no seasonReward ||  - with seasonReward
+		stream.put(Hex.toByteArray(giveSeasonReward ? "39" : "41"));
 
 		stream.putRrsInt32(14); // 15
 
-		if (giveReward) {
+		if (giveSeasonReward) {
 			stream.putRrsInt32(5699);
 			stream.putRrsInt32(53);
 			stream.putRrsInt32(4);
