@@ -4,7 +4,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.reflections.Reflections;
 import royaleserver.Server;
-import royaleserver.config.Database;
+import royaleserver.config.Config;
 import royaleserver.database.service.*;
 
 import javax.persistence.Entity;
@@ -15,7 +15,7 @@ public class DataManager {
 	private final SessionFactory sessionFactory;
 	private final DataServices services;
 
-	public DataManager(Database config) throws Server.ServerException {
+	public DataManager(Config config) throws Server.ServerException {
 		// Disable hibernate logging
 		@SuppressWarnings("unused")
 		org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger("org.hibernate");
@@ -29,7 +29,7 @@ public class DataManager {
 
 		Properties properties = new Properties();
 
-		switch (config.provider) {
+		switch (config.get("database.provider").getAsString()) {
 		case "mysql":
 			properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect");
 			properties.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
@@ -40,18 +40,18 @@ public class DataManager {
 
 			properties.setProperty("hibernate.connection.url", (new StringBuilder())
 					.append("jdbc:mysql://")
-					.append(config.mysql.host)
+					.append(config.get("database.mysql.host").getAsString())
 					.append(":")
-					.append(config.mysql.port)
+					.append(config.get("database.mysql.port").getAsShort())
 					.append("/")
-					.append(config.mysql.database)
+					.append(config.get("database.mysql.database").getAsString())
 					.toString());
 
-			properties.setProperty("hibernate.connection.username", config.mysql.user);
-			properties.setProperty("hibernate.connection.password", config.mysql.password);
+			properties.setProperty("hibernate.connection.username", config.get("database.mysql.user").getAsString());
+			properties.setProperty("hibernate.connection.password", config.get("database.mysql.password").getAsString());
 			break;
 		default:
-			throw new Server.ServerException("Invalid data provider " + config.provider);
+			throw new Server.ServerException("Invalid data provider " + config.get("database.provider").getAsString());
 		}
 
 		Configuration configuration = new Configuration()

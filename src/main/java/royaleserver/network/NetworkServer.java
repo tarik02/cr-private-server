@@ -12,6 +12,7 @@ import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import royaleserver.CodeEnterPlayer;
 import royaleserver.Player;
 import royaleserver.Server;
+import royaleserver.config.Config;
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
 import royaleserver.database.entity.PlayerEntity;
@@ -50,10 +51,10 @@ public final class NetworkServer {
 
 	private final boolean requireLoginCode;
 
-	public NetworkServer(Server server, royaleserver.config.Server config) {
+	public NetworkServer(Server server, Config config) {
 		this.server = server;
 
-		this.requireLoginCode = config.requireLoginCode;
+		this.requireLoginCode = config.get("server.requireLoginCode").getAsBoolean();
 
 		ClientCommandFactory.instance.init();
 		ClientMessageFactory.instance.init();

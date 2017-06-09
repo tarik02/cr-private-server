@@ -72,6 +72,10 @@ public final class StringUtils {
 			return null;
 		}
 
+		return from(buffer);
+	}
+
+	public static String from(byte[] buffer) {
 		return new String(buffer, charset);
 	}
 }

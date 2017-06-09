@@ -1,18 +1,22 @@
 package royaleserver;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonWriter;
 import royaleserver.assets.AssetManager;
 import royaleserver.assets.FolderAssetManager;
 import royaleserver.config.Config;
 import royaleserver.database.DataManager;
 import royaleserver.logic.*;
 import royaleserver.network.NetworkServer;
+import royaleserver.utils.GsonUtils;
+import royaleserver.utils.IO;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -66,22 +70,67 @@ public class Server {
 
 		logger.info("Reading config...");
 		try {
-			config = (new Gson()).fromJson(new InputStreamReader(new FileInputStream(new File(workingDirectory, "config.json"))), Config.class);
+			File configFile = new File(workingDirectory, "config.json");
+			int version = 0;
+
+			JsonObject configObject = null;
+			if (configFile.exists()) {
+				try {
+					configObject = new JsonParser().parse(new InputStreamReader(new FileInputStream(configFile))).getAsJsonObject();
+					JsonElement jversion = configObject.get("_version");
+					if (jversion != null && !jversion.isJsonNull()) {
+						version = jversion.getAsInt();
+					}
+				} catch (Exception ignored) {}
+			}
+
+			if (version == 0 || version < Config.CONFIG_VERSION) {
+				InputStream configInputStream = Main.class.getResourceAsStream("/config.json");
+				if (configInputStream == null) {
+					throw new Server.ServerException("Failed to get default config resource.");
+				}
+
+				if (version == 0) {
+					logger.warn("Resetting your config...");
+
+					final byte[] bytes = IO.getByteArray(configInputStream, true);
+					if (bytes == null) {
+						throw new ServerException("Failed to get default config.");
+					}
+
+					configObject = new JsonParser().parse(new InputStreamReader(new ByteArrayInputStream(bytes))).getAsJsonObject();
+					try (OutputStream os = new FileOutputStream(configFile)) {
+						os.write(bytes);
+					}
+				} else if (version < Config.CONFIG_VERSION) {
+					JsonObject defaultConfig = new JsonParser().parse(new InputStreamReader(configInputStream)).getAsJsonObject();
+					GsonUtils.extendJsonObject(defaultConfig, GsonUtils.ConflictStrategy.PREFER_FIRST_OBJ, configObject);
+					configObject = defaultConfig;
+				}
+
+				configObject.addProperty("_version", Config.CONFIG_VERSION);
+
+				logger.warn("Saving config...");
+				JsonWriter writer = new JsonWriter(new FileWriter(configFile));
+				writer.setIndent("\t");
+				new Gson().toJson(configObject, writer);
+				writer.close();
+
+				logger.warn("Check out your config and start the server.");
+				return;
+			}
+
+			config = new Config(configObject);
 		} catch (Throwable e) {
 			logger.fatal("Cannot read config.", e);
 			throw new ServerException("Cannot read config.");
-		}
-
-		if (config.version < Config.CONFIG_VERSION) {
-			logger.fatal("Config is too old.\n\tCurrent version: %d.\n\tRequired version: %d.", config.version, Config.CONFIG_VERSION);
-			throw new ServerException("Config is too old.");
 		}
 
 		assetManager = new FolderAssetManager(new File(workingDirectory, "assets"));
 		resourceFingerprint = assetManager.open("fingerprint.json").content();
 
 		logger.info("Initializing data manager...");
-		dataManager = new DataManager(config.database);
+		dataManager = new DataManager(config);
 
 		logger.info("Loading data...");
 		Rarity.init(this);
@@ -95,7 +144,7 @@ public class Server {
 
 		logger.info("Starting the network thread...");
 
-		networkServer = new NetworkServer(this, config.server);
+		networkServer = new NetworkServer(this, config);
 		networkServer.start();
 
 		System.gc();
@@ -110,19 +159,23 @@ public class Server {
 		}
 		running = false;
 
-		logger.info("Stopping the server...");
-		networkServer.stop();
+		if (networkServer != null) {
+			logger.info("Stopping the server...");
+			networkServer.stop();
 
-		logger.info("Disconnecting the clients...");
-		for (Player player : players) {
-			player.close("server stopped", true);
+			logger.info("Disconnecting the clients...");
+			for (Player player : players) {
+				player.close("server stopped", true);
+			}
+
+			logger.info("Closing the server...");
+			networkServer.close();
 		}
 
-		logger.info("Closing the server...");
-		networkServer.close();
-
-		logger.info("Stopping data manager...");
-		dataManager.stop();
+		if (dataManager != null) {
+			logger.info("Stopping data manager...");
+			dataManager.stop();
+		}
 
 		logger.info("Server stopped!");
 	}

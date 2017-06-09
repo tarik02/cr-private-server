@@ -1,5 +1,5 @@
 {
-	"version": 2,
+	"_version": 3,
 
 	"server": {
 		"requireLoginCode": false
