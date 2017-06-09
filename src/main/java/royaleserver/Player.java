@@ -71,6 +71,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	/**
 	 * Adds experience and increases level if needed
+	 *
 	 * @param count of experience to merge
 	 */
 	public void addExperience(int count) {
@@ -334,8 +335,8 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 		if (sendDisconnect) {
 			LoginFailed loginFailed = new LoginFailed();
-			loginFailed.errorCode = 7;
-			loginFailed.resourceFingerprintData = server.getResourceFingerprint();
+			loginFailed.errorCode = LoginFailed.ERROR_CODE_RESET_ACCOUNT;
+			loginFailed.resourceFingerprintData = "";
 			loginFailed.redirectDomain = "";
 			loginFailed.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com";
 			loginFailed.updateURL = "";
@@ -345,6 +346,7 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 			loginFailed.unknown_8 = "";
 			session.sendMessage(loginFailed);
 		}
+
 		session.close();
 
 		return true;
@@ -663,6 +665,11 @@ public class Player implements ClientMessageHandler, ClientCommandHandler {
 
 	@Override
 	public boolean handleTournamentAskJoinable(TournamentAskJoinable message) throws Throwable {
+		return false;
+	}
+
+	@Override
+	public boolean handleUnlockAccount(UnlockAccount message) throws Throwable {
 		return false;
 	}
 

@@ -23,8 +23,8 @@ public class PlayerService extends Service {
 		playerEntity.setRegisteredDate(new Date());
 		playerEntity.setLastOnlineStatusUpdate(new Date());
 		playerEntity.setPassToken(StringUtils.randomString(32, 64));
-		playerEntity.setTrophies(3800);
-		playerEntity.setLogicArena(Arena.by("Arena_T"));
+		playerEntity.setTrophies(6400);
+		playerEntity.setLogicArena(Arena.by("Arena_L9"));
 		playerEntity.setLogicLastExpLevel(ExpLevel.by(13));
 		playerEntity.setLogicExpLevel(ExpLevel.by(13));
 		playerEntity.setGold(10000);

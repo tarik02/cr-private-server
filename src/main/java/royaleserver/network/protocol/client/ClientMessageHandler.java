@@ -24,4 +24,5 @@ public interface ClientMessageHandler extends Handler {
 	boolean handleNameCheck(NameCheck message) throws Throwable;
 	boolean handlePing(Ping message) throws Throwable;
 	boolean handleTournamentAskJoinable(TournamentAskJoinable message) throws Throwable;
+	boolean handleUnlockAccount(UnlockAccount message) throws Throwable;
 }
