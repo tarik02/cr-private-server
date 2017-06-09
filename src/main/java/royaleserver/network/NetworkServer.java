@@ -361,10 +361,6 @@ public final class NetworkServer {
 
 			MessageHeader header = new MessageHeader(id, payload);
 
-			if(header.payload.length == 0) {
-				return null;
-			}
-
 			crypto.decryptPacket(header);
 
 			ClientMessage message = ClientMessageFactory.instance.create(header.id);
