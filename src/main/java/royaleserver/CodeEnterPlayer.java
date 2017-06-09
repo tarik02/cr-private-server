@@ -12,14 +12,6 @@ public class CodeEnterPlayer extends NetworkSession implements ClientMessageHand
 		super(server, session);
 	}
 
-	public boolean close(final String reason, final boolean sendDisconnect) {
-		if (super.close(reason, sendDisconnect)) {
-			return true;
-		}
-
-		return false;
-	}
-
 	@Override
 	public boolean handleAccountUnlock(AccountUnlock message) throws Throwable {
 		return true;
