@@ -12,6 +12,10 @@ public final class Tag implements Comparable<Tag>, Serializable {
 	}
 
 	public Tag(String tag) {
+		if (tag.startsWith("#")) {
+			tag = tag.substring(1);
+		}
+
 		long parsedId = 0;
 
 		for (char c : tag.toCharArray()) {
