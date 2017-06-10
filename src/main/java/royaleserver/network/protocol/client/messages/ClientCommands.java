@@ -6,6 +6,7 @@ import royaleserver.network.protocol.client.ClientCommandFactory;
 import royaleserver.network.protocol.client.ClientMessage;
 import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.utils.DataStream;
+import royaleserver.utils.Hex;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
@@ -52,6 +53,13 @@ public final class ClientCommands extends ClientMessage {
 			commands[i] = command;
 		}
 
-		stream.skip(4); // Always 0xFFFFFFFF
+		if (stream.remaining() > 4) {
+			byte[] remaining = stream.get(stream.remaining() - 4);
+			logger.warn("Commands is not decoded fully. Not decoded content:\n%s", Hex.dump(remaining));
+		}
+
+		if (stream.remaining() == 4) {
+			stream.skip(4); // Always 0xFFFFFFFF
+		}
 	}
 }
