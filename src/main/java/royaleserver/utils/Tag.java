@@ -1,9 +1,11 @@
 package royaleserver.utils;
 
-public final class Tag {
+import java.io.Serializable;
+
+public final class Tag implements Comparable<Tag>, Serializable {
 	private static final String TAG_CHARACTERS = "0289PYLQGRJCUV";
 	private final long id;
-	private String string = null;
+	private transient String string = null;
 
 	public Tag(long id) {
 		this.id = id;
@@ -70,5 +72,10 @@ public final class Tag {
 	@Override
 	public String toString() {
 		return string;
+	}
+
+	@Override
+	public int compareTo(Tag tag) {
+		return Long.compare(id, tag.id);
 	}
 }
