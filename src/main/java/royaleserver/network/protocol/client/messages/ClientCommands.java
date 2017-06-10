@@ -1,10 +1,10 @@
 package royaleserver.network.protocol.client.messages;
 
+import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.client.ClientCommand;
 import royaleserver.network.protocol.client.ClientCommandFactory;
 import royaleserver.network.protocol.client.ClientMessage;
 import royaleserver.network.protocol.client.ClientMessageHandler;
-import royaleserver.network.protocol.Messages;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
@@ -51,5 +51,7 @@ public final class ClientCommands extends ClientMessage {
 			command.decode(stream);
 			commands[i] = command;
 		}
+
+		stream.skip(4); // Always 0xFFFFFFFF
 	}
 }

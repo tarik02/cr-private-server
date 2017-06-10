@@ -19,6 +19,7 @@ import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.commands.NameSet;
 import royaleserver.network.protocol.server.components.ClanHeader;
 import royaleserver.network.protocol.server.messages.*;
+import royaleserver.utils.DataStream;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
@@ -34,6 +35,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	protected final ArrayList<PlayerCard> cards = new ArrayList<>();
 	protected final ArrayList<PlayerCard> cardsWon = new ArrayList<>();
 	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
+
+	protected Deck deck;
+	protected Deck[] decks;
 
 	public Player(PlayerEntity entity, Server server, NetworkSessionHandler session) {
 		super(server, session);
@@ -77,6 +81,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		session.sendMessage(loginOk);
 
 		sendOwnHomeData();
+
+		deck = new Deck();
+
 	}
 
 	/**
@@ -690,7 +697,15 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			return true;
 		}
 
-		boolean isNew = ((command.cardIndex >> 7) & 1) == 1;
+		if (command.cardIndex != DataStream.RRSINT_NULL) {
+			// Swap deck card and other card
+
+		} else if (command.slot2 != DataStream.RRSINT_NULL) {
+
+			return true;
+		}
+
+		/*boolean isNew = ((command.cardIndex >> 7) & 1) == 1;
 		int cardIndex = command.cardIndex & 0b01111111;
 
 		PlayerCard card = null;
@@ -706,7 +721,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 		if (card != null) {
 			logger.info("Set card on slot %d to %s", command.slot, card.getCard().getName());
-		}
+		}*/
 
 		return true;
 	}

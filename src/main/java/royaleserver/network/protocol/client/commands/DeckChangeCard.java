@@ -14,6 +14,7 @@ public final class DeckChangeCard extends ClientCommand {
 	public long accountId;
 	public int cardIndex;
 	public int slot;
+	public int slot2;
 
 	public DeckChangeCard() {
 		super(ID);
@@ -35,7 +36,8 @@ public final class DeckChangeCard extends ClientCommand {
 		tickEnd = stream.getRrsInt32();
 
 		accountId = stream.getRrsLong();
-		cardIndex = stream.getVarInt32();
-		slot = stream.getVarInt32();
+		cardIndex = stream.getRrsInt32();
+		slot = stream.getRrsInt32();
+		slot2 = stream.getRrsInt32();
 	}
 }
