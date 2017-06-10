@@ -515,11 +515,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	}
 
 	@Override
-	public boolean handleClientHello(ClientHello message) throws Throwable {
-		return false;
-	}
-
-	@Override
 	public boolean handleConnectionInfo(ConnectionInfo message) throws Throwable {
 		return true;
 	}
@@ -555,11 +550,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 	@Override
 	public boolean handleInboxAsk(InboxAsk message) throws Throwable {
-		return false;
-	}
-
-	@Override
-	public boolean handleLogin(Login message) throws Throwable {
 		return false;
 	}
 

@@ -221,6 +221,7 @@ public final class NetworkServer {
 						session = new Player(playerEntity, server, this);
 						status = Status.CONNECTED;
 					}
+					break;
 				case CONNECTED:
 					try {
 						if (!message.handle(session)) {
@@ -258,12 +259,6 @@ public final class NetworkServer {
 		@Override
 		public void close() {
 			status = Status.DISCONNECTING;
-
-			if (lastWrite != null && !lastWrite.isDone()) {
-				lastWrite.addListener(ChannelFutureListener.CLOSE);
-			} else {
-				channel.close();
-			}
 		}
 	}
 

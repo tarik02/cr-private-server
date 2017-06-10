@@ -5,7 +5,6 @@ import royaleserver.network.NetworkSession;
 import royaleserver.network.NetworkSessionHandler;
 import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.network.protocol.client.messages.AccountUnlock;
-import royaleserver.network.protocol.client.messages.Login;
 import royaleserver.network.protocol.client.messages.Ping;
 import royaleserver.network.protocol.server.messages.AccountUnlockFailed;
 import royaleserver.network.protocol.server.messages.AccountUnlockOk;
@@ -41,13 +40,6 @@ public class CodeEnterPlayer extends NetworkSession implements ClientMessageHand
 			session.sendMessage(response);
 		}
 
-		return true;
-	}
-
-	@Override
-	public boolean handleLogin(Login message) throws Throwable {
-		// If server sends LoginFailed with Account Blocked, then client shows activation window but sends Login one
-		// more time, so we will ignore it
 		return true;
 	}
 
