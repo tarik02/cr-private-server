@@ -120,4 +120,8 @@ public class DataManager {
 	public PlayerService getPlayerService() {
 		return services.playerService;
 	}
+
+	public UnlockCodeService getUnlockCodeService() {
+		return services.unlockCodeService;
+	}
 }

@@ -29,7 +29,6 @@ import royaleserver.network.protocol.server.ServerCommandFactory;
 import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.server.ServerMessageFactory;
 import royaleserver.network.protocol.server.messages.LoginFailed;
-import royaleserver.network.protocol.server.messages.LoginOk;
 import royaleserver.network.protocol.server.messages.ServerHello;
 import royaleserver.utils.*;
 
@@ -216,46 +215,9 @@ public final class NetworkServer {
 					}
 
 					if (playerEntity == null) {
-						LoginFailed loginFailed = new LoginFailed();
-						loginFailed.errorCode = LoginFailed.ERROR_CODE_ACCOUNT_BLOCKED;
-						loginFailed.resourceFingerprintData = "";
-						loginFailed.redirectDomain = "";
-						loginFailed.contentURL = "";
-						loginFailed.updateURL = "";
-						loginFailed.reason = "";
-						loginFailed.secondsUntilMaintenanceEnd = 0;
-						loginFailed.unknown_7 = (byte)0;
-						loginFailed.unknown_8 = "";
-						sendMessage(loginFailed);
-
 						session = new CodeEnterPlayer(server, this);
 						status = Status.CONNECTED;
 					} else {
-						LoginOk loginOk = new LoginOk();
-						loginOk.userId = loginOk.homeId = playerEntity.getId();
-						loginOk.userToken = playerEntity.getPassToken();
-						loginOk.gameCenterId = "";
-						loginOk.facebookId = "";
-						loginOk.serverMajorVersion = 3; // TODO: Make it constant
-						loginOk.serverBuild = 193; // TODO: Make it constant
-						loginOk.contentVersion = 8; // TODO: Make it constant
-						loginOk.environment = "prod";
-						loginOk.sessionCount = 5;
-						loginOk.playTimeSeconds = 114; // TODO: Get it from store
-						loginOk.daysSinceStartedPlaying = 0; // TODO: Get it from store
-						loginOk.facebookAppId = "1475268786112433";
-						loginOk.serverTime = String.valueOf(System.currentTimeMillis());
-						loginOk.accountCreatedDate = String.valueOf(playerEntity.getRegisteredDate().getTime()); // TODO: Get it from store
-						loginOk.unknown_16 = 0;
-						loginOk.googleServiceId = "";
-						loginOk.unknown_18 = "";
-						loginOk.unknown_19 = "";
-						loginOk.region = "UA"; // TODO: Make it from config
-						loginOk.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com"; // TODO: Make it from config
-						loginOk.eventAssetsURL = "https://event-assets.clashroyale.com"; // TODO: Make it from config
-						loginOk.unknown_23 = 1;
-						sendMessage(loginOk);
-
 						session = new Player(playerEntity, server, this);
 						status = Status.CONNECTED;
 					}
@@ -286,6 +248,11 @@ public final class NetworkServer {
 		public void sendMessage(Message message) {
 			logger.debug("< %s", message.getClass().getSimpleName());
 			lastWrite = channel.write(message);
+		}
+
+		@Override
+		public void replace(NetworkSession newSession) {
+			session = newSession;
 		}
 
 		@Override

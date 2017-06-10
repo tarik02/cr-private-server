@@ -18,6 +18,7 @@ public final class DataServices {
 	public final HomeChestService homeChestService;
 	public final PlayerCardService playerCardService;
 	public final PlayerService playerService;
+	public final UnlockCodeService unlockCodeService;
 
 	public DataServices(SessionFactory sessionFactory) {
 		this.arenaService = new ArenaService(sessionFactory);
@@ -31,5 +32,6 @@ public final class DataServices {
 		this.homeChestService = new HomeChestService(sessionFactory);
 		this.playerCardService = new PlayerCardService(sessionFactory);
 		this.playerService = new PlayerService(sessionFactory);
+		this.unlockCodeService = new UnlockCodeService(sessionFactory);
 	}
 }

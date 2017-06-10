@@ -6,7 +6,7 @@ import royaleserver.network.protocol.client.ClientMessageHandler;
 import royaleserver.utils.DataStream;
 
 public final class AccountUnlock extends ClientMessage {
-	public static final short ID = Messages.UNLOCK_ACCOUNT;
+	public static final short ID = Messages.ACCOUNT_UNLOCK;
 
 	public int unknown_0;
 	public int unknown_1;

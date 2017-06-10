@@ -19,7 +19,7 @@ public final class Messages {
 	public static final short RESET_ACCOUNT = 10116;
 	public static final short REPORT_USER = 10117;
 	public static final short ACCOUNT_SWITCHED = 10118;
-	public static final short UNLOCK_ACCOUNT = 10121;
+	public static final short ACCOUNT_UNLOCK = 10121;
 	public static final short APPLE_BILLING_REQUEST = 10150;
 	public static final short GOOGLE_BILLING_REQUEST = 10151;
 	public static final short KUNLUN_BILLING_REQUEST = 10159;
@@ -87,7 +87,7 @@ public final class Messages {
 	public static final short CHAT_ACCOUNT_BAN_STATUS = 20118;
 	public static final short BILLING_REQUEST_FAILED = 20121;
 	public static final short UNLOCK_ACCOUNT_OK = 20132;
-	public static final short UNLOCK_ACCOUNT_FAILED = 20133;
+	public static final short ACCOUNT_UNLOCK_FAILED = 20133;
 	public static final short APPLE_BILLING_PROCESSED_BY_SERVER = 20151;
 	public static final short GOOGLE_BILLING_PROCESSED_BY_SERVER = 20152;
 	public static final short KUNLUN_BILLING_PROCESSED_BY_SERVER = 20156;
