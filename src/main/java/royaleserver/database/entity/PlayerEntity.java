@@ -12,9 +12,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "players")
-@NamedQueries({
-		@NamedQuery(name = ".clear", query = "DELETE FROM PlayerEntity p")
-})
 public class PlayerEntity implements Identifiable<Long> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +20,11 @@ public class PlayerEntity implements Identifiable<Long> {
 	@Column(length = 32, nullable = true)
 	private String name;
 
-	@Column(nullable = false, columnDefinition = "TIMESTAMP")
+	@Column(nullable = false)
 	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date registeredDate = new Date();
 
-	@Column(nullable = false, columnDefinition = "TIMESTAMP")
+	@Column(nullable = false)
 	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date lastOnlineStatusUpdate = new Date();
 
@@ -51,16 +48,16 @@ public class PlayerEntity implements Identifiable<Long> {
 	private int trophies = 0;
 
 	@JoinColumn(name = "arena_id")
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	private ArenaEntity arena;
 
 
 	@JoinColumn(name = "last_exp_level_id")
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	private ExpLevelEntity lastExpLevel;
 	
 	@JoinColumn(name = "exp_level_id")
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	private ExpLevelEntity expLevel;
 
 	@Column(name = "exp_level_experience", nullable = false)
@@ -71,11 +68,11 @@ public class PlayerEntity implements Identifiable<Long> {
 	private Set<HomeChestEntity> homeChests = new HashSet<>();
 
 	@JoinColumn(name = "clan_id")
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private ClanEntity clan = null;
 
 	@JoinColumn(name = "clan_role_id")
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private ClanRoleEntity clanRole = null;
 
 	private long randomSeed;
@@ -84,14 +81,13 @@ public class PlayerEntity implements Identifiable<Long> {
 	private float epicChance = 0;
 	private float legendaryChance = 0;
 
+	public PlayerEntity() {
+		this.registeredDate = new Date();
+		this.lastOnlineStatusUpdate = new Date();
+	}
 
 	public Long getId() {
 		return id;
-	}
-
-	public PlayerEntity setId(Long id) {
-		this.id = id;
-		return this;
 	}
 
 	public String getName() {
@@ -105,11 +101,6 @@ public class PlayerEntity implements Identifiable<Long> {
 
 	public Date getRegisteredDate() {
 		return registeredDate;
-	}
-
-	public PlayerEntity setRegisteredDate(Date registeredDate) {
-		this.registeredDate = registeredDate;
-		return this;
 	}
 
 	public Date getLastOnlineStatusUpdate() {

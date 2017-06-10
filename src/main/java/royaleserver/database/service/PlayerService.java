@@ -8,7 +8,6 @@ import royaleserver.logic.Arena;
 import royaleserver.logic.ExpLevel;
 import royaleserver.utils.StringUtils;
 
-import java.util.Date;
 import java.util.Random;
 
 public class PlayerService extends Service {
@@ -20,8 +19,6 @@ public class PlayerService extends Service {
 
 	public PlayerEntity create() {
 		PlayerEntity playerEntity = new PlayerEntity();
-		playerEntity.setRegisteredDate(new Date());
-		playerEntity.setLastOnlineStatusUpdate(new Date());
 		playerEntity.setPassToken(StringUtils.randomString(32, 64));
 		playerEntity.setTrophies(6400);
 		playerEntity.setLogicArena(Arena.by("Arena_L9"));
@@ -37,35 +34,28 @@ public class PlayerService extends Service {
 	}
 
 	public PlayerEntity add(PlayerEntity entity){
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			PlayerEntity fromDB = (PlayerEntity)session.merge(entity);
 			transaction.commit();
 			return fromDB;
 		}
 	}
 
-	public void delete(PlayerEntity entity){
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
-			session.remove(entity);
-			transaction.commit();
-		}
-	}
-
 	public PlayerEntity get(long id){
-		try (Session session = getSession()) {
+		try (Session session = session()) {
 			return session.find(PlayerEntity.class, id);
 		}
 	}
 
 	public void update(PlayerEntity entity){
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
-			session.merge(entity);
+		try (Session session = session(); Transaction transaction = transaction(session)) {
+			session.update(entity);
 			transaction.commit();
 		}
 	}
 
 	public void clear() {
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			session.createNamedQuery(".clear").executeUpdate();
 			transaction.commit();
 		}

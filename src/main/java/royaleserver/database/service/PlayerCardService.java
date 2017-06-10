@@ -10,18 +10,16 @@ public class PlayerCardService extends Service {
 		super(sessionFactory);
 	}
 
-	public void merge(PlayerCardEntity entity) {
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
-			session.merge(entity);
-			transaction.commit();
-		}
-	}
-
-	public void merge(PlayerCardEntity[] entities) {
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
-			for (PlayerCardEntity entity : entities) {
-				session.saveOrUpdate(entity);
+	public void merge(PlayerCardEntity[] adds, PlayerCardEntity[] updates) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
+			for (PlayerCardEntity entity : adds) {
+				session.save(entity);
 			}
+
+			for (PlayerCardEntity entity : updates) {
+				session.update(entity);
+			}
+
 			transaction.commit();
 		}
 	}

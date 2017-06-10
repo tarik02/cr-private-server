@@ -1,12 +1,13 @@
 {
-	"_version": 3,
+	"_version": 4,
 
 	"server": {
-		"requireLoginCode": false
+		"require_login_code": false
 	},
 
 	"database": {
 		"provider": "mysql",
+		"show_sql": false,
 
 		"mysql": {
 			"host": "localhost",

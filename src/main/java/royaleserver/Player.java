@@ -34,9 +34,12 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	protected OpeningChest openingChest = null;
 	protected final ArrayList<PlayerCard> cards = new ArrayList<>();
 	protected final ArrayList<PlayerCard> cardsWon = new ArrayList<>();
+	protected final Set<PlayerCard> cardsToAdd = new HashSet<>();
 	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
 
 	protected Deck deck;
+	protected ArrayList<PlayerCard> cardsAfterDeck = new ArrayList<>();
+
 	protected Deck[] decks;
 
 	public Player(PlayerEntity entity, Server server, NetworkSessionHandler session) {
@@ -152,7 +155,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 					card.addCount(cardStack.count);
 					this.cardsWon.add(card);
 					this.cards.add(card);
-					this.cardsToUpdate.add(card);
+					this.cardsToAdd.add(card);
 				}
 			}
 
@@ -290,18 +293,26 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	 */
 	public void save() {
 		PlayerService playerService = server.getDataManager().getPlayerService();
-		PlayerCardService playerCardService = server.getDataManager().getPlayerCardService();
 		entity.setRandomSeed(random.nextLong());
 
-		if (cardsToUpdate.size() > 0) {
-			PlayerCardEntity[] cardEntities = new PlayerCardEntity[cardsToUpdate.size()];
+		if (cardsToAdd.size() > 0 || cardsToUpdate.size() > 0) {
+			PlayerCardService playerCardService = server.getDataManager().getPlayerCardService();
+			PlayerCardEntity[] addEntities = new PlayerCardEntity[cardsToAdd.size()];
+			PlayerCardEntity[] updateEntities = new PlayerCardEntity[cardsToUpdate.size()];
+			int i;
 
-			int i = 0;
-			for (PlayerCard card : cardsToUpdate) {
-				cardEntities[i++] = new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount());
+			i = 0;
+			for (PlayerCard card : cardsToAdd) {
+				addEntities[i++] = new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount());
 			}
 
-			playerCardService.merge(cardEntities);
+			i = 0;
+			for (PlayerCard card : cardsToUpdate) {
+				updateEntities[i++] = new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount());
+			}
+
+			playerCardService.merge(addEntities, updateEntities);
+			cardsToAdd.clear();
 			cardsToUpdate.clear();
 		}
 

@@ -22,13 +22,13 @@ public abstract class LogicService<EntityType extends LogicEntity> extends Servi
 	protected abstract EntityType createEntity(String name);
 
 	public List<EntityType> all() {
-		try (Session session = getSession()) {
+		try (Session session = session()) {
 			return session.createNamedQuery(entityClassName + ".all", entityClass).getResultList();
 		}
 	}
 
 	public void store(Map<String, Long> entries) {
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			for (Map.Entry<String, Long> entry : entries.entrySet()) {
 				EntityType entity = createEntity(entry.getKey());
 				Long id = (Long)session.save(entity);
