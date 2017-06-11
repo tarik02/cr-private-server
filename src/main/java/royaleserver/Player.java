@@ -173,7 +173,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	 * @param card Card type to add
 	 * @param count Count oof cards to add
 	 */
-	public void addCard(Card card, int count, int level) {
+	public void addCard(Card card, int count) {
 		boolean found = false;
 		for (PlayerCard playerCard : this.cards.values()) {
 			if (card == playerCard.getCard()) {
@@ -203,7 +203,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			List<OpeningChest.CardStack> cards = openingChest.selectedCards();
 
 			for (OpeningChest.CardStack cardStack : cards) {
-				addCard(cardStack.card, cardStack.count, 1);
+				addCard(cardStack.card, cardStack.count);
 			}
 
 			openingChest = null;
