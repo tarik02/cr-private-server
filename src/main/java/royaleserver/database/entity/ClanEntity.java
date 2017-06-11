@@ -134,6 +134,6 @@ public class ClanEntity {
 	}
 
 	public ClanEntity setLogicBadge(ClanBadge badge) {
-		return setBadge(new ClanBadgeEntity().setId(badge.getDbId()));
+		return setBadge(badge.getDbEntity());
 	}
 }

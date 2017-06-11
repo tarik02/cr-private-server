@@ -1,6 +1,5 @@
 package royaleserver.network.protocol.server.messages;
 
-import royaleserver.logic.Chest;
 import royaleserver.network.protocol.Messages;
 import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.server.components.Card;
@@ -16,9 +15,9 @@ public final class HomeDataOwn extends HomeData {
 	public int loginTime;
 
 	public HomeChest homeChests[];
-	public Card[] cards;
 
 	public Deck currentDeck;
+	public Card[] cardsAfterDeck;
 	public Deck[] decks;
 
 	public String[] offers; // JSON
@@ -54,15 +53,19 @@ public final class HomeDataOwn extends HomeData {
 		for (Deck deck : decks) {
 			stream.putRrsInt32(deck.cards.length);
 			for (Card card : deck.cards) {
-				stream.putRrsInt32((int)card.card.getScid().getValue());
+				if (card != null) {
+					stream.putRrsInt32((int)card.card.getScid().getValue());
+				} else {
+					stream.putRrsInt32(0);
+				}
 			}
 		}
 
 		stream.put(Hex.toByteArray("ff"));
 		currentDeck.encode(stream);
 
-		stream.putRrsInt32(cards.length);
-		for (Card card : cards) {
+		stream.putRrsInt32(cardsAfterDeck.length);
+		for (Card card : cardsAfterDeck) {
 			card.encode(stream);
 		}
 

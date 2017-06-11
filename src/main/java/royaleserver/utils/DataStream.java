@@ -11,6 +11,8 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class DataStream {
+	public static final int RRSINT_NULL = -64;
+
 	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 	private static final int DEFAULT_BUFFER_LENGTH = 128;
 

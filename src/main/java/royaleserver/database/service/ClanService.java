@@ -17,7 +17,7 @@ public class ClanService extends Service {
 	}
 
 	public ClanEntity add(ClanEntity entity){
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			ClanEntity fromDB = (ClanEntity)session.merge(entity);
 			transaction.commit();
 			return fromDB;
@@ -25,26 +25,26 @@ public class ClanService extends Service {
 	}
 
 	public void remove(ClanEntity entity) {
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			session.remove(entity);
 			transaction.commit();
 		}
 	}
 
 	public ClanEntity searchById(long id) {
-		try (Session session = getSession()) {
+		try (Session session = session()) {
 			return session.createNamedQuery("ClanEntity.byId", ClanEntity.class).setParameter("id", id).getSingleResult();
 		}
 	}
 
 	public List<ClanEntity> searchByName(String name) {
-		try (Session session = getSession()) {
+		try (Session session = session()) {
 			return session.createNamedQuery("ClanEntity.byName", ClanEntity.class).setParameter("name", name).getResultList();
 		}
 	}
 
 	public List<ClanEntity> search(String name, int minMembers, int maxMembers, int minTrophies, boolean onlyJoinable) {
-		try (Session session = getSession()) {
+		try (Session session = session()) {
 			CriteriaBuilder builder = session.getCriteriaBuilder();
 			CriteriaQuery<ClanEntity> query = builder.createQuery(ClanEntity.class);
 			Root<ClanEntity> root = query.from(ClanEntity.class);

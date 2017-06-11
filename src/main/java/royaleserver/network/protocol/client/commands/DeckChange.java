@@ -5,29 +5,29 @@ import royaleserver.network.protocol.client.ClientCommand;
 import royaleserver.network.protocol.client.ClientCommandHandler;
 import royaleserver.utils.DataStream;
 
-public final class DeckChangeCard extends ClientCommand {
-	public static final short ID = Commands.DECK_CHANGE_CARD;
+public final class DeckChange extends ClientCommand {
+	public static final short ID = Commands.DECK_CHANGE;
 
 	public int tickStart;
 	public int tickEnd;
 
-	public long accountId;
-	public int cardIndex;
-	public int slot;
-	public int slot2;
+	public int unknown_2;
+	public int unknown_3;
 
-	public DeckChangeCard() {
+	public int slot;
+
+	public DeckChange() {
 		super(ID);
 	}
 
 	@Override
 	public ClientCommand create() {
-		return new DeckChangeCard();
+		return new DeckChange();
 	}
 
 	@Override
 	public boolean handle(ClientCommandHandler handler) throws Throwable {
-		return handler.handleDeckChangeCard(this);
+		return handler.handleDeckChange(this);
 	}
 
 	@Override
@@ -35,9 +35,9 @@ public final class DeckChangeCard extends ClientCommand {
 		tickStart = stream.getRrsInt32();
 		tickEnd = stream.getRrsInt32();
 
-		accountId = stream.getRrsLong();
-		cardIndex = stream.getRrsInt32();
+		unknown_2 = stream.getRrsInt32();
+		unknown_3 = stream.getRrsInt32();
+
 		slot = stream.getRrsInt32();
-		slot2 = stream.getRrsInt32();
 	}
 }

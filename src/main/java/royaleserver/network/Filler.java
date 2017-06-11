@@ -17,6 +17,7 @@ import royaleserver.network.protocol.server.messages.HomeDataOwn;
 import royaleserver.network.protocol.server.messages.HomeDataVisited;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -159,7 +160,8 @@ public final class Filler {
 		message.favouriteCard = null; // TODO:
 	}
 
-	public static void fill(HomeDataOwn message, PlayerEntity entity, List<PlayerCard> cards) {
+	public static void fill(HomeDataOwn message, PlayerEntity entity, royaleserver.Deck currentDeck,
+	                        Collection<PlayerCard> cardsAfterDeck, Collection<royaleserver.Deck> decks) {
 		fill((HomeData)message, entity);
 		message.isMyProfile = true;
 		message.giveSeasonReward = false;
@@ -198,36 +200,55 @@ public final class Filler {
 			message.homeChests[i++] = homeChest;
 		}
 
-		message.cards = new Card[cards.size()];
+		message.cardsAfterDeck = new Card[cardsAfterDeck.size()];
 		i = 0;
-		for (PlayerCard playerCard : cards) {
+		for (PlayerCard playerCard : cardsAfterDeck) {
 			Card card = new Card();
 			card.card = playerCard.getCard();
 			card.level = playerCard.getLevel();
 			card.count = playerCard.getCount();
 
-			message.cards[i++] = card;
+			message.cardsAfterDeck[i++] = card;
 		}
 
-		message.currentDeck = new Deck(); // TODO:
-		message.currentDeck.cards = new Card[8];
-		for (i = 0; i < message.currentDeck.cards.length; i++) {
-			message.currentDeck.cards[i] = new Card();
-			message.currentDeck.cards[i].card = royaleserver.logic.Card.byDB(i + 1); // Temponary solution
-			message.currentDeck.cards[i].level = 1;
+		message.currentDeck = new Deck();
+		message.currentDeck.cards = new Card[royaleserver.Deck.DECK_CARDS_COUNT];
+
+		for (i = 0; i < royaleserver.Deck.DECK_CARDS_COUNT; i++) {
+			Card card = new Card();
+			PlayerCard deckCard = currentDeck.getCard(i);
+			if (deckCard != null) {
+				card.card = deckCard.getCard();
+				card.level = deckCard.getLevel();
+				card.count = deckCard.getCount();
+			} else {
+				card.card = i == 0 ? null : message.currentDeck.cards[i - 1].card;
+				card.label = 0;
+				card.count = 0;
+			}
+
+			message.currentDeck.cards[i] = card;
 		}
 
-		message.decks = new Deck[3]; // TODO:
-		for (i = 0; i < message.decks.length; ++i) {
+		message.decks = new Deck[decks.size()];
+
+		i = 0;
+		for (royaleserver.Deck playerDeck : decks) {
 			Deck deck = new Deck();
-			deck.cards = new Card[8];
-			for (int j = 0; j < deck.cards.length; ++j) {
-				Card card = new Card();
-				card.card = royaleserver.logic.Card.by("Knight");
-				deck.cards[j] = card;
+			deck.cards = new Card[royaleserver.Deck.DECK_CARDS_COUNT];
+			for (int j = 0; j < royaleserver.Deck.DECK_CARDS_COUNT; ++j) {
+				PlayerCard playerCard = playerDeck.getCard(j);
+				if (playerCard != null) {
+					Card card = new Card();
+					card.card = playerCard.getCard();
+					deck.cards[j] = card;
+				} else {
+					deck.cards[j] = null;
+				}
 			}
 
 			message.decks[i] = deck;
+			++i;
 		}
 
 		message.offers = new String[]{}; // TODO:

@@ -4,21 +4,18 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.entity.ExpLevelEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ExpLevel extends DBLogic {
+public final class ExpLevel extends DBLogic<ExpLevelEntity> {
 	private int index;
 	private int numericName;
 	private int expToNextLevel;
 	private int totalExp;
 
 	private ExpLevel() {}
-
-	public long getDbId() {
-		return dbId;
-	}
 
 	public int getIndex() {
 		return index;

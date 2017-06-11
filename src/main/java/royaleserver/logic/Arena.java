@@ -4,12 +4,13 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.entity.ArenaEntity;
 import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Arena extends DBLogic {
+public final class Arena extends DBLogic<ArenaEntity> {
 	public static final int SCID_HIGH = 0; // TODO: Get it
 
 	private int index;

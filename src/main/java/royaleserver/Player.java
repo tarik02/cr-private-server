@@ -19,6 +19,7 @@ import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.commands.NameSet;
 import royaleserver.network.protocol.server.components.ClanHeader;
 import royaleserver.network.protocol.server.messages.*;
+import royaleserver.utils.DataStream;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
@@ -31,9 +32,13 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	protected Random random;
 
 	protected OpeningChest openingChest = null;
-	protected final ArrayList<PlayerCard> cards = new ArrayList<>();
-	protected final ArrayList<PlayerCard> cardsWon = new ArrayList<>();
+	protected final Map<Card, PlayerCard> cards = new HashMap<>();
+	protected final Set<PlayerCard> cardsToAdd = new HashSet<>();
 	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
+
+	protected Deck deck;
+	protected ArrayList<Deck> decks = new ArrayList<>();
+	protected ArrayList<PlayerCard> cardsAfterDeck = new ArrayList<>();
 
 	public Player(PlayerEntity entity, Server server, NetworkSessionHandler session) {
 		super(server, session);
@@ -42,13 +47,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		server.addPlayer(this);
 
 		random = new Random(entity.getRandomSeed());
-
-		Set<PlayerCardEntity> cardEntities = entity.getCards();
-		cards.ensureCapacity(cardEntities.size());
-		for (PlayerCardEntity cardEntity : cardEntities) {
-			PlayerCard card = new PlayerCard(cardEntity.getLogicCard(), cardEntity.getLevel(), cardEntity.getCount());
-			cards.add(card);
-		}
 
 
 		LoginOk loginOk = new LoginOk();
@@ -76,6 +74,52 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		loginOk.unknown_23 = 1;
 		session.sendMessage(loginOk);
 
+
+
+		Set<PlayerCardEntity> cardEntities = entity.getCards();
+		for (PlayerCardEntity cardEntity : cardEntities) {
+			Card card = cardEntity.getLogicCard();
+			int level = cardEntity.getLevel(),
+				count = cardEntity.getCount();
+
+			PlayerCard playerCard = new PlayerCard(card, level, count, cardEntity);
+			cards.put(card, playerCard);
+		}
+
+		for (int i = 0; i < getDecksCount(); ++i) {
+			decks.add(new Deck());
+		}
+
+		Set<PlayerDeckCardEntity> decksCards = entity.getDecksCards();
+		for (PlayerDeckCardEntity playerDeckCard : decksCards) {
+			int deckSlot = playerDeckCard.getDeckSlot();
+			int cardSlot = playerDeckCard.getCardSlot();
+			Card card = playerDeckCard.getLogicCard();
+
+			if (deckSlot < decks.size()) {
+				Deck deck = decks.get(deckSlot);
+				deck.swapCard(cardSlot, cards.get(card));
+				deck.setEntity(cardSlot, playerDeckCard);
+			}
+		}
+
+		// Fill deck with cards, if they aren't present there
+		for (Deck deck : decks) {
+			deck.markUnchanged();
+
+			for (int i = 0; i < Deck.DECK_CARDS_COUNT; ++i) {
+				if (deck.getCard(i) == null) {
+					for (PlayerCard card : cards.values()) {
+						if (!deck.hasCard(card)) {
+							deck.swapCard(i, card);
+						}
+					}
+				}
+			}
+		}
+
+		changeDeck(entity.getCurrentDeckSlot());
+
 		sendOwnHomeData();
 	}
 
@@ -84,7 +128,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	 */
 	public void sendOwnHomeData() {
 		HomeDataOwn response = new HomeDataOwn();
-		Filler.fill(response, entity, cards);
+		Filler.fill(response, entity, deck, cardsAfterDeck, decks);
 
 		session.sendMessage(response);
 	}
@@ -123,6 +167,35 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		}
 	}
 
+	/**
+	 * Add count cards of given type. If needed, convert cards to gold.
+	 *
+	 * @param card Card type to add
+	 * @param count Count oof cards to add
+	 */
+	public void addCard(Card card, int count) {
+		boolean found = false;
+		for (PlayerCard playerCard : this.cards.values()) {
+			if (card == playerCard.getCard()) {
+				playerCard.addCount(count);
+				this.cardsToUpdate.add(playerCard);
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			PlayerCard playerCard = new PlayerCard(card, 1, count);
+			playerCard.addCount(count);
+
+			// TODO: Convert cards to gold if needed
+
+			this.cardsAfterDeck.add(playerCard);
+			this.cards.put(card, playerCard);
+			this.cardsToAdd.add(playerCard);
+		}
+	}
+
 	private void endOpeningChest() {
 		if (openingChest != null) {
 			openingChest.end();
@@ -130,23 +203,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			List<OpeningChest.CardStack> cards = openingChest.selectedCards();
 
 			for (OpeningChest.CardStack cardStack : cards) {
-				boolean found = false;
-				for (PlayerCard card : this.cards) {
-					if (cardStack.card == card.getCard()) {
-						card.addCount(cardStack.count);
-						this.cardsToUpdate.add(card);
-						found = true;
-						break;
-					}
-				}
-
-				if (!found) {
-					PlayerCard card = new PlayerCard(cardStack.card, 1, cardStack.count);
-					card.addCount(cardStack.count);
-					this.cardsWon.add(card);
-					this.cards.add(card);
-					this.cardsToUpdate.add(card);
-				}
+				addCard(cardStack.card, cardStack.count);
 			}
 
 			openingChest = null;
@@ -168,6 +225,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		}
 	}
 
+	// TODO: Move it to another file
 	protected OpeningChest generateChest(Chest chest) {
 		boolean isDraft = chest.isDraftChest();
 		OpeningChest.Builder builder = OpeningChest.builder(isDraft);
@@ -269,6 +327,26 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		return (int)Math.ceil((float)different * (rarityCount / (float)count));
 	}
 
+	protected void changeDeck(int slot) {
+		if (slot < 0 || slot >= decks.size()) {
+			throw new IllegalArgumentException("slot");
+		}
+
+		Deck newDeck = decks.get(slot);
+		if (deck != newDeck) {
+			deck = newDeck;
+
+			cardsAfterDeck.clear();
+			for (PlayerCard card : cards.values()) {
+				if (!deck.hasCard(card)) {
+					cardsAfterDeck.add(card);
+				}
+			}
+
+			entity.setCurrentDeckSlot(slot);
+		}
+	}
+
 	/**
 	 * @param nickname to check
 	 * @return true if nickname is allowed to use
@@ -279,23 +357,80 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	}
 
 	/**
+	 * @return Maximal count of paralell deck.
+	 */
+	public int getDecksCount() {
+		// TODO: 5 after update
+		return 3;
+	}
+
+	/**
 	 * Saves player entity to database.
 	 */
 	public void save() {
 		PlayerService playerService = server.getDataManager().getPlayerService();
-		PlayerCardService playerCardService = server.getDataManager().getPlayerCardService();
 		entity.setRandomSeed(random.nextLong());
 
-		if (cardsToUpdate.size() > 0) {
-			PlayerCardEntity[] cardEntities = new PlayerCardEntity[cardsToUpdate.size()];
+		if (cardsToAdd.size() > 0 || cardsToUpdate.size() > 0) {
+			PlayerCardService playerCardService = server.getDataManager().getPlayerCardService();
+			ArrayList<PlayerCardEntity> addEntities = new ArrayList<>(cardsToAdd.size());
+			ArrayList<PlayerCardEntity> updateEntities = new ArrayList<>(cardsToUpdate.size());
 
-			int i = 0;
 			for (PlayerCard card : cardsToUpdate) {
-				cardEntities[i++] = new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount());
+				PlayerCardEntity cardEntity = card.getEntity();
+				if (cardEntity != null) {
+					cardEntity.setLevel(card.getLevel());
+					cardEntity.setCount(card.getCount());
+					updateEntities.add(cardEntity);
+				}
 			}
 
-			playerCardService.merge(cardEntities);
+			for (PlayerCard card : cardsToAdd) {
+				PlayerCardEntity cardEntity = new PlayerCardEntity(entity, card.getCard().getDbEntity(), card.getLevel(), card.getCount());
+				card.setEntity(cardEntity);
+				addEntities.add(cardEntity);
+			}
+
+			playerCardService.merge(addEntities, updateEntities);
+			cardsToAdd.clear();
 			cardsToUpdate.clear();
+		}
+
+		ArrayList<PlayerDeckCardEntity> deckCardsAdd = new ArrayList<>();
+		ArrayList<PlayerDeckCardEntity> deckCardsUpdate = new ArrayList<>();
+		int deckSlot = 0;
+		for (Deck deck : decks) {
+			if (deck.markUnchanged()) {
+				for (int i = 0; i < Deck.DECK_CARDS_COUNT; ++i) {
+					PlayerCard card = deck.getCard(i);
+					PlayerDeckCardEntity cardEntity = deck.getEntity(i);
+
+					if (card != null) {
+						if (cardEntity == null) {
+							cardEntity = new PlayerDeckCardEntity(entity, deckSlot, i, card.getCard().getDbEntity());
+							deck.setEntity(i, cardEntity);
+							deckCardsAdd.add(cardEntity);
+						} else {
+							cardEntity.setLogicCard(card.getCard());
+							deckCardsUpdate.add(cardEntity);
+						}
+					}
+				}
+			}
+
+			++deckSlot;
+		}
+		if (deckCardsAdd.size() != 0 || deckCardsUpdate.size() != 0) {
+			if (deckCardsAdd.size() == 0) {
+				server.getDataManager().getPlayerDeckCardService().update(deckCardsUpdate);
+			} else if (deckCardsUpdate.size() == 0) {
+				server.getDataManager().getPlayerDeckCardService().add(deckCardsAdd);
+			} else {
+				server.getDataManager().getPlayerDeckCardService().merge(deckCardsAdd, deckCardsUpdate);
+			}
+
+			deckCardsAdd.clear();
+			deckCardsUpdate.clear();
 		}
 
 		playerService.update(entity);
@@ -685,27 +820,27 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		return true;
 	}
 
+	@Override
+	public boolean handleDeckChange(DeckChange command) throws Throwable {
+		changeDeck(command.slot);
+
+		return true;
+	}
+
+	@Override
 	public boolean handleDeckChangeCard(DeckChangeCard command) throws Throwable {
 		if (command.slot < 0 || command.slot >= 8) {
 			return true;
 		}
 
-		boolean isNew = ((command.cardIndex >> 7) & 1) == 1;
-		int cardIndex = command.cardIndex & 0b01111111;
+		if (command.cardIndex != DataStream.RRSINT_NULL) {
+			// Swap deck card and other card
 
-		PlayerCard card = null;
-		if (cardIndex >= 0) {
-			if (isNew) {
-				if (cardIndex < cardsWon.size()) {
-					card = cardsWon.get(cardIndex);
-				}
-			} else if (cardIndex < cards.size()) {
-				card = cards.get(cardIndex);
-			}
-		}
+			cardsAfterDeck.set(command.cardIndex, deck.swapCard(command.slot, cardsAfterDeck.get(command.cardIndex)));
+		} else if (command.slot2 != DataStream.RRSINT_NULL) {
+			// Swap two deck cards
 
-		if (card != null) {
-			logger.info("Set card on slot %d to %s", command.slot, card.getCard().getName());
+			deck.swapCards(command.slot, command.slot2);
 		}
 
 		return true;

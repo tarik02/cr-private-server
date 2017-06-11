@@ -5,12 +5,16 @@ import royaleserver.assets.Asset;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.entity.CardEntity;
 import royaleserver.database.service.CardService;
 import royaleserver.utils.SCID;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public final class Card extends DBLogic {
+public final class Card extends DBLogic<CardEntity> {
 	public static final int TYPE_CHARACTER = 26;
 	public static final int TYPE_BUILDING = 27;
 	public static final int TYPE_SPELL = 28;
@@ -33,10 +37,6 @@ public final class Card extends DBLogic {
 
 	public SCID getScid() {
 		return scid;
-	}
-
-	public long getDbId() {
-		return dbId;
 	}
 
 	public String getName() {

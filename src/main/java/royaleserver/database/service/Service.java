@@ -12,7 +12,7 @@ public abstract class Service {
 		this.sessionFactory = sessionFactory;
 	}
 
-	protected Session getSession() {
+	protected Session session() {
 		return sessionFactory.openSession();
 	}
 

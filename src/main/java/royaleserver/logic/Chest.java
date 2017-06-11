@@ -4,12 +4,13 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.entity.ChestEntity;
 import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Chest extends DBLogic implements Cloneable {
+public final class Chest extends DBLogic<ChestEntity> implements Cloneable {
 	public static final int SCID_HIGH = 19;
 
 	private int index;

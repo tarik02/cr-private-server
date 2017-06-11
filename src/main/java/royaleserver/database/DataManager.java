@@ -29,6 +29,8 @@ public class DataManager {
 
 		Properties properties = new Properties();
 
+		properties.setProperty("hibernate.show_sql", config.get("database.show_sql").getAsBoolean() ? "true" : "false");
+
 		switch (config.get("database.provider").getAsString()) {
 		case "mysql":
 			properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect");
@@ -115,6 +117,10 @@ public class DataManager {
 
 	public PlayerCardService getPlayerCardService() {
 		return services.playerCardService;
+	}
+
+	public PlayerDeckCardService getPlayerDeckCardService() {
+		return services.playerDeckCardService;
 	}
 
 	public PlayerService getPlayerService() {

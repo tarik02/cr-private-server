@@ -16,7 +16,7 @@ public class AssetService extends Service {
 	public AssetEntity get(String name) {
 		AssetEntity entity;
 
-		try (Session session = getSession()) {
+		try (Session session = session()) {
 			try {
 				entity = session.createNamedQuery("AssetEntity.byName", AssetEntity.class)
 						.setParameter("name", name)
@@ -34,7 +34,7 @@ public class AssetService extends Service {
 	public void update(AssetEntity entity) {
 		entity.setLastUpdated(new Date(System.currentTimeMillis()));
 
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			session.merge(entity);
 			transaction.commit();
 		}

@@ -18,7 +18,7 @@ public class UnlockCodeService extends Service {
 	public String generate() {
 		String code = StringUtils.randomString(UnlockCodeEntity.CODE_LENGTH);
 
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			session.merge(new UnlockCodeEntity(code));
 			transaction.commit();
 		}
@@ -28,7 +28,7 @@ public class UnlockCodeService extends Service {
 
 	public boolean use(String code) {
 		boolean result;
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			try {
 				result = session.createNamedQuery("UnlockCodeEntity.use")
 						.setParameter("code", code)

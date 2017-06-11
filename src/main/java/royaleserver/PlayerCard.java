@@ -1,16 +1,24 @@
 package royaleserver;
 
 import royaleserver.logic.Card;
+import royaleserver.database.entity.PlayerCardEntity;
 
 public final class PlayerCard {
 	private Card card;
 	private int level;
 	private int count;
 
+	private PlayerCardEntity entity;
+
 	public PlayerCard(Card card, int level, int count) {
+		this(card, level, count, null);
+	}
+
+	public PlayerCard(Card card, int level, int count, PlayerCardEntity entity) {
 		this.card = card;
 		this.level = level;
 		this.count = count;
+		this.entity = entity;
 	}
 
 	public Card getCard() {
@@ -38,6 +46,14 @@ public final class PlayerCard {
 	public PlayerCard addCount(int count) {
 		this.count += count;
 		return this;
+	}
+
+	public PlayerCardEntity getEntity() {
+		return entity;
+	}
+
+	public void setEntity(PlayerCardEntity entity) {
+		this.entity = entity;
 	}
 
 	@Override

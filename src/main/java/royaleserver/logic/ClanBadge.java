@@ -4,12 +4,13 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.entity.ClanBadgeEntity;
 import royaleserver.utils.SCID;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ClanBadge extends DBLogic {
+public final class ClanBadge extends DBLogic<ClanBadgeEntity> {
 	public static final int SCID_HIGH = 16;
 
 	private SCID scid;

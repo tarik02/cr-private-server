@@ -26,11 +26,11 @@ public class HomeChestEntity implements java.io.Serializable {
 	@Column(nullable = false)
 	private HomeChestStatus status;
 
-	@Column(nullable = true, columnDefinition = "TIMESTAMP")
+	@Column(nullable = true)
 	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date openStart = null;
 
-	@Column(nullable = true, columnDefinition = "TIMESTAMP")
+	@Column(nullable = true)
 	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date openEnd = null;
 
@@ -94,7 +94,7 @@ public class HomeChestEntity implements java.io.Serializable {
 	}
 
 	public HomeChestEntity setLogicChest(Chest chest) {
-		return setChest(new ChestEntity().setId(chest.getDbId()));
+		return setChest(chest.getDbEntity());
 	}
 
 	@Override

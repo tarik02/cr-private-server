@@ -21,17 +21,7 @@ public abstract class LogicEntity<Self extends LogicEntity> {
 		return id;
 	}
 
-	public Self setId(long id) {
-		this.id = id;
-		return (Self)this;
-	}
-
 	public String getName() {
 		return name;
-	}
-
-	public Self setName(String name) {
-		this.name = name;
-		return (Self)this;
 	}
 }

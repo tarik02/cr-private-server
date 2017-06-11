@@ -53,7 +53,7 @@ public final class NetworkServer {
 	public NetworkServer(Server server, Config config) {
 		this.server = server;
 
-		this.requireLoginCode = config.get("server.requireLoginCode").getAsBoolean();
+		this.requireLoginCode = config.get("server.require_login_code").getAsBoolean();
 
 		ClientCommandFactory.instance.init();
 		ClientMessageFactory.instance.init();

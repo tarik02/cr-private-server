@@ -11,14 +11,14 @@ public class HomeChestService extends Service {
 	}
 
 	public void put(HomeChestEntity entity) {
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			session.merge(entity);
 			transaction.commit();
 		}
 	}
 
 	public void delete(HomeChestEntity entity) {
-		try (Session session = getSession(); Transaction transaction = transaction(session)) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
 			session.remove(entity);
 			transaction.commit();
 		}
