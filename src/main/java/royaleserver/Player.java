@@ -32,15 +32,14 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	protected Random random;
 
 	protected OpeningChest openingChest = null;
-	protected final ArrayList<PlayerCard> cards = new ArrayList<>();
+	protected final Map<Card, PlayerCard> cards = new HashMap<>();
 	protected final ArrayList<PlayerCard> cardsWon = new ArrayList<>();
 	protected final Set<PlayerCard> cardsToAdd = new HashSet<>();
 	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
 
 	protected Deck deck;
+	protected ArrayList<Deck> decks = new ArrayList<>();
 	protected ArrayList<PlayerCard> cardsAfterDeck = new ArrayList<>();
-
-	protected Deck[] decks;
 
 	public Player(PlayerEntity entity, Server server, NetworkSessionHandler session) {
 		super(server, session);
@@ -49,13 +48,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		server.addPlayer(this);
 
 		random = new Random(entity.getRandomSeed());
-
-		Set<PlayerCardEntity> cardEntities = entity.getCards();
-		cards.ensureCapacity(cardEntities.size());
-		for (PlayerCardEntity cardEntity : cardEntities) {
-			PlayerCard card = new PlayerCard(cardEntity.getLogicCard(), cardEntity.getLevel(), cardEntity.getCount());
-			cards.add(card);
-		}
 
 
 		LoginOk loginOk = new LoginOk();
@@ -83,10 +75,50 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		loginOk.unknown_23 = 1;
 		session.sendMessage(loginOk);
 
+
+
+		Set<PlayerCardEntity> cardEntities = entity.getCards();
+		for (PlayerCardEntity cardEntity : cardEntities) {
+			Card card = cardEntity.getLogicCard();
+			int level = cardEntity.getLevel(),
+				count = cardEntity.getCount();
+
+			PlayerCard playerCard = new PlayerCard(card, level, count);
+			cards.put(card, playerCard);
+		}
+
+		Set<PlayerDeckCardEntity> decksCards = entity.getDecksCards();
+		for (PlayerDeckCardEntity playerDeckCard : decksCards) {
+			int deckSlot = playerDeckCard.getDeckSlot();
+			int cardSlot = playerDeckCard.getCardSlot();
+			Card card = playerDeckCard.getLogicCard();
+
+			for (int i = decks.size(); i <= deckSlot; ++i) {
+				decks.add(new Deck());
+			}
+
+			Deck deck = decks.get(deckSlot);
+			deck.swapCard(cardSlot, cards.get(card));
+		}
+
+		// Fill deck with cards, if they aren't present there
+		for (Deck deck : decks) {
+			deck.markUnchanged();
+
+			for (int i = 0; i < Deck.DECK_CARDS_COUNT; ++i) {
+				if (deck.getCard(i) == null) {
+					for (PlayerCard card : cards.values()) {
+						if (!deck.hasCard(card)) {
+							deck.swapCard(i, card);
+						}
+					}
+				}
+			}
+		}
+
+		changeDeck(entity.getCurrentDeckSlot());
+
 		sendOwnHomeData();
-
-		deck = new Deck();
-
 	}
 
 	/**
@@ -94,7 +126,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	 */
 	public void sendOwnHomeData() {
 		HomeDataOwn response = new HomeDataOwn();
-		Filler.fill(response, entity, cards);
+		Filler.fill(response, entity, cards.values(), deck, decks);
 
 		session.sendMessage(response);
 	}
@@ -141,7 +173,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 			for (OpeningChest.CardStack cardStack : cards) {
 				boolean found = false;
-				for (PlayerCard card : this.cards) {
+				for (PlayerCard card : this.cards.values()) {
 					if (cardStack.card == card.getCard()) {
 						card.addCount(cardStack.count);
 						this.cardsToUpdate.add(card);
@@ -154,7 +186,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 					PlayerCard card = new PlayerCard(cardStack.card, 1, cardStack.count);
 					card.addCount(cardStack.count);
 					this.cardsWon.add(card);
-					this.cards.add(card);
+					this.cards.put(cardStack.card, card);
 					this.cardsToAdd.add(card);
 				}
 			}
@@ -277,6 +309,26 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 	protected int countDifferent(float rarityCount, int count, int different) {
 		return (int)Math.ceil((float)different * (rarityCount / (float)count));
+	}
+
+	protected void changeDeck(int slot) {
+		if (slot < 0 || slot >= decks.size()) {
+			throw new IllegalArgumentException("slot");
+		}
+
+		Deck newDeck = decks.get(slot);
+		if (deck != newDeck) {
+			deck = newDeck;
+
+			cardsAfterDeck.clear();
+			for (PlayerCard card : cards.values()) {
+				if (!deck.hasCard(card)) {
+					cardsAfterDeck.add(card);
+				}
+			}
+
+			entity.setCurrentDeckSlot(slot);
+		}
 	}
 
 	/**
@@ -703,6 +755,14 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		return true;
 	}
 
+	@Override
+	public boolean handleDeckChange(DeckChange command) throws Throwable {
+		changeDeck(command.slot);
+
+		return true;
+	}
+
+	@Override
 	public boolean handleDeckChangeCard(DeckChangeCard command) throws Throwable {
 		if (command.slot < 0 || command.slot >= 8) {
 			return true;
@@ -711,28 +771,16 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		if (command.cardIndex != DataStream.RRSINT_NULL) {
 			// Swap deck card and other card
 
+			cardsAfterDeck.set(command.cardIndex, deck.swapCard(command.slot, cardsAfterDeck.get(command.cardIndex)));
 		} else if (command.slot2 != DataStream.RRSINT_NULL) {
+			// Swap two deck cards
 
-			return true;
+			deck.swapCards(command.slot, command.slot2);
 		}
 
-		/*boolean isNew = ((command.cardIndex >> 7) & 1) == 1;
-		int cardIndex = command.cardIndex & 0b01111111;
-
-		PlayerCard card = null;
-		if (cardIndex >= 0) {
-			if (isNew) {
-				if (cardIndex < cardsWon.size()) {
-					card = cardsWon.get(cardIndex);
-				}
-			} else if (cardIndex < cards.size()) {
-				card = cards.get(cardIndex);
-			}
+		for (int i = 0; i < Deck.DECK_CARDS_COUNT; ++i) {
+			logger.info("Card %d: %s", 1 + i, deck.getCard(i) == null ? "" : deck.getCard(i).getCard().getName());
 		}
-
-		if (card != null) {
-			logger.info("Set card on slot %d to %s", command.slot, card.getCard().getName());
-		}*/
 
 		return true;
 	}

@@ -17,6 +17,7 @@ public final class Commands {
 
 	// Client commands
 	public static final short DECK_CHANGE_CARD = 500;
+	public static final short DECK_CHANGE = 501;
 	public static final short CHEST_OPEN = 503;
 	public static final short CHEST_BUY = 516;
 	public static final short FIGHT_START = 525;

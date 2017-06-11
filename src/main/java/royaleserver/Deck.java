@@ -1,15 +1,46 @@
 package royaleserver;
 
-public class Deck {
+public final class Deck {
 	public static final int DECK_CARDS_COUNT = 8;
 
 	private final PlayerCard[] cards = new PlayerCard[DECK_CARDS_COUNT];
+	private boolean changed = false;
 
 	public Deck() {
 
 	}
 
+	public boolean changed() {
+		return changed;
+	}
+
+	public boolean markUnchanged() {
+		boolean changed = this.changed;
+		this.changed = false;
+		return changed;
+	}
+
+	public boolean hasCard(PlayerCard card) {
+		for (int i = 0; i < DECK_CARDS_COUNT; ++i) {
+			if (cards[i] == card) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public PlayerCard getCard(int slot) {
+		if (slot < 0 || slot >= DECK_CARDS_COUNT) {
+			throw new IllegalArgumentException("slot");
+		}
+
+		return cards[slot];
+	}
+
 	public void swapCards(int slot1, int slot2) {
+		changed = true;
+
 		if (slot1 < 0 || slot1 >= DECK_CARDS_COUNT) {
 			throw new IllegalArgumentException("slot1");
 		}
@@ -24,6 +55,8 @@ public class Deck {
 	}
 
 	public PlayerCard swapCard(int slot, PlayerCard targetCard) {
+		changed = true;
+
 		if (slot < 0 || slot >= DECK_CARDS_COUNT) {
 			throw new IllegalArgumentException("slot");
 		}

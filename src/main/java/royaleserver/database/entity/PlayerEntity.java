@@ -81,6 +81,12 @@ public class PlayerEntity implements Identifiable<Long> {
 	private float epicChance = 0;
 	private float legendaryChance = 0;
 
+	private int currentDeckSlot = 0;
+
+	@OneToMany(mappedBy = "player")
+	private Set<PlayerDeckCardEntity> decksCards;
+
+
 	public PlayerEntity() {
 		this.registeredDate = new Date();
 		this.lastOnlineStatusUpdate = new Date();
@@ -295,5 +301,17 @@ public class PlayerEntity implements Identifiable<Long> {
 	public PlayerEntity setLegendaryChance(float legendaryChance) {
 		this.legendaryChance = legendaryChance;
 		return this;
+	}
+
+	public int getCurrentDeckSlot() {
+		return currentDeckSlot;
+	}
+
+	public void setCurrentDeckSlot(int currentDeckSlot) {
+		this.currentDeckSlot = currentDeckSlot;
+	}
+
+	public Set<PlayerDeckCardEntity> getDecksCards() {
+		return decksCards;
 	}
 }
