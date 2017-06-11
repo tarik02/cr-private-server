@@ -119,6 +119,10 @@ public class DataManager {
 		return services.playerCardService;
 	}
 
+	public PlayerDeckCardService getPlayerDeckCardService() {
+		return services.playerDeckCardService;
+	}
+
 	public PlayerService getPlayerService() {
 		return services.playerService;
 	}

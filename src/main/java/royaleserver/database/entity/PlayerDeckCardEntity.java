@@ -52,8 +52,16 @@ public class PlayerDeckCardEntity implements Serializable {
 		return card;
 	}
 
+	public void setCard(CardEntity card) {
+		this.card = card;
+	}
+
 	public Card getLogicCard() {
 		return Card.byDB(card.getId());
+	}
+
+	public void setLogicCard(Card card) {
+		setCard(card.getDbEntity());
 	}
 
 	@Override
@@ -73,12 +81,12 @@ public class PlayerDeckCardEntity implements Serializable {
 		if (cardSlot != that.cardSlot) {
 			return false;
 		}
-		return player.equals(that.player);
+		return player != null ? player.equals(that.player) : that.player == null;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = player.hashCode();
+		int result = player != null ? player.hashCode() : 0;
 		result = 31 * result + deckSlot;
 		result = 31 * result + cardSlot;
 		return result;

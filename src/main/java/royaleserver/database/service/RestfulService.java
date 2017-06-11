@@ -6,6 +6,7 @@ import royaleserver.database.util.Transaction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,9 +33,9 @@ public abstract class RestfulService<Id extends Serializable, Entity> extends Se
 	 * @param entities Entities to add
 	 * @return generated id's
 	 */
-	public final List<Id> add(Entity[] entities) {
+	public final Collection<Id> add(Collection<Entity> entities) {
 		try (Session session = session(); Transaction transaction = transaction(session)) {
-			List<Id> ids = new ArrayList<>(entities.length);
+			List<Id> ids = new ArrayList<>(entities.size());
 			for (Entity entity : entities) {
 				ids.add((Id)session.save(entity));
 			}
@@ -46,15 +47,63 @@ public abstract class RestfulService<Id extends Serializable, Entity> extends Se
 
 	public final void update(Entity entity) {
 		try (Session session = session(); Transaction transaction = transaction(session)) {
-			session.save(entity);
+			session.update(entity);
 			transaction.commit();
 		}
 	}
 
-	public final void update(Entity[] entities) {
+	public final void update(Collection<Entity> entities) {
 		try (Session session = session(); Transaction transaction = transaction(session)) {
 			for (Entity entity : entities) {
+				session.update(entity);
+			}
+
+			transaction.commit();
+		}
+	}
+
+	public final void merge(Entity entity) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
+			session.merge(entity);
+			transaction.commit();
+		}
+	}
+
+	public final void merge(Collection<Entity> entities) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
+			for (Entity entity : entities) {
+				session.merge(entity);
+			}
+
+			transaction.commit();
+		}
+	}
+
+	public final void merge(Collection<Entity> entitiesAdd, Collection<Entity> entitiesUpdate) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
+			for (Entity entity : entitiesAdd) {
 				session.save(entity);
+			}
+
+			for (Entity entity : entitiesUpdate) {
+				session.update(entity);
+			}
+
+			transaction.commit();
+		}
+	}
+
+	public final void saveOrUpdate(Entity entity) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
+			session.saveOrUpdate(entity);
+			transaction.commit();
+		}
+	}
+
+	public final void saveOrUpdate(Collection<Entity> entities) {
+		try (Session session = session(); Transaction transaction = transaction(session)) {
+			for (Entity entity : entities) {
+				session.saveOrUpdate(entity);
 			}
 
 			transaction.commit();
@@ -68,7 +117,7 @@ public abstract class RestfulService<Id extends Serializable, Entity> extends Se
 		}
 	}
 
-	public final void delete(Entity[] entities) {
+	public final void delete(Collection<Entity> entities) {
 		try (Session session = session(); Transaction transaction = transaction(session)) {
 			for (Entity entity : entities) {
 				session.delete(entity);

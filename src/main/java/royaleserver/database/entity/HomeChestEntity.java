@@ -94,7 +94,7 @@ public class HomeChestEntity implements java.io.Serializable {
 	}
 
 	public HomeChestEntity setLogicChest(Chest chest) {
-		return setChest(new ChestEntity().setId(chest.getDbId()));
+		return setChest(chest.getDbEntity());
 	}
 
 	@Override

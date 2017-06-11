@@ -17,21 +17,23 @@ public final class DataServices {
 	public final ExpLevelService expLevelService;
 	public final HomeChestService homeChestService;
 	public final PlayerCardService playerCardService;
+	public final PlayerDeckCardService playerDeckCardService;
 	public final PlayerService playerService;
 	public final UnlockCodeService unlockCodeService;
 
 	public DataServices(SessionFactory sessionFactory) {
-		this.arenaService = new ArenaService(sessionFactory);
-		this.assetService = new AssetService(sessionFactory);
-		this.cardService = new CardService(sessionFactory);
-		this.chestService = new ChestService(sessionFactory);
-		this.clanBadgeService = new ClanBadgeService(sessionFactory);
-		this.clanRoleService = new ClanRoleService(sessionFactory);
-		this.clanService = new ClanService(sessionFactory);
-		this.expLevelService = new ExpLevelService(sessionFactory);
-		this.homeChestService = new HomeChestService(sessionFactory);
-		this.playerCardService = new PlayerCardService(sessionFactory);
-		this.playerService = new PlayerService(sessionFactory);
-		this.unlockCodeService = new UnlockCodeService(sessionFactory);
+		arenaService = new ArenaService(sessionFactory);
+		assetService = new AssetService(sessionFactory);
+		cardService = new CardService(sessionFactory);
+		chestService = new ChestService(sessionFactory);
+		clanBadgeService = new ClanBadgeService(sessionFactory);
+		clanRoleService = new ClanRoleService(sessionFactory);
+		clanService = new ClanService(sessionFactory);
+		expLevelService = new ExpLevelService(sessionFactory);
+		homeChestService = new HomeChestService(sessionFactory);
+		playerCardService = new PlayerCardService(sessionFactory);
+		playerDeckCardService = new PlayerDeckCardService(sessionFactory);
+		playerService = new PlayerService(sessionFactory);
+		unlockCodeService = new UnlockCodeService(sessionFactory);
 	}
 }

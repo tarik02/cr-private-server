@@ -15,9 +15,9 @@ public final class HomeDataOwn extends HomeData {
 	public int loginTime;
 
 	public HomeChest homeChests[];
-	public Card[] cards;
 
 	public Deck currentDeck;
+	public Card[] cardsAfterDeck;
 	public Deck[] decks;
 
 	public String[] offers; // JSON
@@ -64,8 +64,8 @@ public final class HomeDataOwn extends HomeData {
 		stream.put(Hex.toByteArray("ff"));
 		currentDeck.encode(stream);
 
-		stream.putRrsInt32(cards.length);
-		for (Card card : cards) {
+		stream.putRrsInt32(cardsAfterDeck.length);
+		for (Card card : cardsAfterDeck) {
 			card.encode(stream);
 		}
 

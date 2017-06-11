@@ -4,20 +4,17 @@ import royaleserver.Server;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
+import royaleserver.database.entity.ClanRoleEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ClanRole extends DBLogic {
+public final class ClanRole extends DBLogic<ClanRoleEntity> {
 	private int index;
 	private int level;
 	private boolean canInvite, canSendMail, canChangeClanSettings, canAcceptJoinRequest, canKick, canBePromotedToLeader, canPromoteToOwnLevel;
 
 	private ClanRole() {}
-
-	public long getDbId() {
-		return dbId;
-	}
 
 	public int getIndex() {
 		return index;

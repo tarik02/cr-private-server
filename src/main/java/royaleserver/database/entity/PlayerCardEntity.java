@@ -67,7 +67,7 @@ public class PlayerCardEntity implements Serializable {
 	}
 
 	public PlayerCardEntity setLogicCard(Card card) {
-		return setCard(new CardEntity().setId(card.getDbId()));
+		return setCard(card.getDbEntity());
 	}
 
 	@Override

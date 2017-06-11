@@ -7,11 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class DBLogic extends NamedLogic {
+public abstract class DBLogic<Entity extends LogicEntity> extends NamedLogic {
 	protected long dbId;
+	protected Entity dbEntity;
 
-	public long getDbId() {
+	public final long getDbId() {
 		return dbId;
+	}
+
+	public final Entity getDbEntity() {
+		return dbEntity;
 	}
 
 	protected static <
@@ -20,7 +25,7 @@ public abstract class DBLogic extends NamedLogic {
 			Service extends LogicService<Entity>
 			> void init(List<Logic> values, Service service) {
 		final Map<String, LogicEntity> entities = new HashMap<>();
-		final HashMap<String, Long> entitiesToAdd = new HashMap<>();
+		final HashMap<String, Entity> entitiesToAdd = new HashMap<>();
 		for (Entity entity : service.all()) {
 			entities.put(entity.getName(), entity);
 		}
@@ -28,18 +33,20 @@ public abstract class DBLogic extends NamedLogic {
 		for (Logic logic : values) {
 			LogicEntity entity = entities.getOrDefault(logic.getName(), null);
 			if (entity == null) {
-				entitiesToAdd.put(logic.getName(), 0L);
+				entitiesToAdd.put(logic.getName(), null);
 			} else {
 				logic.dbId = entity.getId();
+				logic.dbEntity = entity;
 			}
 		}
 
 		if (entitiesToAdd.size() > 0) {
 			service.store(entitiesToAdd);
-			for (Map.Entry<String, Long> entry : entitiesToAdd.entrySet()) {
+			for (Map.Entry<String, Entity> entry : entitiesToAdd.entrySet()) {
 				for (Logic logic : values) {
 					if (logic.name.equals(entry.getKey())) {
-						logic.dbId = entry.getValue();
+						logic.dbEntity = entry.getValue();
+						logic.dbId = logic.dbEntity.getId();
 						break;
 					}
 				}

@@ -99,6 +99,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 			Deck deck = decks.get(deckSlot);
 			deck.swapCard(cardSlot, cards.get(card));
+			deck.setEntity(cardSlot, playerDeckCard);
 		}
 
 		// Fill deck with cards, if they aren't present there
@@ -126,7 +127,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	 */
 	public void sendOwnHomeData() {
 		HomeDataOwn response = new HomeDataOwn();
-		Filler.fill(response, entity, cards.values(), deck, decks);
+		Filler.fill(response, entity, deck, cardsAfterDeck, decks);
 
 		session.sendMessage(response);
 	}
@@ -366,6 +367,40 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			playerCardService.merge(addEntities, updateEntities);
 			cardsToAdd.clear();
 			cardsToUpdate.clear();
+		}
+
+		ArrayList<PlayerDeckCardEntity> deckCardsAdd = new ArrayList<>();
+		ArrayList<PlayerDeckCardEntity> deckCardsUpdate = new ArrayList<>();
+		int deckSlot = 0;
+		for (Deck deck : decks) {
+			if (deck.markUnchanged()) {
+				for (int i = 0; i < Deck.DECK_CARDS_COUNT; ++i) {
+					PlayerCard card = deck.getCard(i);
+					PlayerDeckCardEntity cardEntity = deck.getEntity(i);
+
+					if (card != null) {
+						if (cardEntity == null) {
+							cardEntity = new PlayerDeckCardEntity(entity, deckSlot, i, card.getCard().getDbEntity());
+							deck.setEntity(i, cardEntity);
+							deckCardsAdd.add(cardEntity);
+						} else {
+							cardEntity.setLogicCard(card.getCard());
+							deckCardsUpdate.add(cardEntity);
+						}
+					}
+				}
+			}
+
+			++deckSlot;
+		}
+		if (deckCardsAdd.size() != 0 || deckCardsUpdate.size() != 0) {
+			if (deckCardsAdd.size() == 0) {
+				server.getDataManager().getPlayerDeckCardService().update(deckCardsUpdate);
+			} else if (deckCardsUpdate.size() == 0) {
+				server.getDataManager().getPlayerDeckCardService().add(deckCardsUpdate);
+			} else {
+				server.getDataManager().getPlayerDeckCardService().merge(deckCardsAdd, deckCardsUpdate);
+			}
 		}
 
 		playerService.update(entity);

@@ -1,9 +1,12 @@
 package royaleserver;
 
+import royaleserver.database.entity.PlayerDeckCardEntity;
+
 public final class Deck {
 	public static final int DECK_CARDS_COUNT = 8;
 
 	private final PlayerCard[] cards = new PlayerCard[DECK_CARDS_COUNT];
+	private final PlayerDeckCardEntity[] entities = new PlayerDeckCardEntity[DECK_CARDS_COUNT];
 	private boolean changed = false;
 
 	public Deck() {
@@ -14,6 +17,10 @@ public final class Deck {
 		return changed;
 	}
 
+	/**
+	 * Marks changed to false
+	 * @return old changed value
+	 */
 	public boolean markUnchanged() {
 		boolean changed = this.changed;
 		this.changed = false;
@@ -68,5 +75,21 @@ public final class Deck {
 		PlayerCard result = cards[slot];
 		cards[slot] = targetCard;
 		return result;
+	}
+
+	public PlayerDeckCardEntity getEntity(int slot) {
+		if (slot < 0 || slot >= DECK_CARDS_COUNT) {
+			throw new IllegalArgumentException("slot");
+		}
+
+		return entities[slot];
+	}
+
+	public void setEntity(int slot, PlayerDeckCardEntity entity) {
+		if (slot < 0 || slot >= DECK_CARDS_COUNT) {
+			throw new IllegalArgumentException("slot");
+		}
+
+		entities[slot] = entity;
 	}
 }

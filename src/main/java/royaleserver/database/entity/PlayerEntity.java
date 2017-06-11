@@ -6,13 +6,14 @@ import royaleserver.logic.ClanRole;
 import royaleserver.logic.ExpLevel;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "players")
-public class PlayerEntity implements Identifiable<Long> {
+public class PlayerEntity implements Identifiable<Long>, Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -186,7 +187,7 @@ public class PlayerEntity implements Identifiable<Long> {
 	}
 
 	public PlayerEntity setLogicArena(Arena arena) {
-		return setArena(new ArenaEntity().setId(arena.getDbId()));
+		return setArena(arena.getDbEntity());
 	}
 
 	public ExpLevelEntity getLastExpLevel() {
@@ -203,7 +204,7 @@ public class PlayerEntity implements Identifiable<Long> {
 	}
 
 	public PlayerEntity setLogicLastExpLevel(ExpLevel level) {
-		return setLastExpLevel(new ExpLevelEntity().setId(level.getDbId()));
+		return setLastExpLevel(level.getDbEntity());
 	}
 	
 	public ExpLevelEntity getExpLevel() {
@@ -220,7 +221,7 @@ public class PlayerEntity implements Identifiable<Long> {
 	}
 
 	public PlayerEntity setLogicExpLevel(ExpLevel level) {
-		return setExpLevel(new ExpLevelEntity().setId(level.getDbId()));
+		return setExpLevel(level.getDbEntity());
 	}
 
 	public int getExpLevelExperience() {
@@ -264,7 +265,7 @@ public class PlayerEntity implements Identifiable<Long> {
 	}
 
 	public PlayerEntity setLogicClanRole(ClanRole role) {
-		return setClanRole(new ClanRoleEntity().setId(role.getDbId()));
+		return setClanRole(role.getDbEntity());
 	}
 
 	public float getRareChance() {
@@ -313,5 +314,25 @@ public class PlayerEntity implements Identifiable<Long> {
 
 	public Set<PlayerDeckCardEntity> getDecksCards() {
 		return decksCards;
+	}
+
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof PlayerEntity)) {
+			return false;
+		}
+
+		PlayerEntity that = (PlayerEntity)o;
+
+		return id.equals(that.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
 	}
 }

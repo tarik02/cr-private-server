@@ -27,12 +27,12 @@ public abstract class LogicService<EntityType extends LogicEntity> extends Servi
 		}
 	}
 
-	public void store(Map<String, Long> entries) {
+	public void store(Map<String, EntityType> entries) {
 		try (Session session = session(); Transaction transaction = transaction(session)) {
-			for (Map.Entry<String, Long> entry : entries.entrySet()) {
+			for (Map.Entry<String, EntityType> entry : entries.entrySet()) {
 				EntityType entity = createEntity(entry.getKey());
-				Long id = (Long)session.save(entity);
-				entry.setValue(id);
+				session.save(entity);
+				entry.setValue(entity);
 			}
 
 			transaction.commit();

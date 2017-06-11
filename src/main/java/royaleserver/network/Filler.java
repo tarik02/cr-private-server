@@ -160,7 +160,8 @@ public final class Filler {
 		message.favouriteCard = null; // TODO:
 	}
 
-	public static void fill(HomeDataOwn message, PlayerEntity entity, Collection<PlayerCard> cards, royaleserver.Deck currentDeck, Collection<royaleserver.Deck> decks) {
+	public static void fill(HomeDataOwn message, PlayerEntity entity, royaleserver.Deck currentDeck,
+	                        Collection<PlayerCard> cardsAfterDeck, Collection<royaleserver.Deck> decks) {
 		fill((HomeData)message, entity);
 		message.isMyProfile = true;
 		message.giveSeasonReward = false;
@@ -199,15 +200,15 @@ public final class Filler {
 			message.homeChests[i++] = homeChest;
 		}
 
-		message.cards = new Card[cards.size()];
+		message.cardsAfterDeck = new Card[cardsAfterDeck.size()];
 		i = 0;
-		for (PlayerCard playerCard : cards) {
+		for (PlayerCard playerCard : cardsAfterDeck) {
 			Card card = new Card();
 			card.card = playerCard.getCard();
 			card.level = playerCard.getLevel();
 			card.count = playerCard.getCount();
 
-			message.cards[i++] = card;
+			message.cardsAfterDeck[i++] = card;
 		}
 
 		message.currentDeck = new Deck();
