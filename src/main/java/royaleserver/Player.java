@@ -33,7 +33,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 	protected OpeningChest openingChest = null;
 	protected final Map<Card, PlayerCard> cards = new HashMap<>();
-	protected final ArrayList<PlayerCard> cardsWon = new ArrayList<>();
 	protected final Set<PlayerCard> cardsToAdd = new HashSet<>();
 	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
 
@@ -87,19 +86,21 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			cards.put(card, playerCard);
 		}
 
+		for (int i = 0; i < getDecksCount(); ++i) {
+			decks.add(new Deck());
+		}
+
 		Set<PlayerDeckCardEntity> decksCards = entity.getDecksCards();
 		for (PlayerDeckCardEntity playerDeckCard : decksCards) {
 			int deckSlot = playerDeckCard.getDeckSlot();
 			int cardSlot = playerDeckCard.getCardSlot();
 			Card card = playerDeckCard.getLogicCard();
 
-			for (int i = decks.size(); i <= deckSlot; ++i) {
-				decks.add(new Deck());
+			if (deckSlot < decks.size()) {
+				Deck deck = decks.get(deckSlot);
+				deck.swapCard(cardSlot, cards.get(card));
+				deck.setEntity(cardSlot, playerDeckCard);
 			}
-
-			Deck deck = decks.get(deckSlot);
-			deck.swapCard(cardSlot, cards.get(card));
-			deck.setEntity(cardSlot, playerDeckCard);
 		}
 
 		// Fill deck with cards, if they aren't present there
@@ -186,7 +187,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 				if (!found) {
 					PlayerCard card = new PlayerCard(cardStack.card, 1, cardStack.count);
 					card.addCount(cardStack.count);
-					this.cardsWon.add(card);
+					this.cardsAfterDeck.add(card);
 					this.cards.put(cardStack.card, card);
 					this.cardsToAdd.add(card);
 				}
@@ -211,6 +212,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		}
 	}
 
+	// TODO: Move it to another file
 	protected OpeningChest generateChest(Chest chest) {
 		boolean isDraft = chest.isDraftChest();
 		OpeningChest.Builder builder = OpeningChest.builder(isDraft);
@@ -342,6 +344,14 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	}
 
 	/**
+	 * @return Maximal count of paralell deck.
+	 */
+	public int getDecksCount() {
+		// TODO: 5 after update
+		return 3;
+	}
+
+	/**
 	 * Saves player entity to database.
 	 */
 	public void save() {
@@ -350,18 +360,15 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 		if (cardsToAdd.size() > 0 || cardsToUpdate.size() > 0) {
 			PlayerCardService playerCardService = server.getDataManager().getPlayerCardService();
-			PlayerCardEntity[] addEntities = new PlayerCardEntity[cardsToAdd.size()];
-			PlayerCardEntity[] updateEntities = new PlayerCardEntity[cardsToUpdate.size()];
-			int i;
+			ArrayList<PlayerCardEntity> addEntities = new ArrayList<>(cardsToAdd.size());
+			ArrayList<PlayerCardEntity> updateEntities = new ArrayList<>(cardsToUpdate.size());
 
-			i = 0;
 			for (PlayerCard card : cardsToAdd) {
-				addEntities[i++] = new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount());
+				addEntities.add(new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount()));
 			}
 
-			i = 0;
 			for (PlayerCard card : cardsToUpdate) {
-				updateEntities[i++] = new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount());
+				updateEntities.add(new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount()));
 			}
 
 			playerCardService.merge(addEntities, updateEntities);
@@ -397,10 +404,13 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			if (deckCardsAdd.size() == 0) {
 				server.getDataManager().getPlayerDeckCardService().update(deckCardsUpdate);
 			} else if (deckCardsUpdate.size() == 0) {
-				server.getDataManager().getPlayerDeckCardService().add(deckCardsUpdate);
+				server.getDataManager().getPlayerDeckCardService().add(deckCardsAdd);
 			} else {
 				server.getDataManager().getPlayerDeckCardService().merge(deckCardsAdd, deckCardsUpdate);
 			}
+
+			deckCardsAdd.clear();
+			deckCardsUpdate.clear();
 		}
 
 		playerService.update(entity);

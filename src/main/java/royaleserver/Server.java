@@ -203,6 +203,7 @@ public class Server {
 	protected void tick() {
 		if (tickCounter % (2.5 * 60 * 20) == 0) { // Every 2.5 minutes
 			synchronized (players) {
+				// TODO: Execute it in each handler thread for each it's player. It's better to do everything with player in the same thread.
 				for (Player player : players) {
 					try {
 						player.updateOnline();

@@ -222,7 +222,7 @@ public final class Filler {
 				card.level = deckCard.getLevel();
 				card.count = deckCard.getCount();
 			} else {
-				card.card = message.currentDeck.cards[i - 1].card;
+				card.card = i == 0 ? null : message.currentDeck.cards[i - 1].card;
 				card.label = 0;
 				card.count = 0;
 			}
