@@ -882,7 +882,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 				if(entity.getGold() >= needToUpdateGold && cardEntity.getCount() >= needToUpdateTroops) {
 					entity.setGold(entity.getGold() - needToUpdateGold);
-					entity.setExpLevelExperience(entity.getExpLevelExperience() + addExperience);
+					addExperience(addExperience);
 
 					playerCard.setLevel(++level);
 					playerCard.setCount(cardEntity.getCount() - needToUpdateTroops);
