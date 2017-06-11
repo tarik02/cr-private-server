@@ -21,27 +21,27 @@ public class PlayerCardEntity implements Serializable {
 	private CardEntity card;
 
 	@Column(nullable = false)
-	private int level = 0;
+	private int level = 1;
 
 	@Column(nullable = false)
 	private int count = 0;
+
+	public PlayerCardEntity() {
+	}
+
+	public PlayerCardEntity(PlayerEntity player, CardEntity card, int level, int count) {
+		this.player = player;
+		this.card = card;
+		this.level = level;
+		this.count = count;
+	}
 
 	public PlayerEntity getPlayer() {
 		return player;
 	}
 
-	public PlayerCardEntity setPlayer(PlayerEntity player) {
-		this.player = player;
-		return this;
-	}
-
 	public CardEntity getCard() {
 		return card;
-	}
-
-	public PlayerCardEntity setCard(CardEntity card) {
-		this.card = card;
-		return this;
 	}
 
 	public int getLevel() {
@@ -64,10 +64,6 @@ public class PlayerCardEntity implements Serializable {
 
 	public Card getLogicCard() {
 		return Card.byDB(card.getId());
-	}
-
-	public PlayerCardEntity setLogicCard(Card card) {
-		return setCard(card.getDbEntity());
 	}
 
 	@Override

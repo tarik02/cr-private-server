@@ -82,7 +82,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			int level = cardEntity.getLevel(),
 				count = cardEntity.getCount();
 
-			PlayerCard playerCard = new PlayerCard(card, level, count);
+			PlayerCard playerCard = new PlayerCard(card, level, count, cardEntity);
 			cards.put(card, playerCard);
 		}
 
@@ -167,6 +167,35 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		}
 	}
 
+	/**
+	 * Add count cards of given type. If needed, convert cards to gold.
+	 *
+	 * @param card Card type to add
+	 * @param count Count oof cards to add
+	 */
+	public void addCard(Card card, int count) {
+		boolean found = false;
+		for (PlayerCard playerCard : this.cards.values()) {
+			if (card == playerCard.getCard()) {
+				playerCard.addCount(count);
+				this.cardsToUpdate.add(playerCard);
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			PlayerCard playerCard = new PlayerCard(card, 1, count);
+			playerCard.addCount(count);
+
+			// TODO: Convert cards to gold if needed
+
+			this.cardsAfterDeck.add(playerCard);
+			this.cards.put(card, playerCard);
+			this.cardsToAdd.add(playerCard);
+		}
+	}
+
 	private void endOpeningChest() {
 		if (openingChest != null) {
 			openingChest.end();
@@ -174,23 +203,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			List<OpeningChest.CardStack> cards = openingChest.selectedCards();
 
 			for (OpeningChest.CardStack cardStack : cards) {
-				boolean found = false;
-				for (PlayerCard card : this.cards.values()) {
-					if (cardStack.card == card.getCard()) {
-						card.addCount(cardStack.count);
-						this.cardsToUpdate.add(card);
-						found = true;
-						break;
-					}
-				}
-
-				if (!found) {
-					PlayerCard card = new PlayerCard(cardStack.card, 1, cardStack.count);
-					card.addCount(cardStack.count);
-					this.cardsAfterDeck.add(card);
-					this.cards.put(cardStack.card, card);
-					this.cardsToAdd.add(card);
-				}
+				addCard(cardStack.card, cardStack.count);
 			}
 
 			openingChest = null;
@@ -363,12 +376,19 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			ArrayList<PlayerCardEntity> addEntities = new ArrayList<>(cardsToAdd.size());
 			ArrayList<PlayerCardEntity> updateEntities = new ArrayList<>(cardsToUpdate.size());
 
-			for (PlayerCard card : cardsToAdd) {
-				addEntities.add(new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount()));
+			for (PlayerCard card : cardsToUpdate) {
+				PlayerCardEntity cardEntity = card.getEntity();
+				if (cardEntity != null) {
+					cardEntity.setLevel(card.getLevel());
+					cardEntity.setCount(card.getCount());
+					updateEntities.add(cardEntity);
+				}
 			}
 
-			for (PlayerCard card : cardsToUpdate) {
-				updateEntities.add(new PlayerCardEntity().setPlayer(entity).setLogicCard(card.getCard()).setLevel(card.getLevel()).setCount(card.getCount()));
+			for (PlayerCard card : cardsToAdd) {
+				PlayerCardEntity cardEntity = new PlayerCardEntity(entity, card.getCard().getDbEntity(), card.getLevel(), card.getCount());
+				card.setEntity(cardEntity);
+				addEntities.add(cardEntity);
 			}
 
 			playerCardService.merge(addEntities, updateEntities);
