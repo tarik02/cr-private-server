@@ -91,7 +91,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		}
 
 		Set<PlayerDeckCardEntity> decksCards = entity.getDecksCards();
-		if(decksCards != null)
 		for (PlayerDeckCardEntity playerDeckCard : decksCards) {
 			int deckSlot = playerDeckCard.getDeckSlot();
 			int cardSlot = playerDeckCard.getCardSlot();

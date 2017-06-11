@@ -12,4 +12,5 @@ public interface ClientCommandHandler {
 	boolean handleDeckChange(DeckChange command) throws Throwable;
 	boolean handleDeckChangeCard(DeckChangeCard command) throws Throwable;
 	boolean handleFightStart(FightStart command) throws Throwable;
+	boolean handleCardUpgrade(CardUpgrade command) throws Throwable;
 }
