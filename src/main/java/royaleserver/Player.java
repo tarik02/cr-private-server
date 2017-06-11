@@ -843,10 +843,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			deck.swapCards(command.slot, command.slot2);
 		}
 
-		for (int i = 0; i < Deck.DECK_CARDS_COUNT; ++i) {
-			logger.info("Card %d: %s", 1 + i, deck.getCard(i) == null ? "" : deck.getCard(i).getCard().getName());
-		}
-
 		return true;
 	}
 
