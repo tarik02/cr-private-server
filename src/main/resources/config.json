@@ -1,5 +1,21 @@
 {
-	"_version": 4,
+	"_version": 5,
+
+	"assets": [
+		{
+			"provider": "apk",
+			"file": "ClashRoyale.apk",
+			"disabled": true
+		}, {
+			"provider": "zip",
+			"file": "ClashRoyale.zip",
+			"root": "assets",
+			"disabled": true
+		}, {
+			"provider": "folder",
+			"path": "assets"
+		}
+	],
 
 	"server": {
 		"require_login_code": false

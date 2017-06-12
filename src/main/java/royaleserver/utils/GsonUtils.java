@@ -1,6 +1,5 @@
 package royaleserver.utils;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -38,12 +37,12 @@ public class GsonUtils {
 				//conflict
 				JsonElement leftVal = leftObj.get(rightKey);
 				if (leftVal.isJsonArray() && rightVal.isJsonArray()) {
-					JsonArray leftArr = leftVal.getAsJsonArray();
+					/*JsonArray leftArr = leftVal.getAsJsonArray();
 					JsonArray rightArr = rightVal.getAsJsonArray();
 					//concat the arrays -- there cannot be a conflict in an array, it's just a collection of stuff
 					for (int i = 0; i < rightArr.size(); i++) {
 						leftArr.add(rightArr.get(i));
-					}
+					}*/
 				} else if (leftVal.isJsonObject() && rightVal.isJsonObject()) {
 					//recursive merging
 					extendJsonObject(leftVal.getAsJsonObject(), rightVal.getAsJsonObject(), conflictStrategy);

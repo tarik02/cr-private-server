@@ -22,7 +22,11 @@ public class FolderAssetManager extends AssetManager {
 		return null;
 	}
 
-	private class FileAsset extends Asset {
+	@Override
+	public void close() {
+	}
+
+	private static class FileAsset extends Asset {
 		private final String name;
 		private final File file;
 

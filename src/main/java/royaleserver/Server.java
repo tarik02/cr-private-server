@@ -1,12 +1,8 @@
 package royaleserver;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.google.gson.stream.JsonWriter;
-import royaleserver.assets.AssetManager;
-import royaleserver.assets.FolderAssetManager;
+import royaleserver.assets.*;
 import royaleserver.config.Config;
 import royaleserver.database.DataManager;
 import royaleserver.database.entity.ClanEntity;
@@ -22,6 +18,7 @@ import royaleserver.utils.Logger;
 import java.io.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.ZipFile;
 
 public class Server {
 	private static Logger logger;
@@ -131,7 +128,75 @@ public class Server {
 			throw new ServerException("Cannot read config.");
 		}
 
-		assetManager = new FolderAssetManager(new File(workingDirectory, "assets"));
+		AssetManagerWrapper assetManager = new AssetManagerWrapper();
+		JsonArray jassets = config.get("assets").getAsJsonArray();
+		for (JsonElement item : jassets) {
+			JsonObject jasset = item.getAsJsonObject();
+			String provider = jasset.get("provider").getAsString();
+
+			JsonElement jdisabled = jasset.get("disabled");
+			if (jdisabled != null && jdisabled.getAsBoolean()) {
+				continue;
+			}
+
+			AssetManager manager;
+			switch (provider) {
+			case "folder": {
+				JsonElement jpath = jasset.get("path");
+				String path;
+				if (jpath == null) {
+					throw new ServerException("Zip asset provider must have 'path' field.");
+				}
+				path = jpath.getAsString();
+
+				manager = new FolderAssetManager(new File(workingDirectory, path));
+				break;
+			}
+			case "zip": {
+				JsonElement jfile = jasset.get("file");
+				String file;
+				if (jfile == null) {
+					throw new ServerException("Zip asset provider must have 'file' field.");
+				}
+				file = jfile.getAsString();
+
+				JsonElement jroot = jasset.get("root");
+				String root;
+				if (jroot == null) {
+					root = "";
+				} else {
+					root = jroot.getAsString();
+				}
+
+				try {
+					manager = new ZipAssetManager(new ZipFile(new File(workingDirectory, file)), root);
+				} catch (IOException e) {
+					throw new ServerException("Failed to initialized ZipAssetManager.", e);
+				}
+				break;
+			}
+			case "apk": {
+				JsonElement jfile = jasset.get("file");
+				String file;
+				if (jfile == null) {
+					throw new ServerException("Zip asset provider must have 'file' field.");
+				}
+				file = jfile.getAsString();
+
+				try {
+					manager = new ApkAssetManager(new File(workingDirectory, file));
+				} catch (IOException e) {
+					throw new ServerException("Failed to initialized ApkAssetManager.", e);
+				}
+				break;
+			}
+			default:
+				throw new ServerException("Invalid asset provider '" + provider + "'.");
+			}
+			assetManager.add(manager);
+		}
+		this.assetManager = assetManager.simplify();
+
 		resourceFingerprint = assetManager.open("fingerprint.json").content();
 
 		logger.info("Initializing data manager...");
@@ -278,6 +343,10 @@ public class Server {
 	public static class ServerException extends Exception {
 		public ServerException(String message) {
 			super(message);
+		}
+
+		public ServerException(String message, Throwable e) {
+			super(message, e);
 		}
 	}
 }
