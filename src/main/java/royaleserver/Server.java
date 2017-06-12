@@ -21,9 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipFile;
 
 public class Server {
-	private static Logger logger;
-
+	public static final int CONFIG_VERSION = 5;
 	public static final int TICKS_PER_SECOND = 20;
+
+	private static Logger logger;
 
 
 	protected File workingDirectory;
@@ -71,7 +72,8 @@ public class Server {
 		logger.info("Starting the server...");
 
 		logger.info("Reading config...");
-		if ((config = Config.load(new File(workingDirectory, "config.json"), ignored -> Main.class.getResourceAsStream("/config.json"))) == null) {
+		if ((config = Config.load(CONFIG_VERSION, new File(workingDirectory, "config.json"),
+				ignored -> Main.class.getResourceAsStream("/config.json"))) == null) {
 			return;
 		}
 

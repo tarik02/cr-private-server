@@ -19,7 +19,6 @@ import java.util.function.Function;
 public final class Config {
 	private static final Logger logger = LogManager.getLogger(Config.class);
 
-	public static final int CONFIG_VERSION = 5;
 	public static final String CONTENT_HASH = "e99dcd87d0f3ba976efd982ef51a7f393463aeca";
 
 	private Map<String, JsonElement> map = new HashMap<>();
@@ -36,7 +35,7 @@ public final class Config {
 		return map.getOrDefault(key, def);
 	}
 
-	public static Config load(File configFile, Function<Void, InputStream> defaultConfigFactory) throws ServerException {
+	public static Config load(int configVersion, File configFile, Function<Void, InputStream> defaultConfigFactory) throws ServerException {
 		try {
 			int version = 0;
 
@@ -51,7 +50,7 @@ public final class Config {
 				} catch (Exception ignored) {}
 			}
 
-			if (version == 0 || version < Config.CONFIG_VERSION) {
+			if (version == 0 || version < configVersion) {
 				InputStream configInputStream = defaultConfigFactory.apply(null);
 				if (configInputStream == null) {
 					throw new ServerException("Failed to get default config resource.");
@@ -69,13 +68,13 @@ public final class Config {
 					try (OutputStream os = new FileOutputStream(configFile)) {
 						os.write(bytes);
 					}
-				} else if (version < Config.CONFIG_VERSION) {
+				} else if (version < configVersion) {
 					JsonObject defaultConfig = new JsonParser().parse(new InputStreamReader(configInputStream)).getAsJsonObject();
 					GsonUtils.extendJsonObject(defaultConfig, GsonUtils.ConflictStrategy.PREFER_FIRST_OBJ, configObject);
 					configObject = defaultConfig;
 				}
 
-				configObject.addProperty("_version", Config.CONFIG_VERSION);
+				configObject.addProperty("_version", configVersion);
 
 				logger.warn("Saving config...");
 				JsonWriter writer = new JsonWriter(new FileWriter(configFile));
