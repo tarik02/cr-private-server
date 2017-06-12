@@ -6,13 +6,13 @@ import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerCardService;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.*;
-import royaleserver.network.protocol.client.commands.*;
 import royaleserver.network.Filler;
 import royaleserver.network.NetworkSession;
 import royaleserver.network.NetworkSessionHandler;
 import royaleserver.network.protocol.client.ClientCommand;
 import royaleserver.network.protocol.client.ClientCommandHandler;
 import royaleserver.network.protocol.client.ClientMessageHandler;
+import royaleserver.network.protocol.client.commands.*;
 import royaleserver.network.protocol.client.messages.*;
 import royaleserver.network.protocol.server.commands.ChestOpenOk;
 import royaleserver.network.protocol.server.commands.ClanCreateOk;
@@ -461,12 +461,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			CommandResponse response = new CommandResponse();
 			response.command = command;
 
-			/*AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
-			response_1.membersOnline = 1;
-			response_1.unknown_1 = 0;*/
-
 			session.sendMessage(response);
-			//session.sendMessage(response_1);
 		}
 
 		return true;
