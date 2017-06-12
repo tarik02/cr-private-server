@@ -1,6 +1,5 @@
-package royaleserver.game;
+package royaleserver;
 
-import royaleserver.Server;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 

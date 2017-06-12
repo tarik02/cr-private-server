@@ -11,7 +11,6 @@ import royaleserver.config.Config;
 import royaleserver.database.DataManager;
 import royaleserver.database.entity.ClanEntity;
 import royaleserver.game.Clan;
-import royaleserver.game.Main;
 import royaleserver.game.Player;
 import royaleserver.logic.*;
 import royaleserver.network.NetworkServer;
