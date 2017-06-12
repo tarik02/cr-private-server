@@ -9,6 +9,10 @@ import royaleserver.assets.AssetManager;
 import royaleserver.assets.FolderAssetManager;
 import royaleserver.config.Config;
 import royaleserver.database.DataManager;
+import royaleserver.database.entity.ClanEntity;
+import royaleserver.game.Clan;
+import royaleserver.game.Main;
+import royaleserver.game.Player;
 import royaleserver.logic.*;
 import royaleserver.network.NetworkServer;
 import royaleserver.utils.GsonUtils;
@@ -17,13 +21,14 @@ import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
 import java.io.*;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
 	private static Logger logger;
 
 	public static final int TICKS_PER_SECOND = 20;
+
 
 	protected File workingDirectory;
 
@@ -37,7 +42,8 @@ public class Server {
 	protected String resourceFingerprint = "";
 	protected Config config;
 
-	protected final Set<Player> players = new LinkedHashSet<>();
+	protected final Map<Long, Player> players = new ConcurrentHashMap<>();
+	protected final Map<Long, Clan> clans = new ConcurrentHashMap<>();
 
 	public Server() throws ServerException {
 		this(null);
@@ -164,7 +170,7 @@ public class Server {
 			networkServer.stop();
 
 			logger.info("Disconnecting the clients...");
-			for (Player player : players) {
+			for (Player player : players.values()) {
 				player.close("server stopped", true);
 			}
 
@@ -202,14 +208,12 @@ public class Server {
 
 	protected void tick() {
 		if (tickCounter % (2.5 * 60 * 20) == 0) { // Every 2.5 minutes
-			synchronized (players) {
-				// TODO: Execute it in each handler thread for each it's player. It's better to do everything with player in the same thread.
-				for (Player player : players) {
-					try {
-						player.updateOnline();
-					} catch (RuntimeException e) {
-						logger.error("Error while saving player %s.", e, player.getReadableIdentifier());
-					}
+			// TODO: Execute it in each handler thread for each it's player. It's better to do everything with player in the same thread.
+			for (Player player : players.values()) {
+				try {
+					player.updateOnline();
+				} catch (RuntimeException e) {
+					logger.error("Error while saving player %s.", e, player.getReadableIdentifier());
 				}
 			}
 		}
@@ -232,23 +236,44 @@ public class Server {
 	}
 
 	/**
-	 * @apiNote Internal usage only
 	 * @param player
+	 * @apiNote Internal usage only
 	 */
 	public void addPlayer(Player player) {
-		synchronized (players) {
-			players.add(player);
-		}
+		players.put(player.getEntity().getId(), player);
 	}
 
 	/**
-	 * @apiNote Internal usage only
 	 * @param player
+	 * @apiNote Internal usage only
 	 */
 	public void removePlayer(Player player) {
-		synchronized (players) {
-			players.remove(player);
+		players.remove(player.getEntity().getId(), player);
+	}
+
+	public Clan resolveClan(Player player) {
+		ClanEntity clanEntity = player.getEntity().getClan();
+		if (clanEntity == null) {
+			return null;
 		}
+
+		Clan clan = player.getClan();
+		if (clan != null) {
+			if (clan.getId() == clanEntity.getId()) {
+				return clan;
+			}
+
+			clan.removePlayer(player);
+		}
+
+		clan = clans.computeIfAbsent(clanEntity.getId(), Clan::new);
+		clan.addPlayer(player);
+
+		return clan;
+	}
+
+	public void removeClan(Clan clan) {
+		clans.remove(clan.getId(), clan);
 	}
 
 	public static class ServerException extends Exception {

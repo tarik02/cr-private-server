@@ -5,8 +5,8 @@ import royaleserver.network.protocol.server.ServerCommand;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.SCID;
 
-public final class ClanJoinOk extends ServerCommand {
-	public static final short ID = Commands.CLAN_JOIN_OK;
+public final class ClanCreateOk extends ServerCommand {
+	public static final short ID = Commands.CLAN_CREATE_OK;
 
 	public long clanId;
 	public String name;
@@ -14,13 +14,13 @@ public final class ClanJoinOk extends ServerCommand {
 	public byte unknown_3;
 	public byte accepted;
 
-	public ClanJoinOk() {
+	public ClanCreateOk() {
 		super(ID);
 	}
 
 	@Override
 	public ServerCommand create() {
-		return new ClanJoinOk();
+		return new ClanCreateOk();
 	}
 
 	@Override

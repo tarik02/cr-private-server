@@ -94,7 +94,7 @@ public final class Messages {
 	public static final short SHUTDOWN_STARTED = 20161;
 	public static final short AVATAR_NAME_CHANGE_FAILED = 20205;
 	public static final short AVATAR_IN_GAME_STATUS_UPDATED = 20206;
-	public static final short ALLIANCE_ONLINE_STATUS_UPDATED = 20207;
+	public static final short CLAN_ONLINE_UPDATE = 20207;
 	public static final short BATTLE_RESULT = 20225;
 	public static final short NAME_CHECK_OK = 20300;
 	public static final short OPPONENT_LEFT_MATCH_NOTIFICATION = 20801;
@@ -131,11 +131,11 @@ public final class Messages {
 	public static final short ALLIANCE_LEAVE_OK = 24305;
 	public static final short CHANGE_ALLIANCE_MEMBER_ROLE_OK = 24306;
 	public static final short KICK_ALLIANCE_MEMBER_OK = 24307;
-	public static final short ALLIANCE_MEMBER = 24308;
-	public static final short ALLIANCE_MEMBER_REMOVED = 24309;
+	public static final short CLAN_MEMBER_ADD = 24308;
+	public static final short CLAN_MEMBER_REMOVE = 24309;
 	public static final short ALLIANCE_LIST = 24310;
 	public static final short ALLIANCE_STREAM = 24311;
-	public static final short ALLIANCE_STREAM_ENTRY = 24312;
+	public static final short CLAN_EVENT = 24312;
 	public static final short ALLIANCE_STREAM_ENTRY_REMOVED = 24318;
 	public static final short ALLIANCE_JOIN_REQUEST_OK = 24319;
 	public static final short ALLIANCE_JOIN_REQUEST_FAILED = 24320;

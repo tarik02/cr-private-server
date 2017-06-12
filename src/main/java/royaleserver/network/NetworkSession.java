@@ -15,6 +15,22 @@ public abstract class NetworkSession implements ClientMessageHandler {
 		this.session = session;
 	}
 
+	public Server getServer() {
+		return server;
+	}
+
+	/**
+	 * WARNING. Internal usage only!
+	 * @return
+	 */
+	public NetworkSessionHandler getSession() {
+		return session;
+	}
+
+	public boolean isClosed() {
+		return closed;
+	}
+
 	/**
 	 * Disconnect player showing the reason.
 	 *

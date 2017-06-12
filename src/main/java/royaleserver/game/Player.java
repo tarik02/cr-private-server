@@ -1,20 +1,21 @@
-package royaleserver;
+package royaleserver.game;
 
+import royaleserver.Server;
 import royaleserver.database.entity.*;
 import royaleserver.database.service.ClanService;
 import royaleserver.database.service.PlayerCardService;
 import royaleserver.database.service.PlayerService;
 import royaleserver.logic.*;
+import royaleserver.network.protocol.client.commands.*;
 import royaleserver.network.Filler;
 import royaleserver.network.NetworkSession;
 import royaleserver.network.NetworkSessionHandler;
 import royaleserver.network.protocol.client.ClientCommand;
 import royaleserver.network.protocol.client.ClientCommandHandler;
 import royaleserver.network.protocol.client.ClientMessageHandler;
-import royaleserver.network.protocol.client.commands.*;
 import royaleserver.network.protocol.client.messages.*;
 import royaleserver.network.protocol.server.commands.ChestOpenOk;
-import royaleserver.network.protocol.server.commands.ClanJoinOk;
+import royaleserver.network.protocol.server.commands.ClanCreateOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.commands.NameSet;
 import royaleserver.network.protocol.server.components.ClanHeader;
@@ -31,6 +32,8 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	protected PlayerEntity entity;
 	protected Random random;
 
+	protected Clan clan;
+
 	protected OpeningChest openingChest = null;
 	protected final Map<Card, PlayerCard> cards = new HashMap<>();
 	protected final Set<PlayerCard> cardsToAdd = new HashSet<>();
@@ -45,6 +48,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 		this.entity = entity;
 		server.addPlayer(this);
+		clan = server.resolveClan(this);
 
 		random = new Random(entity.getRandomSeed());
 
@@ -124,6 +128,14 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	}
 
 	/**
+	 * @apiNote Internal usage only
+	 * @return
+	 */
+	public PlayerEntity getEntity() {
+		return entity;
+	}
+
+	/**
 	 * @apiNote For internal usage only
 	 */
 	public void sendOwnHomeData() {
@@ -194,6 +206,10 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			this.cards.put(card, playerCard);
 			this.cardsToAdd.add(playerCard);
 		}
+	}
+
+	public Clan getClan() {
+		return clan;
 	}
 
 	private void endOpeningChest() {
@@ -445,6 +461,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		if (super.close(reason, sendDisconnect)) {
 			endOpeningChest();
 
+			if (clan != null) {
+				clan.removePlayer(this);
+			}
 			server.removePlayer(this);
 			entity.setOnline(false);
 			save();
@@ -528,10 +547,12 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			entity.setClan(clan);
 			entity.setLogicClanRole(ClanRole.by("Leader"));
 			clan.getMembers().add(entity);
+			this.clan = server.resolveClan(this);
 			save();
 
+
 			// Send some information about clan
-			ClanJoinOk command = new ClanJoinOk();
+			ClanCreateOk command = new ClanCreateOk();
 			Filler.fill(command, clan);
 
 			CommandResponse response = new CommandResponse();
@@ -551,25 +572,22 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	@Override
 	public boolean handleClanJoin(ClanJoin message) throws Throwable {
 		final ClanService clanService = server.getDataManager().getClanService();
-		final ClanEntity clan = clanService.searchById(message.clanId);
+		final ClanEntity clanEntity = clanService.searchById(message.clanId);
 
-		if (clan != null && entity.getClan() == null && entity.getTrophies() >= clan.getRequiredTrophies()) {
-			entity.setClan(clan);
+		if (clanEntity != null && entity.getClan() == null && entity.getTrophies() >= clanEntity.getRequiredTrophies()) {
+			entity.setClan(clanEntity);
 			entity.setLogicClanRole(ClanRole.by("Member"));
-			clan.getMembers().add(entity);
+			clanEntity.getMembers().add(entity);
 			save();
 
-			ClanJoinOk command = new ClanJoinOk();
-			Filler.fill(command, clan);
-
+			ClanCreateOk command = new ClanCreateOk(); // TODO: Find out ClanJoinOk
+			Filler.fill(command, clanEntity);
 			CommandResponse response = new CommandResponse();
 			response.command = command;
-
-			/*AllianceOnlineStatusUpdated response_1 = new AllianceOnlineStatusUpdated();
-			response_1.membersOnline = 1;
-			response_1.unknown_1 = 0;*/
-
 			session.sendMessage(response);
+
+			clan = server.resolveClan(this);
+			clan.joinPlayer(this);
 		}
 
 		return true;
@@ -578,19 +596,29 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	@Override
 	public boolean handleClanLeave(ClanLeave message) throws Throwable {
 		final ClanService clanService = server.getDataManager().getClanService();
-		final ClanEntity clan = entity.getClan();
+		final ClanEntity clanEntity = entity.getClan();
 
-		if (clan != null) {
+		if (clanEntity != null) {
 			ClanLeaveOk command = new ClanLeaveOk();
-			Filler.fill(command, clan);
+			Filler.fill(command, clanEntity);
 
 			CommandResponse response = new CommandResponse();
 			response.command = command;
+			session.sendMessage(response);
 
-			Set<PlayerEntity> members = clan.getMembers();
+			if (clan != null) {
+				clan.leavePlayer(this);
+			}
+			clan = server.resolveClan(this);
+
+			entity.setClan(null);
+			entity.setClanRole(null);
+			save();
+
+			Set<PlayerEntity> members = clanEntity.getMembers();
 			members.remove(entity);
 			if (members.size() == 0) {
-				clanService.remove(clan);
+				clanService.remove(clanEntity);
 			} else if (entity.getLogicClanRole() == ClanRole.by("Leader")) {
 				int memberIndex = members.size();
 				Iterator<PlayerEntity> iterator = members.iterator();
@@ -602,12 +630,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 				PlayerEntity newLeader = iterator.next();
 				newLeader.setLogicClanRole(ClanRole.by("Leader"));
 			}
-
-			entity.setClan(null);
-			entity.setClanRole(null);
-			save();
-
-			session.sendMessage(response);
 		}
 
 		return true;

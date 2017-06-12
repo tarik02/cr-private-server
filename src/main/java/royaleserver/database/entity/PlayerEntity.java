@@ -272,17 +272,17 @@ public class PlayerEntity implements Identifiable<Long>, Serializable {
 		return rareChance;
 	}
 
+	public PlayerEntity setRareChance(float rareChance) {
+		this.rareChance = rareChance;
+		return this;
+	}
+
 	public long getRandomSeed() {
 		return randomSeed;
 	}
 
 	public PlayerEntity setRandomSeed(long randomSeed) {
 		this.randomSeed = randomSeed;
-		return this;
-	}
-
-	public PlayerEntity setRareChance(float rareChance) {
-		this.rareChance = rareChance;
 		return this;
 	}
 

@@ -12,7 +12,7 @@ public final class Commands {
 	// Server commands
 	public static final short NAME_SET = 201;
 	public static final short CLAN_LEAVE_OK = 205;
-	public static final short CLAN_JOIN_OK = 206;
+	public static final short CLAN_CREATE_OK = 206;
 	public static final short CHEST_OPEN_OK = 210;
 
 	// Client commands

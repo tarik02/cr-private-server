@@ -1,5 +1,6 @@
-package royaleserver;
+package royaleserver.game;
 
+import royaleserver.Server;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.network.NetworkSession;
 import royaleserver.network.NetworkSessionHandler;
@@ -29,11 +30,11 @@ public class CodeEnterPlayer extends NetworkSession implements ClientMessageHand
 
 	@Override
 	public boolean handleAccountUnlock(AccountUnlock message) throws Throwable {
-		if (server.dataManager.getUnlockCodeService().use(message.unlockCode)) {
+		if (server.getDataManager().getUnlockCodeService().use(message.unlockCode)) {
 			AccountUnlockOk response = new AccountUnlockOk();
 			session.sendMessage(response);
 
-			PlayerEntity playerEntity = server.dataManager.getPlayerService().create();
+			PlayerEntity playerEntity = server.getDataManager().getPlayerService().create();
 			session.replace(new Player(playerEntity, server, session));
 		} else {
 			AccountUnlockFailed response = new AccountUnlockFailed();

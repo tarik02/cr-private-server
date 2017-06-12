@@ -1,4 +1,4 @@
-package royaleserver;
+package royaleserver.game;
 
 import royaleserver.logic.Card;
 

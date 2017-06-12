@@ -1,16 +1,17 @@
 package royaleserver.network;
 
-import royaleserver.OpeningChest;
-import royaleserver.PlayerCard;
+import royaleserver.game.OpeningChest;
+import royaleserver.game.PlayerCard;
 import royaleserver.database.entity.ClanEntity;
 import royaleserver.database.entity.HomeChestEntity;
 import royaleserver.database.entity.HomeChestStatus;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.logic.ClanRole;
 import royaleserver.network.protocol.server.commands.ChestOpenOk;
-import royaleserver.network.protocol.server.commands.ClanJoinOk;
+import royaleserver.network.protocol.server.commands.ClanCreateOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.components.*;
+import royaleserver.network.protocol.server.components.Deck;
 import royaleserver.network.protocol.server.messages.ClanData;
 import royaleserver.network.protocol.server.messages.HomeData;
 import royaleserver.network.protocol.server.messages.HomeDataOwn;
@@ -83,7 +84,7 @@ public final class Filler {
 		message.unknown_17 = 0;
 	}
 
-	public static void fill(ClanJoinOk message, ClanEntity entity) {
+	public static void fill(ClanCreateOk message, ClanEntity entity) {
 		message.clanId = entity.getId();
 		message.name = entity.getName();
 		message.badge = entity.getLogicBadge().getScid();
@@ -160,8 +161,8 @@ public final class Filler {
 		message.favouriteCard = null; // TODO:
 	}
 
-	public static void fill(HomeDataOwn message, PlayerEntity entity, royaleserver.Deck currentDeck,
-	                        Collection<PlayerCard> cardsAfterDeck, Collection<royaleserver.Deck> decks) {
+	public static void fill(HomeDataOwn message, PlayerEntity entity, royaleserver.game.Deck currentDeck,
+	                        Collection<PlayerCard> cardsAfterDeck, Collection<royaleserver.game.Deck> decks) {
 		fill((HomeData)message, entity);
 		message.isMyProfile = true;
 		message.giveSeasonReward = false;
@@ -212,9 +213,9 @@ public final class Filler {
 		}
 
 		message.currentDeck = new Deck();
-		message.currentDeck.cards = new Card[royaleserver.Deck.DECK_CARDS_COUNT];
+		message.currentDeck.cards = new Card[royaleserver.game.Deck.DECK_CARDS_COUNT];
 
-		for (i = 0; i < royaleserver.Deck.DECK_CARDS_COUNT; i++) {
+		for (i = 0; i < royaleserver.game.Deck.DECK_CARDS_COUNT; i++) {
 			Card card = new Card();
 			PlayerCard deckCard = currentDeck.getCard(i);
 			if (deckCard != null) {
@@ -233,10 +234,10 @@ public final class Filler {
 		message.decks = new Deck[decks.size()];
 
 		i = 0;
-		for (royaleserver.Deck playerDeck : decks) {
+		for (royaleserver.game.Deck playerDeck : decks) {
 			Deck deck = new Deck();
-			deck.cards = new Card[royaleserver.Deck.DECK_CARDS_COUNT];
-			for (int j = 0; j < royaleserver.Deck.DECK_CARDS_COUNT; ++j) {
+			deck.cards = new Card[royaleserver.game.Deck.DECK_CARDS_COUNT];
+			for (int j = 0; j < royaleserver.game.Deck.DECK_CARDS_COUNT; ++j) {
 				PlayerCard playerCard = playerDeck.getCard(j);
 				if (playerCard != null) {
 					Card card = new Card();
