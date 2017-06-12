@@ -35,6 +35,8 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	protected Clan clan;
 
 	protected OpeningChest openingChest = null;
+	protected ChestGenerator chestGenerator = new ChestGenerator();
+
 	protected final Map<Card, PlayerCard> cards = new HashMap<>();
 	protected final Set<PlayerCard> cardsToAdd = new HashSet<>();
 	protected final Set<PlayerCard> cardsToUpdate = new HashSet<>();
@@ -135,16 +137,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		return entity;
 	}
 
-	/**
-	 * @apiNote For internal usage only
-	 */
-	public void sendOwnHomeData() {
-		HomeDataOwn response = new HomeDataOwn();
-		Filler.fill(response, entity, deck, cardsAfterDeck, decks);
-
-		session.sendMessage(response);
-	}
-
 	// API
 
 	/**
@@ -212,138 +204,11 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		return clan;
 	}
 
-	private void endOpeningChest() {
-		if (openingChest != null) {
-			openingChest.end();
-
-			List<OpeningChest.CardStack> cards = openingChest.selectedCards();
-
-			for (OpeningChest.CardStack cardStack : cards) {
-				addCard(cardStack.card, cardStack.count);
-			}
-
-			openingChest = null;
-		}
-	}
-
-	private void openChest(Chest chest) {
-		endOpeningChest();
-
-		ChestOpenOk command = new ChestOpenOk();
-		Filler.fill(command, openingChest = generateChest(chest));
-
-		CommandResponse response = new CommandResponse();
-		response.command = command;
-		session.sendMessage(response);
-
-		if (openingChest.optionSize() == 1) {
-			endOpeningChest();
-		}
-	}
-
-	// TODO: Move it to another file
-	protected OpeningChest generateChest(Chest chest) {
-		boolean isDraft = chest.isDraftChest();
-		OpeningChest.Builder builder = OpeningChest.builder(isDraft);
-
-		final Rarity common = Rarity.by("Common");
-		final Rarity rare = Rarity.by("Rare");
-		final Rarity epic = Rarity.by("Epic");
-		final Rarity legendary = Rarity.by("Legendary");
-
-		float rewardMultiplier = chest.getArena().getChestRewardMultiplier() / 100;
-		int minimumSpellsCount = (int)(chest.getRandomSpells() * rewardMultiplier);
-		int minimumDifferentSpells = (int)(chest.getDifferentSpells() * rewardMultiplier);
-
-		float minimumRare = (float)minimumSpellsCount / (float)chest.getRareChance();
-		float minimumEpic = (float)minimumSpellsCount / (float)chest.getEpicChance();
-		float minimumLegendary = (float)minimumSpellsCount / (float)chest.getLegendaryChance();
-
-		float rareCount = minimumRare + entity.getRareChance();
-		float epicCount = minimumEpic + entity.getEpicChance();
-		float legendaryCount = minimumLegendary + entity.getLegendaryChance();
-		float commonCount = minimumSpellsCount - rareCount - epicCount - legendaryCount;
-
-		int differentRare = countDifferent(rareCount, minimumSpellsCount, minimumDifferentSpells);
-		int differentEpic = countDifferent(epicCount, minimumSpellsCount, minimumDifferentSpells);
-		int differentLegendary = countDifferent(legendaryCount, minimumSpellsCount, minimumDifferentSpells);
-		int differentCommon = minimumDifferentSpells - differentRare - differentEpic - differentLegendary;
-
-		int realSpellsCount = (int)(commonCount + rareCount + epicCount + legendaryCount);
-
-		Map<Rarity, List<royaleserver.logic.Card>> candidates = royaleserver.logic.Card.select(entity.getLogicArena());
-		commonCount -= generateCards(builder, candidates.get(common), differentCommon, (int)commonCount);
-		rareCount -= generateCards(builder, candidates.get(rare), differentRare, (int)rareCount);
-		epicCount -= generateCards(builder, candidates.get(epic), differentEpic, (int)epicCount);
-		legendaryCount -= generateCards(builder, candidates.get(legendary), differentLegendary, (int)legendaryCount);
-
-		entity.setRareChance(rareCount);
-		entity.setEpicChance(epicCount);
-		entity.setLegendaryChance(legendaryCount);
-
-		int minGold = chest.getMinGoldPerCard() * realSpellsCount;
-		int maxGold = chest.getMaxGoldPerCard() * realSpellsCount;
-
-		builder.gold(minGold + random.nextInt(maxGold - minGold));
-		builder.gems(0); // TODO:
-
-		return builder.build();
-	}
-
-	private int generateCards(OpeningChest.Builder builder, List<royaleserver.logic.Card> candidates,
-	                          int different, int count) {
-		int first;
-		if (different == 1) {
-			first = count;
-		} else {
-			first = (int)Math.ceil(count / different * (1f + random.nextFloat()));
-		}
-
-		int current = first;
-		int sum = 0;
-
-		while (different != 1 && sum + current <= count && candidates.size() > builder.optionSize() * 2) {
-			if (addStack(builder, candidates, current)) {
-				sum += current;
-				current *= 1f + random.nextFloat();
-				--different;
-			}
-		}
-
-		if (sum < count) {
-			current = count - sum;
-			if (addStack(builder, candidates, current)) {
-				sum += current;
-				current *= 1f + random.nextFloat();
-				--different;
-			}
-		}
-
-		return sum;
-	}
-
-	private boolean addStack(OpeningChest.Builder builder, List<royaleserver.logic.Card> candidates, int count) {
-		if (candidates.size() > builder.optionSize()) {
-			OpeningChest.CardStack[] stack = new OpeningChest.CardStack[builder.optionSize()];
-			for (int i = 0; i < stack.length; ++i) {
-				int index = random.nextInt(candidates.size());
-				Card candidate = candidates.remove(index);
-
-				stack[i] = new OpeningChest.CardStack(candidate, count);
-			}
-			builder.add(stack);
-
-			return true;
-		}
-
-		return false;
-	}
-
-	protected int countDifferent(float rarityCount, int count, int different) {
-		return (int)Math.ceil((float)different * (rarityCount / (float)count));
-	}
-
-	protected void changeDeck(int slot) {
+	/**
+	 * @apiNote Internal usage only.
+	 * @param slot Index of deck
+	 */
+	public void changeDeck(int slot) {
 		if (slot < 0 || slot >= decks.size()) {
 			throw new IllegalArgumentException("slot");
 		}
@@ -477,6 +342,44 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 	public String getReadableIdentifier() {
 		return entity.getName() + "#" + entity.getId();
+	}
+
+
+
+	protected void endOpeningChest() {
+		if (openingChest != null) {
+			openingChest.end();
+
+			List<OpeningChest.CardStack> cards = openingChest.selectedCards();
+
+			for (OpeningChest.CardStack cardStack : cards) {
+				addCard(cardStack.card, cardStack.count);
+			}
+
+			openingChest = null;
+		}
+	}
+
+	protected void openChest(Chest chest) {
+		endOpeningChest();
+
+		ChestOpenOk command = new ChestOpenOk();
+		Filler.fill(command, openingChest = chestGenerator.generateChest(this, chest, random));
+
+		CommandResponse response = new CommandResponse();
+		response.command = command;
+		session.sendMessage(response);
+
+		if (openingChest.optionSize() == 1) {
+			endOpeningChest();
+		}
+	}
+
+	protected void sendOwnHomeData() {
+		HomeDataOwn response = new HomeDataOwn();
+		Filler.fill(response, entity, deck, cardsAfterDeck, decks);
+
+		session.sendMessage(response);
 	}
 
 
