@@ -106,7 +106,7 @@ public class Server {
 					}
 				} else if (version < Config.CONFIG_VERSION) {
 					JsonObject defaultConfig = new JsonParser().parse(new InputStreamReader(configInputStream)).getAsJsonObject();
-					GsonUtils.extendJsonObject(defaultConfig, GsonUtils.ConflictStrategy.PREFER_FIRST_OBJ, configObject);
+					GsonUtils.extendJsonObject(defaultConfig, GsonUtils.ConflictStrategy.PREFER_SECOND_OBJ, configObject);
 					configObject = defaultConfig;
 				}
 

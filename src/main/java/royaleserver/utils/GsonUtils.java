@@ -43,6 +43,7 @@ public class GsonUtils {
 					for (int i = 0; i < rightArr.size(); i++) {
 						leftArr.add(rightArr.get(i));
 					}*/
+					handleMergeConflict(rightKey, leftObj, leftVal, rightVal, conflictStrategy);
 				} else if (leftVal.isJsonObject() && rightVal.isJsonObject()) {
 					//recursive merging
 					extendJsonObject(leftVal.getAsJsonObject(), rightVal.getAsJsonObject(), conflictStrategy);
