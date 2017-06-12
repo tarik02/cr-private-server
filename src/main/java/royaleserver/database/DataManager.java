@@ -3,7 +3,7 @@ package royaleserver.database;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.reflections.Reflections;
-import royaleserver.Server;
+import royaleserver.ServerException;
 import royaleserver.config.Config;
 import royaleserver.database.service.*;
 
@@ -15,7 +15,7 @@ public class DataManager {
 	private final SessionFactory sessionFactory;
 	private final DataServices services;
 
-	public DataManager(Config config) throws Server.ServerException {
+	public DataManager(Config config) throws ServerException {
 		// Disable hibernate logging
 		@SuppressWarnings("unused")
 		org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger("org.hibernate");
@@ -53,7 +53,7 @@ public class DataManager {
 			properties.setProperty("hibernate.connection.password", config.get("database.mysql.password").getAsString());
 			break;
 		default:
-			throw new Server.ServerException("Invalid data provider " + config.get("database.provider").getAsString());
+			throw new ServerException("Invalid data provider " + config.get("database.provider").getAsString());
 		}
 
 		Configuration configuration = new Configuration()

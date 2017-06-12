@@ -1,6 +1,7 @@
 package royaleserver.logic;
 
 import royaleserver.Server;
+import royaleserver.ServerException;
 import royaleserver.assets.Asset;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
@@ -62,7 +63,7 @@ public final class Card extends DBLogic<CardEntity> {
 	private static boolean initialized = false;
 	private static List<Card> values = new ArrayList<>();
 
-	public static void init(Server server) throws Server.ServerException {
+	public static void init(Server server) throws ServerException {
 		if (initialized) {
 			return;
 		}
@@ -78,7 +79,7 @@ public final class Card extends DBLogic<CardEntity> {
 		initialized = true;
 	}
 
-	private static int loadCards(Server server, int type, Asset asset, int indexCounter) throws Server.ServerException {
+	private static int loadCards(Server server, int type, Asset asset, int indexCounter) throws ServerException {
 		CardService cardService = server.getDataManager().getCardService();
 
 		Table csv_cards = asset.csv();

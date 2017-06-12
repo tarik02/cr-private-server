@@ -1,6 +1,7 @@
 package royaleserver.logic;
 
 import royaleserver.Server;
+import royaleserver.ServerException;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
@@ -62,7 +63,7 @@ public class GameMode {
 	private static boolean initialized = false;
 	private static Map<String, GameMode> values = new HashMap<>();
 
-	public static void init(Server server) throws Server.ServerException {
+	public static void init(Server server) throws ServerException {
 		if (initialized) {
 			return;
 		}

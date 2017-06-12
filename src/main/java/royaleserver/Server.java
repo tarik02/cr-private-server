@@ -1,7 +1,8 @@
 package royaleserver;
 
-import com.google.gson.*;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import royaleserver.assets.*;
 import royaleserver.config.Config;
 import royaleserver.database.DataManager;
@@ -10,12 +11,11 @@ import royaleserver.game.Clan;
 import royaleserver.game.Player;
 import royaleserver.logic.*;
 import royaleserver.network.NetworkServer;
-import royaleserver.utils.GsonUtils;
-import royaleserver.utils.IO;
 import royaleserver.utils.LogManager;
 import royaleserver.utils.Logger;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipFile;
@@ -71,61 +71,8 @@ public class Server {
 		logger.info("Starting the server...");
 
 		logger.info("Reading config...");
-		try {
-			File configFile = new File(workingDirectory, "config.json");
-			int version = 0;
-
-			JsonObject configObject = null;
-			if (configFile.exists()) {
-				try {
-					configObject = new JsonParser().parse(new InputStreamReader(new FileInputStream(configFile))).getAsJsonObject();
-					JsonElement jversion = configObject.get("_version");
-					if (jversion != null && !jversion.isJsonNull()) {
-						version = jversion.getAsInt();
-					}
-				} catch (Exception ignored) {}
-			}
-
-			if (version == 0 || version < Config.CONFIG_VERSION) {
-				InputStream configInputStream = Main.class.getResourceAsStream("/config.json");
-				if (configInputStream == null) {
-					throw new Server.ServerException("Failed to get default config resource.");
-				}
-
-				if (version == 0) {
-					logger.warn("Resetting your config...");
-
-					final byte[] bytes = IO.getByteArray(configInputStream, true);
-					if (bytes == null) {
-						throw new ServerException("Failed to get default config.");
-					}
-
-					configObject = new JsonParser().parse(new InputStreamReader(new ByteArrayInputStream(bytes))).getAsJsonObject();
-					try (OutputStream os = new FileOutputStream(configFile)) {
-						os.write(bytes);
-					}
-				} else if (version < Config.CONFIG_VERSION) {
-					JsonObject defaultConfig = new JsonParser().parse(new InputStreamReader(configInputStream)).getAsJsonObject();
-					GsonUtils.extendJsonObject(defaultConfig, GsonUtils.ConflictStrategy.PREFER_SECOND_OBJ, configObject);
-					configObject = defaultConfig;
-				}
-
-				configObject.addProperty("_version", Config.CONFIG_VERSION);
-
-				logger.warn("Saving config...");
-				JsonWriter writer = new JsonWriter(new FileWriter(configFile));
-				writer.setIndent("\t");
-				new Gson().toJson(configObject, writer);
-				writer.close();
-
-				logger.warn("Check out your config and start the server.");
-				return;
-			}
-
-			config = new Config(configObject);
-		} catch (Throwable e) {
-			logger.fatal("Cannot read config.", e);
-			throw new ServerException("Cannot read config.");
+		if ((config = Config.load(new File(workingDirectory, "config.json"), ignored -> Main.class.getResourceAsStream("/config.json"))) == null) {
+			return;
 		}
 
 		AssetManagerWrapper assetManager = new AssetManagerWrapper();
@@ -338,15 +285,5 @@ public class Server {
 
 	public void removeClan(Clan clan) {
 		clans.remove(clan.getId(), clan);
-	}
-
-	public static class ServerException extends Exception {
-		public ServerException(String message) {
-			super(message);
-		}
-
-		public ServerException(String message, Throwable e) {
-			super(message, e);
-		}
 	}
 }

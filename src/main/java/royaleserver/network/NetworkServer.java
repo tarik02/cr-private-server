@@ -9,14 +9,14 @@ import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import org.jboss.netty.handler.codec.replay.VoidEnum;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
-import royaleserver.game.CodeEnterPlayer;
-import royaleserver.game.Player;
 import royaleserver.Server;
 import royaleserver.config.Config;
 import royaleserver.crypto.ClientCrypto;
 import royaleserver.crypto.ServerCrypto;
 import royaleserver.database.entity.PlayerEntity;
 import royaleserver.database.service.PlayerService;
+import royaleserver.game.CodeEnterPlayer;
+import royaleserver.game.Player;
 import royaleserver.network.protocol.Message;
 import royaleserver.network.protocol.MessageHeader;
 import royaleserver.network.protocol.Messages;
@@ -116,7 +116,6 @@ public final class NetworkServer {
 		private NetworkSession session;
 
 		private Channel channel;
-		private ChannelFuture lastWrite = null;
 		private Status status;
 
 		public PlayerHandler(NetworkServer networkServer) {
@@ -248,7 +247,7 @@ public final class NetworkServer {
 		@Override
 		public void sendMessage(Message message) {
 			logger.debug("< %s", message.getClass().getSimpleName());
-			lastWrite = channel.write(message);
+			channel.write(message);
 		}
 
 		@Override

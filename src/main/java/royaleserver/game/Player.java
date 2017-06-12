@@ -97,15 +97,17 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		}
 
 		Set<PlayerDeckCardEntity> decksCards = entity.getDecksCards();
-		for (PlayerDeckCardEntity playerDeckCard : decksCards) {
-			int deckSlot = playerDeckCard.getDeckSlot();
-			int cardSlot = playerDeckCard.getCardSlot();
-			Card card = playerDeckCard.getLogicCard();
+		if (decksCards != null) {
+			for (PlayerDeckCardEntity playerDeckCard : decksCards) {
+				int deckSlot = playerDeckCard.getDeckSlot();
+				int cardSlot = playerDeckCard.getCardSlot();
+				Card card = playerDeckCard.getLogicCard();
 
-			if (deckSlot < decks.size()) {
-				Deck deck = decks.get(deckSlot);
-				deck.swapCard(cardSlot, cards.get(card));
-				deck.setEntity(cardSlot, playerDeckCard);
+				if (deckSlot < decks.size()) {
+					Deck deck = decks.get(deckSlot);
+					deck.swapCard(cardSlot, cards.get(card));
+					deck.setEntity(cardSlot, playerDeckCard);
+				}
 			}
 		}
 

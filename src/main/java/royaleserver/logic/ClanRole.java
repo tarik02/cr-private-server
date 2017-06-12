@@ -1,6 +1,7 @@
 package royaleserver.logic;
 
 import royaleserver.Server;
+import royaleserver.ServerException;
 import royaleserver.csv.Column;
 import royaleserver.csv.Row;
 import royaleserver.csv.Table;
@@ -59,7 +60,7 @@ public final class ClanRole extends DBLogic<ClanRoleEntity> {
 	private static boolean initialized = false;
 	private static List<ClanRole> values = new ArrayList<>();
 
-	public static void init(Server server) throws Server.ServerException {
+	public static void init(Server server) throws ServerException {
 		if (initialized) {
 			return;
 		}
