@@ -765,6 +765,34 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	// Commands
 
 	@Override
+	public boolean handleCardUpgrade(CardUpgrade command) throws Throwable {
+		for (PlayerCard playerCard : this.cards.values()) {
+			PlayerCardEntity cardEntity = playerCard.getEntity();
+			Card card = cardEntity.getLogicCard();
+
+			if (card.getScid().getValue() == command.cardSCID.getValue()) {
+				int level = cardEntity.getLevel();
+				Rarity rarity = card.getRarity();
+				int needToUpdateGold = rarity.getUpgradeCost()[level - 1];
+				int needToUpdateTroops = rarity.getUpgradeMaterialCount()[level - 1];
+				int addExperience = rarity.getUpgradeExp()[level - 1];
+
+				if (entity.getGold() >= needToUpdateGold && cardEntity.getCount() >= needToUpdateTroops) {
+					entity.setGold(entity.getGold() - needToUpdateGold);
+					addExperience(addExperience);
+
+					playerCard.setLevel(++level);
+					playerCard.setCount(cardEntity.getCount() - needToUpdateTroops);
+
+					this.cardsToUpdate.add(playerCard);
+				}
+			}
+		}
+
+		return true;
+	}
+
+	@Override
 	public boolean handleChallengeBuy(ChallengeBuy command) throws Throwable {
 		return false;
 	}
@@ -863,36 +891,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		response.level = 13;
 
 		session.sendMessage(response);
-
-		return true;
-	}
-
-	@Override
-	public boolean handleCardUpgrade(CardUpgrade command) throws Throwable {
-
-		for (PlayerCard playerCard : this.cards.values()) {
-			PlayerCardEntity cardEntity = playerCard.getEntity();
-			Card card = cardEntity.getLogicCard();
-
-			if(card.getScid().getValue() == command.cardSCID.getValue()) {
-				int level = cardEntity.getLevel();
-				int needToUpdateGold = card.getRarity().getUpgradeCost()[level - 1];
-				int needToUpdateTroops = card.getRarity().getUpgradeMaterialCount()[level - 1];
-				int addExperience = card.getRarity().getUpgradeExp()[level - 1];
-
-				if(entity.getGold() >= needToUpdateGold && cardEntity.getCount() >= needToUpdateTroops) {
-					entity.setGold(entity.getGold() - needToUpdateGold);
-					addExperience(addExperience);
-
-					playerCard.setLevel(++level);
-					playerCard.setCount(cardEntity.getCount() - needToUpdateTroops);
-
-					this.cardsToUpdate.add(playerCard);
-				}
-			}
-		}
-
-		save(); // need?
 
 		return true;
 	}
