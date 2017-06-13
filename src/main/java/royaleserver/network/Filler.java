@@ -280,6 +280,8 @@ public final class Filler {
 		message.isMyProfile = isMyProfile;
 
 		message.place = 0; // TODO:
+		((HomeData)message).cardsFound = entity.getCards().size();
+		((HomeData)message).arena = entity.getLogicArena();
 
 		message.deck = new Deck();
 		message.deck.cards = new Card[royaleserver.game.Deck.DECK_CARDS_COUNT];
