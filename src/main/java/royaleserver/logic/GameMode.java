@@ -20,7 +20,6 @@ public class GameMode {
 	private float elixirProductionOvertimeMultiplier;
 	private boolean useStartingElixir;
 	private int startingElixir;
-	private boolean team;
 
 	private GameMode() {}
 
@@ -56,10 +55,6 @@ public class GameMode {
 		return startingElixir;
 	}
 
-	public boolean isTeam() {
-		return team;
-	}
-
 	private static boolean initialized = false;
 	private static Map<String, GameMode> values = new HashMap<>();
 
@@ -75,7 +70,6 @@ public class GameMode {
 		Column csv_ElixirProductionOvertimeMultiplier = csv_game_modes.getColumn("ElixirProductionOvertimeMultiplier");
 		Column csv_UseStartingElixir = csv_game_modes.getColumn("UseStartingElixir");
 		Column csv_StartingElixir = csv_game_modes.getColumn("StartingElixir");
-		Column csv_Team = csv_game_modes.getColumn("Team");
 
 		int index = 1;
 		for (Row csv_game_mode : csv_game_modes.getRows()) {
@@ -102,7 +96,6 @@ public class GameMode {
 
 			gameMode.useStartingElixir = csv_game_mode.getValue(csv_UseStartingElixir).asBoolean();
 			gameMode.startingElixir = gameMode.useStartingElixir ? csv_game_mode.getValue(csv_StartingElixir).asInt() : 0;
-			gameMode.team = csv_game_mode.getValue(csv_Team).asBoolean();
 
 			values.put(gameMode.name, gameMode);
 			++index;

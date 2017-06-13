@@ -27,13 +27,13 @@ public abstract class DBLogic<Entity extends LogicEntity> extends NamedLogic {
 		final Map<String, LogicEntity> entities = new HashMap<>();
 		final HashMap<String, Entity> entitiesToAdd = new HashMap<>();
 		for (Entity entity : service.all()) {
-			entities.put(entity.getName(), entity);
+			entities.put(entity.getName().toLowerCase(), entity);
 		}
 
 		for (Logic logic : values) {
-			LogicEntity entity = entities.getOrDefault(logic.getName(), null);
+			LogicEntity entity = entities.getOrDefault(logic.getName().toLowerCase(), null);
 			if (entity == null) {
-				entitiesToAdd.put(logic.getName(), null);
+				entitiesToAdd.put(logic.getName().toLowerCase(), null);
 			} else {
 				logic.dbId = entity.getId();
 				logic.dbEntity = entity;

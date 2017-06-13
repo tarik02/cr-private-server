@@ -24,8 +24,8 @@ public final class Arena extends DBLogic<ArenaEntity> {
 	private int chestRewardMultiplier, chestShopPriceMultiplier;
 	private int requestSize;
 	private int maxDonationCountCommon, maxDonationCountRare, maxDonationCountEpic;
-	private int dailyDonationCapacityLimit;
-	private int battleRewardGold;
+	private Integer dailyDonationCapacityLimit;
+	private Integer battleRewardGold;
 	private String releaseDate;
 
 	private Arena() {}
@@ -86,11 +86,11 @@ public final class Arena extends DBLogic<ArenaEntity> {
 		return maxDonationCountEpic;
 	}
 
-	public int getDailyDonationCapacityLimit() {
+	public Integer getDailyDonationCapacityLimit() {
 		return dailyDonationCapacityLimit;
 	}
 
-	public int getBattleRewardGold() {
+	public Integer getBattleRewardGold() {
 		return battleRewardGold;
 	}
 
@@ -145,8 +145,8 @@ public final class Arena extends DBLogic<ArenaEntity> {
 			arena.maxDonationCountCommon = csv_arena.getValue(csv_MaxDonationCountCommon).asInt();
 			arena.maxDonationCountRare = csv_arena.getValue(csv_MaxDonationCountRare).asInt();
 			arena.maxDonationCountEpic = csv_arena.getValue(csv_MaxDonationCountEpic).asInt();
-			arena.dailyDonationCapacityLimit = csv_arena.getValue(csv_DailyDonationCapacityLimit).asInt();
-			arena.battleRewardGold = csv_arena.getValue(csv_BattleRewardGold).asInt();
+			arena.dailyDonationCapacityLimit = csv_arena.getValue(csv_DailyDonationCapacityLimit).asIntNullable();
+			arena.battleRewardGold = csv_arena.getValue(csv_BattleRewardGold).asIntNullable();
 			arena.releaseDate = csv_arena.getValue(csv_ReleaseDate).asString(true);
 
 			values.add(arena);
