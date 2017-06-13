@@ -75,7 +75,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		loginOk.unknown_18 = "";
 		loginOk.unknown_19 = "";
 		loginOk.region = "UA"; // TODO: Make it from config
-		loginOk.contentURL = "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com"; // TODO: Make it from config
+		loginOk.contentURL = server.getContentUrl();
 		loginOk.eventAssetsURL = "https://event-assets.clashroyale.com"; // TODO: Make it from config
 		loginOk.unknown_23 = 1;
 		session.sendMessage(loginOk);

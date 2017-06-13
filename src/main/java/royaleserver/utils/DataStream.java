@@ -65,7 +65,7 @@ public class DataStream {
 
 	public DataStream reset(boolean saveBufferCapacity) {
 		if (saveBufferCapacity) {
-			Arrays.fill(buffer, (byte)0);
+			//Arrays.fill(buffer, (byte)0);
 		} else {
 			buffer = new byte[32];
 		}

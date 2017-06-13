@@ -40,7 +40,7 @@
 
 	<properties>
 		<hibernate.version>5.2.10.Final</hibernate.version>
-		<netty.version>3.2.10.Final</netty.version>
+		<netty.version>4.1.6.Final</netty.version>
 	</properties>
 
 	<dependencies>
@@ -95,8 +95,8 @@
 			<version>5.1.6</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.netty</groupId>
-			<artifactId>netty</artifactId>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
 			<version>${netty.version}</version>
 		</dependency>
 	</dependencies>

@@ -3,6 +3,7 @@ package royaleserver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import royaleserver.assets.*;
 import royaleserver.config.Config;
 import royaleserver.database.DataManager;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipFile;
 
 public class Server {
-	public static final int CONFIG_VERSION = 5;
+	public static final int CONFIG_VERSION = 6;
 	public static final int TICKS_PER_SECOND = 20;
 
 	private static Logger logger;
@@ -35,9 +36,10 @@ public class Server {
 	protected AssetManager assetManager = null;
 	protected DataManager dataManager = null;
 	protected NetworkServer networkServer = null;
-
-	protected String resourceFingerprint = "";
 	protected Config config;
+
+	protected String resourceFingerprint;
+	protected String contentHash, contentUrl;
 
 	protected final Map<Long, Player> players = new ConcurrentHashMap<>();
 	protected final Map<Long, Clan> clans = new ConcurrentHashMap<>();
@@ -58,13 +60,11 @@ public class Server {
 
 		LogManager.initMainLogger(new File(workingDirectory, "server.log"));
 		logger = LogManager.getLogger(Server.class);
-
-		start();
 	}
 
-	public void start() throws ServerException {
+	public boolean start() throws ServerException {
 		if (running) {
-			return;
+			return false;
 		}
 		running = true;
 		tickCounter = 0;
@@ -74,7 +74,7 @@ public class Server {
 		logger.info("Reading config...");
 		if ((config = Config.load(CONFIG_VERSION, new File(workingDirectory, "config.json"),
 				ignored -> Main.class.getResourceAsStream("/config.json"))) == null) {
-			return;
+			return false;
 		}
 
 		AssetManagerWrapper assetManager = new AssetManagerWrapper();
@@ -147,6 +147,8 @@ public class Server {
 		this.assetManager = assetManager.simplify();
 
 		resourceFingerprint = assetManager.open("fingerprint.json").content();
+		contentHash = new JsonParser().parse(resourceFingerprint).getAsJsonObject().get("sha").getAsString();
+		contentUrl = config.get("content.url").getAsString();
 
 		logger.info("Initializing data manager...");
 		dataManager = new DataManager(config);
@@ -166,10 +168,9 @@ public class Server {
 		networkServer = new NetworkServer(this, config);
 		networkServer.start();
 
-		System.gc();
 		logger.info("Server started!");
 
-		loop();
+		return true;
 	}
 
 	public void stop() {
@@ -199,7 +200,7 @@ public class Server {
 		logger.info("Server stopped!");
 	}
 
-	private void loop() {
+	public void loop() {
 		final int TICK_TIME = 1000 / TICKS_PER_SECOND;
 
 		while (running) {
@@ -240,12 +241,20 @@ public class Server {
 		return dataManager;
 	}
 
+	public Config getConfig() {
+		return config;
+	}
+
 	public String getResourceFingerprint() {
 		return resourceFingerprint;
 	}
 
 	public String getContentHash() {
-		return config.CONTENT_HASH;
+		return contentHash;
+	}
+
+	public String getContentUrl() {
+		return contentUrl;
 	}
 
 	/**

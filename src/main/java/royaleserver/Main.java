@@ -8,7 +8,15 @@ public class Main {
 
 	public static void main(String[] args) throws Throwable {
 		try {
-			new Server().stop();
+			Server server = new Server();
+			try {
+				if (server.start()) {
+					System.gc();
+					server.loop();
+				}
+			} finally {
+				server.stop();
+			}
 		} catch (Throwable e) {
 			logger.fatal(e.getMessage(), e);
 		}

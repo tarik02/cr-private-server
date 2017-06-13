@@ -19,8 +19,6 @@ import java.util.function.Function;
 public final class Config {
 	private static final Logger logger = LogManager.getLogger(Config.class);
 
-	public static final String CONTENT_HASH = "e99dcd87d0f3ba976efd982ef51a7f393463aeca";
-
 	private Map<String, JsonElement> map = new HashMap<>();
 
 	public Config(JsonObject json) {

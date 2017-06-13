@@ -1,5 +1,5 @@
 {
-	"_version": 5,
+	"_version": 6,
 
 	"assets": [
 		{
@@ -17,8 +17,13 @@
 		}
 	],
 
+	"content": {
+		"url": "http://7166046b142482e67b30-2a63f4436c967aa7d355061bd0d924a1.r65.cf1.rackcdn.com"
+	},
+
 	"server": {
-		"require_login_code": false
+		"require_login_code": false,
+		"port": 9339
 	},
 
 	"database": {
