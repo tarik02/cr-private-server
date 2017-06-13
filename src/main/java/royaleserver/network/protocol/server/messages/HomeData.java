@@ -7,6 +7,7 @@ import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.server.components.HomeResources;
 import royaleserver.network.protocol.server.components.PlayerClan;
 import royaleserver.utils.DataStream;
+import royaleserver.utils.Hex;
 
 public abstract class HomeData extends ServerMessage {
 	public boolean isMyProfile;
@@ -40,6 +41,7 @@ public abstract class HomeData extends ServerMessage {
 	}
 
 	public void encode(DataStream stream) {
+
 		stream.putRrsLong(homeId);
 		stream.putRrsLong(homeId);
 		stream.putRrsLong(homeId);
@@ -51,30 +53,25 @@ public abstract class HomeData extends ServerMessage {
 		}
 		stream.putRrsInt32(nameChangesCount);
 
-		stream.putByte((byte)(arena.getIndex() + 1));
+		stream.putRrsInt32(10);
+
 		stream.putRrsInt32(trophies);
+		stream.putRrsInt32(240); // unk_6 0
+		stream.putRrsInt32(highestTrophies); // highest trophies?
 
-		stream.putRrsInt32(0); // unk_6
-
-		stream.putRrsInt32(legendaryTrophies);
-		stream.putRrsInt32(trophies); // trophies s h
-
-		stream.putRrsInt32(30); // always30
-
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0); // always30
 		stream.putRrsInt32(0); // BestSeasonLeaderboardNr
-		stream.putRrsInt32(trophies); // BestSeasonTrophies
-
+		stream.putRrsInt32(0); // BestSeasonTrophies
 		stream.putRrsInt32(0); // unk_6_b
-		stream.putRrsInt32(31); // always30_2
-
-		stream.putRrsInt32(0); // PreviousSeasonLeaderboardNr
-		stream.putRrsInt32(trophies); // PreviousSeasonTrophies
-
-		stream.putRrsInt32(highestTrophies);
-
-		stream.putRrsInt32(0); //unk_7 = p.readRRSInt32()
-		stream.putRrsInt32(arena.getIndex() + 1); // seasonReward arena
-		stream.putRrsInt32(7); //always_7 = p.readRRSInt32()
+		stream.putRrsInt32(0); // always30_2
+		stream.putRrsInt32(32); // PreviousSeasonLeaderboardNr
+		stream.putRrsInt32(0); // PreviousSeasonTrophies
+		stream.putRrsInt32(0); // PreviousSeasonTrophies
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(8); //always_7 = p.readRRSInt32()
 
 		HomeResources homeResources = new HomeResources();
 		homeResources.resources.put(HomeResources.RESOURCE_GOLD, gold);
@@ -87,6 +84,7 @@ public abstract class HomeData extends ServerMessage {
 		homeResources.resources.put(HomeResources.RESOURCE_CHALLENGE_CARDS_WON2, challengeCardsWon);
 		homeResources.resources.put(HomeResources.RESOURCE_MAX_CHALLENGE_WINS, challengeMaxWins);
 		homeResources.resources.put(HomeResources.RESOURCE_FAVOURITE_CARD, favouriteCard == null ? 0 : favouriteCard.getIndex());
+
 		homeResources.encode(stream);
 
 		stream.putRrsInt32(0);
@@ -146,6 +144,7 @@ public abstract class HomeData extends ServerMessage {
 		}
 
 		stream.putRrsInt32(0); // 0
+		stream.putRrsInt32(0); // 0
 
 		stream.putRrsInt32(gems);
 		stream.putRrsInt32(freeGems);
@@ -153,7 +152,7 @@ public abstract class HomeData extends ServerMessage {
 		stream.putRrsInt32(levelExperience);
 		stream.putRrsInt32(level.getIndex());
 
-		stream.putBoolean(isMyProfile);
+		stream.putRrsInt32(0);
 
 		if (name == null && isMyProfile) {
 			stream.putRrsInt32(0);
@@ -165,7 +164,7 @@ public abstract class HomeData extends ServerMessage {
 		}
 
 		// Matches played (global/tournament/challenge)?
-		stream.putRrsInt32(0); // global?
+		stream.putRrsInt32(402); // global?
 		stream.putRrsInt32(0); // tournament
 		stream.putRrsInt32(0); // unk
 
