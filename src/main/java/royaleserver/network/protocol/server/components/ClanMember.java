@@ -5,7 +5,6 @@ import royaleserver.utils.SCID;
 
 public class ClanMember {
 	public long avatarId;
-	public String facebookId;
 	public String name;
 	public SCID arena;
 	public byte role;
@@ -25,7 +24,6 @@ public class ClanMember {
 
 	public void encode(DataStream stream) {
 		stream.putBLong(avatarId);
-		stream.putString(facebookId);
 		stream.putString(name);
 		stream.putSCID(arena);
 		stream.putByte(role);

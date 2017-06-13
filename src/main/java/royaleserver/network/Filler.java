@@ -1,17 +1,16 @@
 package royaleserver.network;
 
-import royaleserver.game.OpeningChest;
-import royaleserver.game.PlayerCard;
 import royaleserver.database.entity.ClanEntity;
 import royaleserver.database.entity.HomeChestEntity;
 import royaleserver.database.entity.HomeChestStatus;
 import royaleserver.database.entity.PlayerEntity;
+import royaleserver.game.OpeningChest;
+import royaleserver.game.PlayerCard;
 import royaleserver.logic.ClanRole;
 import royaleserver.network.protocol.server.commands.ChestOpenOk;
 import royaleserver.network.protocol.server.commands.ClanCreateOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.components.*;
-import royaleserver.network.protocol.server.components.Deck;
 import royaleserver.network.protocol.server.messages.ClanData;
 import royaleserver.network.protocol.server.messages.HomeData;
 import royaleserver.network.protocol.server.messages.HomeDataOwn;
@@ -98,7 +97,6 @@ public final class Filler {
 
 	public static void fill(ClanMember message, PlayerEntity entity) {
 		message.avatarId = entity.getId();
-		message.facebookId = "0";
 		message.name = entity.getName();
 		message.arena = entity.getLogicArena().getScid();
 		message.role = (byte)entity.getLogicClanRole().getIndex();
