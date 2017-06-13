@@ -275,18 +275,27 @@ public final class Filler {
 		message.shopCards[5].boughtTimes = 1;
 	}
 
-	public static void fill(HomeDataVisited message, PlayerEntity entity, boolean isMyProfile) {
+	public static void fill(HomeDataVisited message, PlayerEntity entity, royaleserver.game.Deck currentDeck, Collection<PlayerCard> cardsAfterDeck, boolean isMyProfile) {
 		fill((HomeData)message, entity);
 		message.isMyProfile = isMyProfile;
 
 		message.place = 0; // TODO:
 
-		message.deck = new Deck(); // TODO:
-		message.deck.cards = new Card[8];
-		for (int i = 0; i < message.deck.cards.length; i++) {
+		message.deck = new Deck();
+		message.deck.cards = new Card[royaleserver.game.Deck.DECK_CARDS_COUNT];
+
+		for (int i = 0; i < royaleserver.game.Deck.DECK_CARDS_COUNT; i++) {
 			Card card = new Card();
-			card.card = royaleserver.logic.Card.byDB(i + 1); // Temponary solution
-			card.level = 1;
+			PlayerCard deckCard = currentDeck.getCard(i);
+			if (deckCard != null) {
+				card.card = deckCard.getCard();
+				card.level = deckCard.getLevel();
+				card.count = deckCard.getCount();
+			} else {
+				card.card = i == 0 ? null : message.deck.cards[i - 1].card;
+				card.label = 0;
+				card.count = 0;
+			}
 
 			message.deck.cards[i] = card;
 		}

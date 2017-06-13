@@ -113,10 +113,8 @@ public class Clan {
 	}
 
 	public void updateOnline() {
-		// error when you send it :(
 		ClanOnlineUpdate message = new ClanOnlineUpdate();
-		message.membersOnline = 1;
-		message.unknown_1 = 0;
+		message.membersOnline = players.size();
 		//broadcast(message);
 	}
 }

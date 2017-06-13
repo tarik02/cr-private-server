@@ -244,7 +244,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	 */
 	public int getDecksCount() {
 		// TODO: 5 after update
-		return 3;
+		return 5;
 	}
 
 	/**
@@ -590,9 +590,11 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			isMyProfile = false;
 		}
 
+		responseEntity.getCards();
+
 		if (responseEntity != null) {
 			HomeDataVisited response = new HomeDataVisited();
-			Filler.fill(response, responseEntity, isMyProfile);
+			Filler.fill(response, responseEntity, deck, cardsAfterDeck, isMyProfile);
 			session.sendMessage(response);
 		}
 
@@ -709,6 +711,8 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 					this.cardsToUpdate.add(playerCard);
 				}
 			}
+
+			save();
 		}
 
 		return true;
