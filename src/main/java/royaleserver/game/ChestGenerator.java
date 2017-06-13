@@ -54,7 +54,11 @@ public class ChestGenerator {
 		int minGold = chest.getMinGoldPerCard() * realSpellsCount;
 		int maxGold = chest.getMaxGoldPerCard() * realSpellsCount;
 
-		builder.gold(minGold + random.nextInt(maxGold - minGold));
+		if (minGold == maxGold) {
+			builder.gold(minGold);
+		} else {
+			builder.gold(minGold + random.nextInt(maxGold - minGold));
+		}
 		builder.gems(0); // TODO:
 
 		return builder.build();
