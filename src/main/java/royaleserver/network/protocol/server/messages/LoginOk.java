@@ -1,7 +1,7 @@
 package royaleserver.network.protocol.server.messages;
 
-import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.network.protocol.Messages;
+import royaleserver.network.protocol.server.ServerMessage;
 import royaleserver.utils.DataStream;
 
 public final class LoginOk extends ServerMessage {
@@ -46,7 +46,6 @@ public final class LoginOk extends ServerMessage {
 		stream.putBLong(homeId);
 		stream.putString(userToken);
 		stream.putString(gameCenterId);
-		stream.putString(facebookId);
 		stream.putRrsInt32(serverMajorVersion);
 		stream.putRrsInt32(serverBuild);
 		stream.putRrsInt32(serverBuild);
