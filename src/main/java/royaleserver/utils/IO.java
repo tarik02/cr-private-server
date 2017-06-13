@@ -1,5 +1,6 @@
 package royaleserver.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,8 +14,17 @@ public final class IO {
 
 	public static byte[] getByteArray(InputStream is, boolean close) {
 		try {
-			byte[] buffer = new byte[is.available()];
-			is.read(buffer);
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+			byte[] buffer = new byte[1024];
+			int i;
+
+			while ((i = is.read(buffer)) != -1) {
+				os.write(buffer, 0, i);
+			}
+
+			buffer = os.toByteArray();
+			os.close();
 
 			if (close) {
 				try {
