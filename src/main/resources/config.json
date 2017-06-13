@@ -12,6 +12,7 @@
 			"file": "ClashRoyale.zip",
 			"root": "assets"
 		}, {
+			"disabled": true,
 			"provider": "folder",
 			"path": "assets"
 		}
