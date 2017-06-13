@@ -164,7 +164,7 @@ public class PlayerHandler extends SimpleChannelInboundHandler<ClientMessage> im
 	@Override
 	public void sendMessage(Message message) {
 		logger.debug("< %s", message.getClass().getSimpleName());
-		channel.write(message);
+		channel.writeAndFlush(message);
 	}
 
 	@Override
@@ -175,6 +175,5 @@ public class PlayerHandler extends SimpleChannelInboundHandler<ClientMessage> im
 	@Override
 	public void close() {
 		status = Status.DISCONNECTING;
-		channel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
 	}
 }
