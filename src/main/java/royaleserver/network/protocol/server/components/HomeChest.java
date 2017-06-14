@@ -17,11 +17,11 @@ public class HomeChest {
 	public int ticksToOpen; // Remains ticks to open
 
 	public void encode(DataStream stream) {
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(offset);
-
 		if (first) {
 			stream.putRrsInt32(firstOffset);
+		} else {
+			stream.putRrsInt32(0);
+			stream.putRrsInt32(8);
 		}
 
 		stream.putSCID(chest.getScid());
@@ -34,10 +34,10 @@ public class HomeChest {
 			stream.putRrsInt32((int)System.currentTimeMillis());
 		}
 
-		stream.putRrsInt32(5772); // ?? chest id (у пользователя)??
+		stream.putRrsInt32(slot); // ?? chest id (у пользователя)??
 
 		stream.putRrsInt32(1);
-		stream.putRrsInt32(slot);
+		stream.putRrsInt32(0);
 		stream.putRrsInt32(0);
 	}
 }

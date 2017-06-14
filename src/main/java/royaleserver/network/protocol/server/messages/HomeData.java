@@ -53,7 +53,7 @@ public abstract class HomeData extends ServerMessage {
 		}
 		stream.putRrsInt32(nameChangesCount);
 
-		stream.putRrsInt32(10);
+		stream.putRrsInt32(arena.getArena() + 1); // arena?
 
 		stream.putRrsInt32(trophies);
 		stream.putRrsInt32(240); // unk_6 0
@@ -90,13 +90,13 @@ public abstract class HomeData extends ServerMessage {
 		stream.putRrsInt32(0);
 
 		int[] statItems = new int[] {
-				26, cardsGiven, cardsGiven, cardsGiven,
+				/*26, cardsGiven, cardsGiven, cardsGiven,
 				10, 10, 10,
 				cardsFound, cardsFound, cardsFound,
 				1, tournamentCardsWon, tournamentCardsWon, tournamentCardsWon,
 				1, 1, 1, 726, challengeMaxWins, challengeMaxWins, challengeMaxWins,
 				121, 121, 121, 14, 14, 14,
-				cardsGiven, cardsGiven, cardsGiven
+				cardsGiven, cardsGiven, cardsGiven*/
 		};
 
 		stream.putRrsInt32(statItems.length);
@@ -107,7 +107,7 @@ public abstract class HomeData extends ServerMessage {
 		}
 
 		// Unknown structure
-		int lengthOfStruct = 28;
+		int lengthOfStruct = 0;
 
 		stream.putRrsInt32(lengthOfStruct);
 
@@ -117,11 +117,24 @@ public abstract class HomeData extends ServerMessage {
 			stream.putRrsInt32(1);
 		}
 
+		homeResources = new HomeResources();
+		homeResources.resources.put(HomeResources.RESOURCE_GOLD, gold);
+		homeResources.resources.put(HomeResources.RESOURCE_FREE_GOLD, gold);
+		homeResources.resources.put(HomeResources.RESOURCE_THREE_CROWNS_WIN, threeCrownsWin);
+		homeResources.resources.put(HomeResources.RESOURCE_CARDS_FOUND, cardsFound);
+		homeResources.resources.put(HomeResources.RESOURCE_CARDS_GIVEN, cardsGiven);
+		homeResources.resources.put(HomeResources.RESOURCE_HIGHEST_TROPHIES, highestTrophies);
+		homeResources.resources.put(HomeResources.RESOURCE_CHALLENGE_CARDS_WON, challengeCardsWon);
+		homeResources.resources.put(HomeResources.RESOURCE_CHALLENGE_CARDS_WON2, challengeCardsWon);
+		homeResources.resources.put(HomeResources.RESOURCE_MAX_CHALLENGE_WINS, challengeMaxWins);
+		homeResources.resources.put(HomeResources.RESOURCE_FAVOURITE_CARD, favouriteCard == null ? 0 : favouriteCard.getIndex());
+
 		homeResources.encode(stream);
 
-		int lengthOfStruct_2 = 46;
-		int lengthOfStruct_3 = 11;
-		int lengthOfStruct_4 = 15;
+		/* Это ачивки. Позже изучу структуру. */
+		int lengthOfStruct_2 = 0;
+		int lengthOfStruct_3 = 0;
+		int lengthOfStruct_4 = 0;
 
 		stream.putRrsInt32(lengthOfStruct_2 + lengthOfStruct_3 + lengthOfStruct_4);
 

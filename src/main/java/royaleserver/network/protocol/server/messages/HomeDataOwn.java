@@ -7,6 +7,7 @@ import royaleserver.network.protocol.server.components.Deck;
 import royaleserver.network.protocol.server.components.HomeChest;
 import royaleserver.utils.DataStream;
 import royaleserver.utils.Hex;
+import royaleserver.utils.SCID;
 
 public final class HomeDataOwn extends HomeData {
 	public static final short ID = Messages.HOME_DATA_OWN;
@@ -130,6 +131,8 @@ public final class HomeDataOwn extends HomeData {
 
 		if (homeChests.length != 0) {
 			homeChests[0].first = true;
+			homeChests[0].offset = 4;
+			homeChests[0].firstOffset = 1;
 			for (HomeChest chest : homeChests) {
 				chest.encode(stream);
 			}
@@ -150,7 +153,7 @@ public final class HomeDataOwn extends HomeData {
 		stream.put(Hex.toByteArray("00"));
 		stream.put(Hex.toByteArray("7f0000"));
 		stream.put(Hex.toByteArray("00000000000000000000"));
-		stream.putRrsInt32(8);
+		stream.putRrsInt32(10);
 
 		// unknown struct
 		stream.put(Hex.toByteArray("00"));
