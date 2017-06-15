@@ -143,21 +143,21 @@ public class DataStream {
 		return result;
 	}
 
+	// TODO: Move it anyway!
 	public DataStream zlibCompress() {
 		Deflater compressor = new Deflater();
-		compressor.setInput(this.get());
+		byte[] input = this.get();
+		compressor.setInput(input);
 
 		this.reset();
-		this.put(Hex.toByteArray("0178040000")); // size?!
+		this.putByte((byte)0x01);
+		this.putLInt(input.length);
 
 		byte[] buf = new byte[1024];
-		int length = 0;
-
 		compressor.finish();
 		while (!compressor.finished()) {
 			int count = compressor.deflate(buf);
 			this.put(buf, 0, count);
-			length += count;
 		}
 		compressor.end();
 
