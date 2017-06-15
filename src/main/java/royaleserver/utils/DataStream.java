@@ -144,26 +144,22 @@ public class DataStream {
 	}
 
 	public DataStream zlibCompress() {
-		byte[] bytes = this.get();
-		int length = bytes.length;
-
 		Deflater compressor = new Deflater();
-		compressor.setInput(bytes);
+		compressor.setInput(this.get());
 
 		this.reset();
-		this.putByte((byte)1); // always 1
-		this.putLInt(length);
+		this.put(Hex.toByteArray("0178040000")); // size?!
 
 		byte[] buf = new byte[1024];
+		int length = 0;
 
 		compressor.finish();
 		while (!compressor.finished()) {
 			int count = compressor.deflate(buf);
 			this.put(buf, 0, count);
+			length += count;
 		}
 		compressor.end();
-
-		System.out.println(Hex.toHexString(this.get(1024)));
 
 		return this;
 	}
