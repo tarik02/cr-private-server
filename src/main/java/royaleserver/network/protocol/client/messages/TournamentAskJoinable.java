@@ -8,6 +8,10 @@ import royaleserver.utils.DataStream;
 public final class TournamentAskJoinable extends ClientMessage {
 	public static final short ID = Messages.TOURNAMENT_ASK_JOINABLE;
 
+	public byte unknown_0;
+	public byte unknown_1;
+	public byte unknown_2;
+
 	public TournamentAskJoinable() {
 		super(ID);
 	}
@@ -24,5 +28,8 @@ public final class TournamentAskJoinable extends ClientMessage {
 
 	@Override
 	public void decode(DataStream stream) {
+		unknown_0 = stream.getByte();
+		unknown_1 = stream.getByte();
+		unknown_2 = stream.getByte();
 	}
 }

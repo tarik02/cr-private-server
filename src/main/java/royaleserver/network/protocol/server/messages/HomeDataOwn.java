@@ -150,7 +150,7 @@ public final class HomeDataOwn extends HomeData {
 		stream.put(Hex.toByteArray("00"));
 		stream.put(Hex.toByteArray("7f0000"));
 		stream.put(Hex.toByteArray("00000000000000000000"));
-		stream.putRrsInt32(10);
+		stream.putRrsInt32(0);
 
 		// unknown struct
 		stream.put(Hex.toByteArray("00"));
