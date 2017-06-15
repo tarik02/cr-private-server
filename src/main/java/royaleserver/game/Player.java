@@ -627,19 +627,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	@Override
 	public boolean handleMatchmakeStart(MatchmakeStart message) throws Throwable {
 		SectorState response = new SectorState();
-
-		response.homeID = entity.getId();
-		response.isTrainer = 1;
-		response.username = "Tester";
-		response.wins = 100;
-		response.looses = 100;
-		response.arena = Arena.by("Arena_T");
-		response.trophies = 3500;
-		response.gold = 10000;
-		response.gems = 10000;
-		response.levelExperience = 0;
-		response.level = 13;
-
+		Filler.fill(response, entity, deck);
 		session.sendMessage(response);
 		return true;
 	}
@@ -805,22 +793,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 	@Override
 	public boolean handleFightStart(FightStart command) throws Throwable {
-		SectorState response = new SectorState();
-
-		response.homeID = entity.getId();
-		response.isTrainer = 0;
-		response.username = "Tester";
-		response.wins = 100;
-		response.looses = 100;
-		response.arena = Arena.by("Arena_T");
-		response.trophies = 3500;
-		response.gold = 10000;
-		response.gems = 10000;
-		response.levelExperience = 0;
-		response.level = 13;
-
-		session.sendMessage(response);
-
+		SectorState sectorState = new SectorState();
+		Filler.fill(sectorState, entity, deck);
+		session.sendMessage(sectorState);
 		return true;
 	}
 }

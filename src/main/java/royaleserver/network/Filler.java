@@ -11,10 +11,7 @@ import royaleserver.network.protocol.server.commands.ChestOpenOk;
 import royaleserver.network.protocol.server.commands.ClanCreateOk;
 import royaleserver.network.protocol.server.commands.ClanLeaveOk;
 import royaleserver.network.protocol.server.components.*;
-import royaleserver.network.protocol.server.messages.ClanData;
-import royaleserver.network.protocol.server.messages.HomeData;
-import royaleserver.network.protocol.server.messages.HomeDataOwn;
-import royaleserver.network.protocol.server.messages.HomeDataVisited;
+import royaleserver.network.protocol.server.messages.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -302,6 +299,47 @@ public final class Filler {
 		message.shopCards[5] = new Card();
 		message.shopCards[5].card = royaleserver.logic.Card.by("Log");
 		message.shopCards[5].boughtTimes = 1;
+	}
+
+	public static void fill(SectorState message, PlayerEntity entity, royaleserver.game.Deck currentDeck) {
+		message.username = entity.getName();
+		message.homeID = entity.getId();
+		message.gold = entity.getGold();
+		message.level = entity.getLogicExpLevel();
+
+		message.currentDeck = new Deck();
+		message.currentDeck.cards = new Card[royaleserver.game.Deck.DECK_CARDS_COUNT];
+
+		for (int i = 0; i < royaleserver.game.Deck.DECK_CARDS_COUNT; i++) {
+			Card card = new Card();
+			PlayerCard deckCard = currentDeck.getCard(i);
+
+			if (deckCard != null) {
+				card.card = deckCard.getCard();
+				card.level = deckCard.getLevel();
+				card.count = deckCard.getCount();
+			} else {
+				card.card = i == 0 ? null : message.currentDeck.cards[i - 1].card;
+				card.label = 0;
+				card.count = 0;
+			}
+
+			message.currentDeck.cards[i] = card;
+		}
+
+		message.arena = entity.getLogicArena();
+		message.trophies = entity.getTrophies();
+		message.highestTrophies = entity.getTrophies(); // TODO:
+
+		message.wins = 0; // TODO:
+		message.threeCrownsWin = 0; // TODO:
+		message.looses = 0; // TODO:
+		message.cardsGiven = 0; // TODO:
+		message.cardsFound = 0; // TODO:
+		message.tournamentCardsWon = 0; // TODO:
+		message.challengeCardsWon = 0; // TODO:
+		message.challengeMaxWins = 0; // TODO:
+		message.favouriteCard = null; // TODO:
 	}
 
 	public static void fill(HomeDataVisited message, PlayerEntity entity, royaleserver.game.Deck currentDeck, boolean isMyProfile) {
