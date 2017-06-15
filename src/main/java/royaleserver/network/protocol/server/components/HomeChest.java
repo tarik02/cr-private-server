@@ -21,7 +21,7 @@ public class HomeChest {
 			stream.putRrsInt32(firstOffset);
 		} else {
 			stream.putRrsInt32(0);
-			stream.putRrsInt32(8);
+			stream.putRrsInt32(offset);
 		}
 
 		stream.putSCID(chest.getScid());

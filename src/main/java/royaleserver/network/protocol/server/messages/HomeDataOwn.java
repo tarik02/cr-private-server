@@ -130,9 +130,6 @@ public final class HomeDataOwn extends HomeData {
 		stream.putByte((byte)4);
 
 		if (homeChests.length != 0) {
-			homeChests[0].first = true;
-			homeChests[0].offset = 4;
-			homeChests[0].firstOffset = 1;
 			for (HomeChest chest : homeChests) {
 				chest.encode(stream);
 			}
