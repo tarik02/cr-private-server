@@ -159,6 +159,28 @@ public final class Filler {
 		message.favouriteCard = null; // TODO:
 	}
 
+	// HomeChestsFunctions
+	public static int getRealOffsetBS(int slot) { // BySlot
+		int offset = (int)Math.pow(2, slot + 2); // 2 * 2 ^ (slot + 1) => 2 ^ (slot + 2)
+
+		return offset;
+	}
+
+	// крч говнокод, но зато работает
+	public static int[] getOffset(int chestSlot, int lastSlot, boolean isFirst) {
+		int offset = 0;
+		int firstOffset = 0;
+
+		if (isFirst) {
+			firstOffset = (int)Math.pow(2, chestSlot);
+		} else {
+			int RS_RL = chestSlot - lastSlot;
+			offset = getRealOffsetBS(RS_RL);
+		}
+
+		return new int[]{offset, firstOffset};
+	}
+
 	public static void fill(HomeDataOwn message, PlayerEntity entity, royaleserver.game.Deck currentDeck,
 	                        Collection<PlayerCard> cardsAfterDeck, Collection<royaleserver.game.Deck> decks) {
 		fill((HomeData)message, entity);
@@ -176,9 +198,16 @@ public final class Filler {
 		homeChests.sort(Comparator.comparingInt(HomeChestEntity::getSlot));
 		message.homeChests = new HomeChest[homeChests.size()];
 		for (HomeChestEntity homeChestEntity : homeChests) {
+			boolean isFirst = i == 0 ? true : false;
+			int chestsOffsets[] = getOffset(homeChestEntity.getSlot(), isFirst ? 0 : homeChests.get(i - 1).getSlot(), isFirst);
+
 			HomeChest homeChest = new HomeChest();
 			homeChest.slot = homeChestEntity.getSlot();
 			homeChest.chest = homeChestEntity.getLogicChest();
+			homeChest.offset = chestsOffsets[0];
+			homeChest.firstOffset = chestsOffsets[1];
+			homeChest.first = isFirst;
+
 			switch (homeChestEntity.getStatus()) {
 			case IDLE:
 				homeChest.status = HomeChest.STATUS_STATIC;
