@@ -243,7 +243,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	 * @return Maximal count of paralell deck.
 	 */
 	public int getDecksCount() {
-		if (entity.getExpLevelExperience() >= 8) {
+		if (entity.getLogicExpLevel().getNumericName() >= 8) {
 			return 5;
 		} else {
 			return 3;
