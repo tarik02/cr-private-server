@@ -275,7 +275,7 @@ public final class Filler {
 		message.shopCards[5].boughtTimes = 1;
 	}
 
-	public static void fill(HomeDataVisited message, PlayerEntity entity, royaleserver.game.Deck currentDeck, Collection<PlayerCard> cardsAfterDeck, boolean isMyProfile) {
+	public static void fill(HomeDataVisited message, PlayerEntity entity, royaleserver.game.Deck currentDeck, boolean isMyProfile) {
 		fill((HomeData)message, entity);
 		message.isMyProfile = isMyProfile;
 

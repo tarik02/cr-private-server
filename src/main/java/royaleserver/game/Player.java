@@ -243,8 +243,11 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	 * @return Maximal count of paralell deck.
 	 */
 	public int getDecksCount() {
-		// TODO: 5 after update
-		return 5;
+		if (entity.getExpLevelExperience() >= 8) {
+			return 5;
+		} else {
+			return 3;
+		}
 	}
 
 	/**
@@ -590,11 +593,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			isMyProfile = false;
 		}
 
-		responseEntity.getCards();
-
 		if (responseEntity != null) {
 			HomeDataVisited response = new HomeDataVisited();
-			Filler.fill(response, responseEntity, deck, cardsAfterDeck, isMyProfile);
+			Filler.fill(response, responseEntity, deck, isMyProfile);
 			session.sendMessage(response);
 		}
 
@@ -711,9 +712,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 					this.cardsToUpdate.add(playerCard);
 				}
 			}
-
-			save();
 		}
+
+		save();
 
 		return true;
 	}
@@ -750,6 +751,8 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	@Override
 	public boolean handleChestOpen(ChestOpen command) throws Throwable {
 		int slot = command.slot;
+
+		System.out.println(slot);
 
 		for (HomeChestEntity homeChest : entity.getHomeChests()) {
 			if (homeChest.getSlot() == slot) {
