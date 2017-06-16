@@ -21,6 +21,7 @@ public interface ClientMessageHandler extends Handler {
 	boolean handleLogin(Login message) throws Throwable;
 	boolean handleMatchmakeCancel(MatchmakeCancel message) throws Throwable;
 	boolean handleMatchmakeStart(MatchmakeStart message) throws Throwable;
+	boolean handleCancelChallenge(CancelChallenge message) throws Throwable;
 	boolean handleNameChange(NameChange message) throws Throwable;
 	boolean handleNameCheck(NameCheck message) throws Throwable;
 	boolean handlePing(Ping message) throws Throwable;

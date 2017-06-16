@@ -8,6 +8,8 @@ public interface ClientCommandHandler {
 	boolean handleChestBuy(ChestBuy command) throws Throwable;
 	boolean handleChestCardNext(ChestCardNext command) throws Throwable;
 	boolean handleChestDraftCardSelect(ChestDraftCardSelect command) throws Throwable;
+	boolean handleChestFreeOpen(ChestFreeOpen command) throws Throwable;
+	boolean handleChestCrownOpen(ChestCrownOpen command) throws Throwable;
 	boolean handleChestOpen(ChestOpen command) throws Throwable;
 	boolean handleChestSeasonRewardOpen(ChestSeasonRewardOpen command) throws Throwable;
 	boolean handleDeckChange(DeckChange command) throws Throwable;

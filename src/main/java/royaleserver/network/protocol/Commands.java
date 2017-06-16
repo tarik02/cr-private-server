@@ -20,6 +20,8 @@ public final class Commands {
 	public static final short DECK_CHANGE = 501;
 	public static final short CHEST_OPEN = 503;
 	public static final short CARD_UPGRADE = 504;
+	public static final short CHEST_FREE_OPEN = 509;
+	public static final short CHEST_CROWN_OPEN = 511;
 	public static final short CHEST_BUY = 516;
 	public static final short FIGHT_START = 525;
 	public static final short CHEST_CARD_NEXT = 526;

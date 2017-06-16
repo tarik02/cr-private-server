@@ -38,6 +38,7 @@ public final class Messages {
 	public static final short HOME_LOGIC_STOPPED = 14105;
 	public static final short MATCHMAKE_CANCEL = 14107;
 	public static final short CHANGE_HOME_NAME = 14108;
+	public static final short CANCEL_CHALLENGE_REQUEST = 14111;
 	public static final short HOME_ASK_DATA = 14113;
 	public static final short HOME_BATTLE_REPLAY = 14114;
 	public static final short HOME_BATTLE_REPLAY_VIEWED = 14117;

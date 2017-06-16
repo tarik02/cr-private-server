@@ -80,16 +80,27 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		loginOk.unknown_23 = 1;
 		session.sendMessage(loginOk);
 
-
-
 		Set<PlayerCardEntity> cardEntities = entity.getCards();
-		for (PlayerCardEntity cardEntity : cardEntities) {
-			Card card = cardEntity.getLogicCard();
-			int level = cardEntity.getLevel(),
-				count = cardEntity.getCount();
 
-			PlayerCard playerCard = new PlayerCard(card, level, count, cardEntity);
-			cards.put(card, playerCard);
+		if (cardEntities.size() > 0) {
+			for (PlayerCardEntity cardEntity : cardEntities) {
+				Card card = cardEntity.getLogicCard();
+				int level = cardEntity.getLevel(),
+						count = cardEntity.getCount();
+
+				PlayerCard playerCard = new PlayerCard(card, level, count, cardEntity);
+				cards.put(card, playerCard);
+			}
+		} else {
+			// temporary solution
+			addCard(Card.by("knight"), 0);
+			addCard(Card.by("goblins"), 0);
+			addCard(Card.by("cannon"), 0);
+			addCard(Card.by("barbarians"), 0);
+			addCard(Card.by("musketeer"), 0);
+			addCard(Card.by("pekka"), 0);
+			addCard(Card.by("valkyrie"), 0);
+			addCard(Card.by("skeletons"), 0);
 		}
 
 		for (int i = 0; i < getDecksCount(); ++i) {
@@ -132,8 +143,8 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	}
 
 	/**
-	 * @apiNote Internal usage only
 	 * @return
+	 * @apiNote Internal usage only
 	 */
 	public PlayerEntity getEntity() {
 		return entity;
@@ -176,7 +187,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	/**
 	 * Add count cards of given type. If needed, convert cards to gold.
 	 *
-	 * @param card Card type to add
+	 * @param card  Card type to add
 	 * @param count Count oof cards to add
 	 */
 	public void addCard(Card card, int count) {
@@ -207,8 +218,8 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	}
 
 	/**
-	 * @apiNote Internal usage only.
 	 * @param slot Index of deck
+	 * @apiNote Internal usage only.
 	 */
 	public void changeDeck(int slot) {
 		if (slot < 0 || slot >= decks.size()) {
@@ -348,7 +359,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	public String getReadableIdentifier() {
 		return entity.getName() + "#" + entity.getId();
 	}
-
 
 
 	protected void endOpeningChest() {
@@ -627,20 +637,18 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	@Override
 	public boolean handleMatchmakeStart(MatchmakeStart message) throws Throwable {
 		SectorState response = new SectorState();
+		Filler.fill(response, entity, deck);
+		session.sendMessage(response);
+		return true;
+	}
 
-		response.homeID = entity.getId();
-		response.isTrainer = 1;
-		response.username = "Tester";
-		response.wins = 100;
-		response.looses = 100;
-		response.arena = Arena.by("Arena_T");
-		response.trophies = 3500;
-		response.gold = 10000;
-		response.gems = 10000;
-		response.levelExperience = 0;
-		response.level = 13;
+	@Override
+	public boolean handleCancelChallenge(CancelChallenge message) throws Throwable {
+		MatchmakeCancelOk response = new MatchmakeCancelOk();
+		MatchmakeInfo response2 = new MatchmakeInfo();
 
 		session.sendMessage(response);
+		session.sendMessage(response2);
 		return true;
 	}
 
@@ -684,7 +692,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 	@Override
 	public boolean handleTournamentAskJoinable(TournamentAskJoinable message) throws Throwable {
-		return false;
+		TournamentList tournamentList = new TournamentList();
+		session.sendMessage(tournamentList);
+		return true;
 	}
 
 	// Commands
@@ -752,8 +762,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 	public boolean handleChestOpen(ChestOpen command) throws Throwable {
 		int slot = command.slot;
 
-		System.out.println(slot);
-
 		for (HomeChestEntity homeChest : entity.getHomeChests()) {
 			if (homeChest.getSlot() == slot) {
 				if (homeChest.getStatus() == HomeChestStatus.OPENED ||
@@ -768,6 +776,21 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			}
 		}
 
+		return true;
+	}
+
+	@Override
+	public boolean handleChestFreeOpen(ChestFreeOpen command) throws Throwable {
+		// TODO: get free chest by player arena
+		// openChest(Chest.byDB(142));
+		// fix bug with / by zero
+
+		return true;
+	}
+
+	@Override
+	public boolean handleChestCrownOpen(ChestCrownOpen command) throws Throwable {
+		// TODO: get crown chest by player arena
 		return true;
 	}
 
@@ -805,22 +828,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 	@Override
 	public boolean handleFightStart(FightStart command) throws Throwable {
-		SectorState response = new SectorState();
-
-		response.homeID = entity.getId();
-		response.isTrainer = 0;
-		response.username = "Tester";
-		response.wins = 100;
-		response.looses = 100;
-		response.arena = Arena.by("Arena_T");
-		response.trophies = 3500;
-		response.gold = 10000;
-		response.gems = 10000;
-		response.levelExperience = 0;
-		response.level = 13;
-
-		session.sendMessage(response);
-
+		SectorState sectorState = new SectorState();
+		Filler.fill(sectorState, entity, deck);
+		session.sendMessage(sectorState);
 		return true;
 	}
 }
