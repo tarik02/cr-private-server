@@ -111,7 +111,7 @@ public final class Messages {
 	public static final short MATCHMAKE_INFO = 24107;
 	public static final short MATCHMAKE_FAILED = 24108;
 	public static final short SERVER_COMMAND = 24111;
-	public static final short UDP_CONNECTION_INFO = 24112;
+	public static final short UDP_CONNECTION = 24112;
 	public static final short HOME_DATA_VISITED = 24113;
 	public static final short HOME_BATTLE_REPLAY_DATA = 24114;
 	public static final short SERVER_ERROR = 24115;
