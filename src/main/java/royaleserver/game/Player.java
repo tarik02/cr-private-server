@@ -184,6 +184,37 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		}
 	}
 
+	public void addGold(int count) {
+		int newGold = entity.getGold() + count;
+
+		if (newGold > 1000000) {
+			newGold = 1000000;
+		}
+
+		entity.setGold(newGold);
+	}
+
+	public void addGems(int count) {
+		int newGems = entity.getGems() + count;
+
+		if (newGems > 1000000) {
+			newGems = 1000000;
+		}
+
+		entity.setGems(newGems);
+	}
+
+	public void addChest(Chest chest, int slot) {
+		HomeChestEntity homeChestEntity = new HomeChestEntity();
+		homeChestEntity.setPlayer(entity);
+
+		homeChestEntity.setChest(chest.getDbEntity());
+		homeChestEntity.setSlot(slot);
+		homeChestEntity.setStatus(HomeChestStatus.OPENED);
+
+		entity.getHomeChests().add(homeChestEntity);
+	}
+
 	/**
 	 * Add count cards of given type. If needed, convert cards to gold.
 	 *
@@ -380,6 +411,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 		ChestOpenOk command = new ChestOpenOk();
 		Filler.fill(command, openingChest = chestGenerator.generateChest(this, chest, random));
+
+		addGold(openingChest.gold());
+		addGems(openingChest.gems());
 
 		CommandResponse response = new CommandResponse();
 		response.command = command;
@@ -614,6 +648,7 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 	@Override
 	public boolean handleHomeAskDataOwn(HomeAskDataOwn message) throws Throwable {
+		changeDeck(entity.getCurrentDeckSlot());
 		sendOwnHomeData();
 		return true;
 	}
