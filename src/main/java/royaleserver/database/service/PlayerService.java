@@ -24,7 +24,7 @@ public class PlayerService extends Service {
 		playerEntity.setLogicArena(Arena.by("Arena_L9"));
 		playerEntity.setLogicLastExpLevel(ExpLevel.by(13));
 		playerEntity.setLogicExpLevel(ExpLevel.by(13));
-		playerEntity.setGold(10000);
+		playerEntity.setGold(100000);
 		playerEntity.setGems(100000);
 		playerEntity.setRandomSeed(random.nextLong());
 		playerEntity.setRareChance(random.nextFloat());

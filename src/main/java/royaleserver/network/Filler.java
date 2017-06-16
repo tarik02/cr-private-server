@@ -187,7 +187,7 @@ public final class Filler {
 		message.accountCreatedTime = (int)(entity.getRegisteredDate().getTime() / 1000);
 		message.loginTime = (int)(System.currentTimeMillis() / 1000);
 		message.homeChests = new HomeChest[entity.getHomeChests().size()];
-
+		message.currentDeckSlot = entity.getCurrentDeckSlot();
 		int i;
 
 		i = 0;

@@ -16,6 +16,7 @@ public final class HomeDataOwn extends HomeData {
 	public int loginTime;
 
 	public HomeChest homeChests[];
+	public int currentDeckSlot;
 
 	public Deck currentDeck;
 	public Card[] cardsAfterDeck;
@@ -49,7 +50,7 @@ public final class HomeDataOwn extends HomeData {
 		stream.putByte((byte)-120); // donationCapacity
 		stream.putRrsInt32(-11698279);
 
-		stream.putByte((byte)0);
+		stream.putByte((byte)2);
 
 		stream.putRrsInt32(decks.length);
 		for (Deck deck : decks) {
@@ -71,7 +72,8 @@ public final class HomeDataOwn extends HomeData {
 			card.encode(stream);
 		}
 
-		stream.put(Hex.toByteArray("0000007f30b6b0f7930b0100"));
+		stream.putByte((byte) currentDeckSlot);
+		stream.put(Hex.toByteArray("ff13067f000000008a01007f000000002b007f0000000002007f000000000d007f000000008d01007f000000008f01007f000000009201007f000000003339bcb69f940b0100"));
 
 		// offers struct
 		int countOfOffers = offers.length;
@@ -121,11 +123,14 @@ public final class HomeDataOwn extends HomeData {
 		}
 
 		stream.put(Hex.toByteArray("00000000000080c4be8b0b000000033d013e01800101023d023e02")); // short version
+
 		stream.putRrsInt32(2);
 
 		// first
 		stream.putString("{\"ID\":\"CARD_RELEASE\",\"Params\":{}}");
 		stream.putByte((byte)4);
+
+		// second
 		stream.putString("{\"ID\":\"CLAN_CHEST\",\"Params\":{\"StartTime\":\"20170317T070000.000Z\",\"ActiveDuration\":\"P3dT0h\",\"InactiveDuration\":\"P4dT0h\",\"ChestType\":[\"ClanCrowns\",\"TeamBattle\"]}}");
 		stream.putByte((byte)4);
 
@@ -319,8 +324,8 @@ public final class HomeDataOwn extends HomeData {
 
 		stream.putRrsInt32(0); // 1
 
-		stream.putBInt(1495782488);
-		stream.putBInt(1496041688);
+		stream.putBInt((int)System.currentTimeMillis());
+		stream.putBInt((int)System.currentTimeMillis());
 
 		stream.put(Hex.toByteArray("7f0001"));
 		stream.put(Hex.toByteArray("00 00 00 00 00 00 01 00 00 00"));
