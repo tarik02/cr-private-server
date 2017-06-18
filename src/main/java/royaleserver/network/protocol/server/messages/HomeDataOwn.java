@@ -40,16 +40,16 @@ public final class HomeDataOwn extends HomeData {
 	public void encode(DataStream stream) {
 		stream.putBLong(homeId);
 
-		stream.putRrsInt32(4667); // age / time?
-		stream.putRrsInt32(1735); // age / time?
+		stream.putRrsInt32(584); // age / time?
+		stream.putRrsInt32(223); // age / time?
 
-		stream.putRrsInt32(1351400); // donation Cooldown Seconds NextFreeChest ?
-		stream.putRrsInt32(1563600); // donationCapacity
+		stream.putRrsInt32(242660); // donation Cooldown Seconds NextFreeChest ?
+		stream.putRrsInt32(1726780); // donationCapacity
 
-		stream.putByte((byte)-67);
-		stream.putRrsInt32(-11700695);
+		stream.putByte((byte)-120); // donationCapacity
+		stream.putRrsInt32(-11698279);
 
-		stream.putByte((byte)0);
+		stream.putByte((byte)2);
 
 		stream.putRrsInt32(decks.length);
 		for (Deck deck : decks) {
@@ -120,48 +120,8 @@ public final class HomeDataOwn extends HomeData {
 			stream.putString(challenges[i]); // json
 		}
 
-		stream.put(Hex.toByteArray("000000")); // short version
+		stream.put(Hex.toByteArray("00000000000080c4be8b0b000000033d013e01800101023d023e02")); // short version
 
-		stream.putRrsInt32(1);
-
-		stream.putRrsInt32(73000028);
-		stream.putRrsInt32(2);
-		stream.putRrsInt32(1);
-
-		stream.putRrsInt32(18);
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(1497266100);
-		stream.put(Hex.toByteArray("000000"));
-
-		stream.putRrsInt32(4);
-
-		stream.putRrsInt32(61);
-		stream.putRrsInt32(1);
-
-		stream.putRrsInt32(62);
-		stream.putRrsInt32(1);
-
-		stream.putRrsInt32(64);
-		stream.putRrsInt32(1);
-
-		stream.putRrsInt32(65);
-		stream.putRrsInt32(1);
-
-		stream.putRrsInt32(4);
-
-		stream.putRrsInt32(61);
-		stream.putRrsInt32(2);
-
-		stream.putRrsInt32(62);
-		stream.putRrsInt32(2);
-
-		stream.putRrsInt32(64);
-		stream.putRrsInt32(3);
-
-		stream.putRrsInt32(65);
-		stream.putRrsInt32(2);
-
-		// JSONs count
 		stream.putRrsInt32(2);
 
 		// first
@@ -169,7 +129,7 @@ public final class HomeDataOwn extends HomeData {
 		stream.putByte((byte)4);
 
 		// second
-		stream.putString("{\"ID\":\"CLAN_CHEST\",\"Params\":{\"StartTime\":\"20170317T070000.000Z\",\"ActiveDuration\":\"P3dT0h\",\"InactiveDuration\":\"P4dT0h\",\"ChestType\":[\"ClanCrowns\"]}}");
+		stream.putString("{\"ID\":\"CLAN_CHEST\",\"Params\":{\"StartTime\":\"20170317T070000.000Z\",\"ActiveDuration\":\"P3dT0h\",\"InactiveDuration\":\"P4dT0h\",\"ChestType\":[\"ClanCrowns\",\"TeamBattle\"]}}");
 		stream.putByte((byte)4);
 
 		if (homeChests.length != 0) {
@@ -178,19 +138,16 @@ public final class HomeDataOwn extends HomeData {
 			}
 		}
 
-		stream.put(Hex.toByteArray("00"));
-		stream.putRrsInt32(35260);
-		stream.putRrsInt32(247460);
-		stream.putRrsInt32(1497625774);
-
 		// free treasure chest next comedown (00007f - already downed)
+		stream.put(Hex.toByteArray("00"));
+		stream.put(Hex.toByteArray("00007f"));
 		stream.put(Hex.toByteArray("00007f"));
 
 		stream.putRrsInt32(1);
 		stream.putRrsInt32(19);
-		stream.putRrsInt32(42);
+		stream.putRrsInt32(72);
 		stream.putRrsInt32(1);
-		stream.putRrsInt32(4666);
+		stream.putRrsInt32(583);
 
 		// struct of CrownChest
 		stream.put(Hex.toByteArray("00"));
@@ -208,15 +165,18 @@ public final class HomeDataOwn extends HomeData {
 		// unknown struct
 		stream.put(Hex.toByteArray("00"));
 		stream.put(Hex.toByteArray("00007f"));
-		stream.putRrsInt32(name == null ? 13 : 3); // ? 3 - name not set
+		stream.putRrsInt32(13); // ? 3 - name not set
 		stream.put(Hex.toByteArray("0000000000000002"));
 
 		// last information
 		stream.putRrsInt32(lastLevel.getIndex());
-		stream.putByte((byte)54);
+		stream.putByte((byte)36);
 		stream.putByte((byte)lastArena.getIndex());
 
-		stream.put(Hex.toByteArray("c1acbbc4060606"));
+		stream.putRrsInt32(1395285809);
+
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(6);
 
 		// next shop update
 		stream.putRrsInt32(72000); // 72000 = 1 hour => 1200 = 1 min => 20 = 1 sec
@@ -246,92 +206,92 @@ public final class HomeDataOwn extends HomeData {
 
 		// unknown ints
 		stream.putRrsInt32(7);
-		stream.putRrsInt32(3);
-		stream.putRrsInt32(2236);
-		stream.putRrsInt32(1896);
-		stream.putRrsInt32(657);
-		stream.putRrsInt32(3);
-		stream.putRrsInt32(193);
-		stream.putRrsInt32(10);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(402);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(2214);
+		stream.putRrsInt32(9);
 		stream.putRrsInt32(0);
 
 		stream.putRrsInt32(1);
 		stream.putRrsInt32(26);
-		stream.putRrsInt32(11);
+		stream.putRrsInt32(14);
 		stream.putRrsInt32(1);
 		stream.putRrsInt32(10);
 		stream.putRrsInt32(0);
-		stream.putRrsInt32(850);
+		stream.putRrsInt32(0);
 
 		stream.put(Hex.toByteArray("0000"));
-		stream.put(Hex.toByteArray("fa"));
+		stream.putRrsInt32(-505);
 
 		// wtf??!1
-		stream.putRrsInt32(7);
-		stream.putRrsInt32(16);
-		stream.putRrsInt32(3);
-		stream.putRrsInt32(24500694);
-		stream.putRrsInt32(1);
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(9);
-
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(5);
-		stream.putRrsInt32(3);
-		stream.putRrsInt32(24538909);
-		stream.putRrsInt32(1);
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(5);
-
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(46);
-		stream.putRrsInt32(3);
-		stream.putRrsInt32(-64);
 		stream.putRrsInt32(4);
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(6);
-
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(85);
-		stream.putRrsInt32(3);
-		stream.putRrsInt32(-64);
 		stream.putRrsInt32(3);
 		stream.putRrsInt32(0);
-		stream.putRrsInt32(13);
+		stream.putRrsInt32(10);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(3);
+		stream.putRrsInt32(0);
 
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(3);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(204);
 		stream.putRrsInt32(0);
 		stream.putRrsInt32(2);
+		stream.putRrsInt32(0);
+
+		stream.putRrsInt32(68);
+		stream.putRrsInt32(4);
+		stream.putRrsInt32(24505500);
+		stream.putRrsInt32(7);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(0);
+
+		stream.putRrsInt32(77);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(24504159);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
+
+		stream.putRrsInt32(12);
+		stream.putRrsInt32(3);
+		stream.putRrsInt32(24504841);
+		stream.putRrsInt32(11);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(3);
+		stream.putRrsInt32(0);
+
+		stream.putRrsInt32(74);
+		stream.putRrsInt32(6);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(44);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(2);
+		stream.putRrsInt32(0);
+
 		stream.putRrsInt32(8);
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(1350);
-		stream.putRrsInt32(112);
-		stream.putRrsInt32(7);
-
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(37);
-		stream.putRrsInt32(6);
-		stream.putRrsInt32(24769249);
 		stream.putRrsInt32(1);
-		stream.putRrsInt32(1);
-		stream.putRrsInt32(4);
-
+		stream.putRrsInt32(24504148);
 		stream.putRrsInt32(0);
-		stream.putRrsInt32(80);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(0);
+
+		stream.putRrsInt32(36);
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(24823758);
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(0);
 		stream.putRrsInt32(3);
-		stream.putRrsInt32(24474878);
-		stream.putRrsInt32(2);
 		stream.putRrsInt32(0);
-		stream.putRrsInt32(9);
 
-		stream.putRrsInt32(0);
-		stream.putRrsInt32(81);
-		stream.putRrsInt32(9);
-		stream.putRrsInt32(24528284);
-		stream.putRrsInt32(84);
-		stream.putRrsInt32(83);
-		stream.putRrsInt32(15);
-
-		stream.put(Hex.toByteArray("0000"));
+		stream.put(Hex.toByteArray("00"));
 
 		// new unknown ints
 		stream.putRrsInt32(3);
@@ -342,39 +302,33 @@ public final class HomeDataOwn extends HomeData {
 		stream.putRrsInt32(26);
 		stream.putRrsInt32(48);
 		stream.putRrsInt32(0);
-		stream.putRrsInt32(1);
-		stream.putRrsInt32(3);
-		stream.putRrsInt32(-537760);
-		stream.putRrsInt32(6);
-		stream.putRrsInt32(1);
 		stream.putRrsInt32(0);
-
-		stream.writeStructureRRS(new int[]{66000014, 66000015});
-		stream.writeStructureRRS(new int[]{66000013, 66000012, 66000014, 66000028});
-		stream.putRrsInt32(1);
-		stream.writeStructureRRS(new int[]{66000029});
+		stream.putRrsInt32(0);
+		stream.writeStructureRRS(new int[]{66000012, 66000013, 66000014});
+		stream.putRrsInt32(0);
+		stream.putRrsInt32(0);
 		stream.writeStructureRRS(new int[]{1608786000}); // player id?? in rrs int??
 
 		stream.put(Hex.toByteArray("00"));
 
-		stream.putRrsInt32(130); // changed
+		stream.putRrsInt32(8); // changed
 		stream.putRrsInt32(1);
-
-		stream.writeStructureRRS(new int[]{54000010});
+		stream.putRrsInt32(1);
+		stream.putRrsInt32(54000010);
 
 		stream.putRrsInt32(2); // 1 - without reward, 2 - with reward
-		stream.putRrsInt32(1); // changed
-		stream.putRrsInt32(232041); // changed
+		stream.putRrsInt32(0); // changed
+		stream.putRrsInt32(307034); // changed
 
-		stream.putRrsInt32(75); // 1
+		stream.putRrsInt32(0); // 1
 
-		stream.putBInt(1497596551);
-		stream.putBInt(1497855751);
+		stream.putBInt((int)System.currentTimeMillis());
+		stream.putBInt((int)System.currentTimeMillis());
 
-		stream.putRrsInt32(4778892);
-		stream.put(Hex.toByteArray("00 00 00 00 00 00 00 00 01 00"));
+		stream.put(Hex.toByteArray("7f0001"));
+		stream.put(Hex.toByteArray("00 00 00 00 00 00 01 00 00 00"));
 
-		stream.putBInt(37635);
+		stream.putRrsInt32(23);
 
 		super.encode(stream);
 
