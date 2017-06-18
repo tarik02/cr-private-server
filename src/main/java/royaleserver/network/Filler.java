@@ -281,24 +281,31 @@ public final class Filler {
 
 		message.shopCards = new Card[6]; // TODO:
 
+		// need to set 1 level, because in Card.encode level will -1
 		message.shopCards[0] = new Card();
 		message.shopCards[0].card = royaleserver.logic.Card.by("Goblins");
+		message.shopCards[0].level = 1;
 
 		message.shopCards[1] = new Card();
 		message.shopCards[1].card = royaleserver.logic.Card.by("Giant");
+		message.shopCards[1].level = 1;
 
 		message.shopCards[2] = new Card();
 		message.shopCards[2].card = royaleserver.logic.Card.by("Zap");
+		message.shopCards[2].level = 1;
 
 		message.shopCards[3] = new Card();
 		message.shopCards[3].card = royaleserver.logic.Card.by("Heal");
+		message.shopCards[3].level = 1;
 
 		message.shopCards[4] = new Card();
 		message.shopCards[4].card = royaleserver.logic.Card.by("Balloon");
+		message.shopCards[4].level = 1;
 
 		message.shopCards[5] = new Card();
 		message.shopCards[5].card = royaleserver.logic.Card.by("Log");
-		message.shopCards[5].boughtTimes = 1;
+		message.shopCards[5].level = 1;
+		//message.shopCards[5].boughtTimes = 1;
 	}
 
 	public static void fill(SectorState message, PlayerEntity entity, royaleserver.game.Deck currentDeck) {

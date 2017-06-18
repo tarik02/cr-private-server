@@ -59,25 +59,27 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		loginOk.userId = loginOk.homeId = entity.getId();
 		loginOk.userToken = entity.getPassToken();
 		loginOk.gameCenterId = "";
+		loginOk.unknown_4 = "";
 		loginOk.facebookId = "";
 		loginOk.serverMajorVersion = 3; // TODO: Make it constant
-		loginOk.serverBuild = 193; // TODO: Make it constant
-		loginOk.contentVersion = 8; // TODO: Make it constant
+		loginOk.serverBuild = 377; // TODO: Make it constant
+		loginOk.contentVersion = 3; // TODO: Make it constant
 		loginOk.environment = "prod";
-		loginOk.sessionCount = 5;
-		loginOk.playTimeSeconds = 114; // TODO: Get it from store
-		loginOk.daysSinceStartedPlaying = 0; // TODO: Get it from store
+		loginOk.sessionCount = 5648;
+		loginOk.playTimeSeconds = 1936053; // TODO: Get it from store
+		loginOk.daysSinceStartedPlaying = 338; // TODO: Get it from store
 		loginOk.facebookAppId = "1475268786112433";
 		loginOk.serverTime = String.valueOf(System.currentTimeMillis());
 		loginOk.accountCreatedDate = String.valueOf(entity.getRegisteredDate().getTime()); // TODO: Get it from store
-		loginOk.unknown_16 = 0;
+		loginOk.unknown_17 = 0;
 		loginOk.googleServiceId = "";
-		loginOk.unknown_18 = "";
 		loginOk.unknown_19 = "";
+		loginOk.unknown_20 = "";
 		loginOk.region = "UA"; // TODO: Make it from config
+		loginOk.city = "Kiev"; // TODO: Make it from config
 		loginOk.contentURL = server.getContentUrl();
 		loginOk.eventAssetsURL = "https://event-assets.clashroyale.com"; // TODO: Make it from config
-		loginOk.unknown_23 = 1;
+		loginOk.unknown_25 = 2;
 		session.sendMessage(loginOk);
 
 		Set<PlayerCardEntity> cardEntities = entity.getCards();
@@ -101,6 +103,9 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 			addCard(Card.by("pekka"), 0);
 			addCard(Card.by("valkyrie"), 0);
 			addCard(Card.by("skeletons"), 0);
+
+			// need save?
+			save();
 		}
 
 		for (int i = 0; i < getDecksCount(); ++i) {

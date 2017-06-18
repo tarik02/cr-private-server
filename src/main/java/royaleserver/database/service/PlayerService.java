@@ -30,6 +30,7 @@ public class PlayerService extends Service {
 		playerEntity.setRareChance(random.nextFloat());
 		playerEntity.setEpicChance(random.nextFloat());
 		playerEntity.setLegendaryChance(random.nextFloat());
+		playerEntity.setCurrentDeckSlot(0); // default
 		return add(playerEntity);
 	}
 

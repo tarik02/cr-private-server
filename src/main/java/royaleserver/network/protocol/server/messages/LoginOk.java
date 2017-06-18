@@ -10,6 +10,7 @@ public final class LoginOk extends ServerMessage {
 	public long userId;
 	public long homeId;
 	public String userToken;
+	public String unknown_4;
 	public String gameCenterId;
 	public String facebookId;
 	public int serverMajorVersion;
@@ -22,14 +23,15 @@ public final class LoginOk extends ServerMessage {
 	public String facebookAppId;
 	public String serverTime;
 	public String accountCreatedDate;
-	public int unknown_16;
+	public int unknown_17;
 	public String googleServiceId;
-	public String unknown_18;
 	public String unknown_19;
+	public String unknown_20;
 	public String region;
+	public String city;
 	public String contentURL;
 	public String eventAssetsURL;
-	public byte unknown_23;
+	public byte unknown_25;
 
 	public LoginOk() {
 		super(ID);
@@ -45,6 +47,7 @@ public final class LoginOk extends ServerMessage {
 		stream.putBLong(userId);
 		stream.putBLong(homeId);
 		stream.putString(userToken);
+		stream.putString(unknown_4); // unknown
 		stream.putString(gameCenterId);
 		stream.putRrsInt32(serverMajorVersion);
 		stream.putRrsInt32(serverBuild);
@@ -57,13 +60,14 @@ public final class LoginOk extends ServerMessage {
 		stream.putString(facebookAppId);
 		stream.putString(serverTime);
 		stream.putString(accountCreatedDate);
-		stream.putRrsInt32(unknown_16);
+		stream.putRrsInt32(unknown_17);
 		stream.putString(googleServiceId);
-		stream.putString(unknown_18);
 		stream.putString(unknown_19);
+		stream.putString(unknown_20);
 		stream.putString(region);
+		stream.putString(city);
 		stream.putString(contentURL);
 		stream.putString(eventAssetsURL);
-		stream.putByte(unknown_23);
+		stream.putByte(unknown_25);
 	}
 }
