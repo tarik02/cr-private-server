@@ -372,7 +372,7 @@ public final class HomeDataOwn extends HomeData {
 		stream.putBInt(1497855751);
 
 		stream.putRrsInt32(4778892);
-		stream.put(Hex.toByteArray("00 00 00 00 00 00 01 00 00 00"));
+		stream.put(Hex.toByteArray("00 00 00 00 00 00 00 00 01 00"));
 
 		stream.putBInt(37635);
 
