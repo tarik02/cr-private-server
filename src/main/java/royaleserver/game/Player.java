@@ -84,28 +84,13 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 
 		Set<PlayerCardEntity> cardEntities = entity.getCards();
 
-		if (cardEntities.size() > 0) {
-			for (PlayerCardEntity cardEntity : cardEntities) {
-				Card card = cardEntity.getLogicCard();
-				int level = cardEntity.getLevel(),
-						count = cardEntity.getCount();
+		for (PlayerCardEntity cardEntity : cardEntities) {
+			Card card = cardEntity.getLogicCard();
+			int level = cardEntity.getLevel(),
+					count = cardEntity.getCount();
 
-				PlayerCard playerCard = new PlayerCard(card, level, count, cardEntity);
-				cards.put(card, playerCard);
-			}
-		} else {
-			// temporary solution
-			addCard(Card.by("knight"), 0);
-			addCard(Card.by("goblins"), 0);
-			addCard(Card.by("cannon"), 0);
-			addCard(Card.by("barbarians"), 0);
-			addCard(Card.by("musketeer"), 0);
-			addCard(Card.by("pekka"), 0);
-			addCard(Card.by("valkyrie"), 0);
-			addCard(Card.by("skeletons"), 0);
-
-			// need save?
-			save();
+			PlayerCard playerCard = new PlayerCard(card, level, count, cardEntity);
+			cards.put(card, playerCard);
 		}
 
 		for (int i = 0; i < getDecksCount(); ++i) {
@@ -143,7 +128,6 @@ public class Player extends NetworkSession implements ClientMessageHandler, Clie
 		}
 
 		changeDeck(entity.getCurrentDeckSlot());
-
 		sendOwnHomeData();
 	}
 
